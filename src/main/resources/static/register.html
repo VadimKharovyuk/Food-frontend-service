@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📝 Регистрация - Food Delivery</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div class="container">
+  <header class="header">
+    <h1>📝 Регистрация</h1>
+    <nav>
+      <a href="index.html" class="nav-link">🏠 Главная</a>
+      <a href="login.html" class="nav-link">🔐 Вход</a>
+    </nav>
+  </header>
+
+  <main class="main">
+    <div class="form-container">
+      <form id="registerForm" class="auth-form">
+        <h2>Создать новый аккаунт</h2>
+
+        <div class="form-group">
+          <label for="firstName">Имя *</label>
+          <input type="text" id="firstName" name="firstName" required
+                 placeholder="Введите ваше имя">
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Фамилия *</label>
+          <input type="text" id="lastName" name="lastName" required
+                 placeholder="Введите вашу фамилию">
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input type="email" id="email" name="email" required
+                 placeholder="example@mail.com">
+          <div id="emailStatus" class="field-status"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Пароль *</label>
+          <input type="password" id="password" name="password" required
+                 placeholder="Минимум 6 символов" minlength="6">
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Подтвердите пароль *</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required
+                 placeholder="Повторите пароль">
+        </div>
+
+        <div class="form-group">
+          <label for="userRole">Тип аккаунта *</label>
+          <select id="userRole" name="userRole" required>
+            <option value="">Выберите тип аккаунта</option>
+            <!-- Роли загружаются динамически -->
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            📝 Зарегистрироваться
+          </button>
+          <button type="reset" class="btn btn-outline">
+            🔄 Очистить
+          </button>
+        </div>
+
+        <div class="form-footer">
+          <p>Уже есть аккаунт? <a href="login.html">Войти</a></p>
+        </div>
+      </form>
+
+      <div id="messageContainer" class="message-container"></div>
+    </div>
+  </main>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/register.js"></script>
+</body>
+</html>

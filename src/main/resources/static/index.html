@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍕 Food Delivery - Тестовый UI</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <h1>🍕 Food Delivery System</h1>
+        <p>Тестовый интерфейс для микросервисов</p>
+    </header>
+
+    <main class="main">
+        <div class="welcome-section">
+            <h2>Добро пожаловать!</h2>
+            <p>Выберите действие:</p>
+
+            <div class="action-buttons">
+                <a href="register.html" class="btn btn-primary">
+                    📝 Регистрация
+                </a>
+                <a href="login.html" class="btn btn-secondary">
+                    🔐 Вход в аккаунт
+                </a>
+            </div>
+        </div>
+
+        <div class="services-status">
+            <h3>📊 Статус сервисов</h3>
+            <div class="status-grid">
+                <div class="status-item">
+                    <span class="service-name">Frontend Service</span>
+                    <span id="frontend-status" class="status online">🟢 Online</span>
+                </div>
+                <div class="status-item">
+                    <span class="service-name">User Service</span>
+                    <span id="user-service-status" class="status checking">🔄 Проверяем...</span>
+                </div>
+                <div class="status-item">
+                    <span class="service-name">Eureka Server</span>
+                    <span id="eureka-status" class="status checking">🔄 Проверяем...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Тестирование API</h3>
+            <div class="test-buttons">
+                <button onclick="testRegistrationService()" class="btn btn-outline">
+                    Тест Registration
+                </button>
+                <button onclick="testAuthService()" class="btn btn-outline">
+                    Тест Auth
+                </button>
+                <button onclick="loadRoles()" class="btn btn-outline">
+                    Загрузить роли
+                </button>
+            </div>
+            <div id="test-results" class="test-results"></div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>© 2025 Food Delivery System | Frontend Service на порту 8082</p>
+    </footer>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+    // Проверяем статус сервисов при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        checkServicesStatus();
+    });
+
+    async function checkServicesStatus() {
+        try {
+            // Тест Registration Service
+            const regResponse = await fetch('/api/registration/test');
+            const regData = await regResponse.json();
+            updateStatus('user-service-status', true, 'Registration OK');
+
+            // Тест Auth Service
+            const authResponse = await fetch('/api/auth/test');
+            const authData = await authResponse.json();
+            updateStatus('user-service-status', true, 'User Service OK');
+
+        } catch (error) {
+            updateStatus('user-service-status', false, 'Недоступен');
+        }
+    }
+
+    function updateStatus(elementId, isOnline, message) {
+        const element = document.getElementById(elementId);
+        element.className = `status ${isOnline ? 'online' : 'offline'}`;
+        element.textContent = `${isOnline ? '🟢' : '🔴'} ${message}`;
+    }
+
+    async function testRegistrationService() {
+        showTestResult('Тестируем Registration Service...');
+        try {
+            const response = await fetch('/api/registration/test');
+            const data = await response.json();
+            showTestResult(`✅ Registration: ${JSON.stringify(data)}`);
+        } catch (error) {
+            showTestResult(`❌ Registration Error: ${error.message}`);
+        }
+    }
+
+    async function testAuthService() {
+        showTestResult('Тестируем Auth Service...');
+        try {
+            const response = await fetch('/api/auth/test');
+            const data = await response.json();
+            showTestResult(`✅ Auth: ${JSON.stringify(data)}`);
+        } catch (error) {
+            showTestResult(`❌ Auth Error: ${error.message}`);
+        }
+    }
+
+    async function loadRoles() {
+        showTestResult('Загружаем роли...');
+        try {
+            const response = await fetch('/api/registration/roles');
+            const roles = await response.json();
+            showTestResult(`✅ Роли: ${JSON.stringify(roles)}`);
+        } catch (error) {
+            showTestResult(`❌ Roles Error: ${error.message}`);
+        }
+    }
+
+    function showTestResult(message) {
+        const resultsDiv = document.getElementById('test-results');
+        resultsDiv.innerHTML += `<div class="test-result">${new Date().toLocaleTimeString()}: ${message}</div>`;
+        resultsDiv.scrollTop = resultsDiv.scrollHeight;
+    }
+</script>
+</body>
+</html>
