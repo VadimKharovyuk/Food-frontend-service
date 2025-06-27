@@ -1,6 +1,6 @@
-package com.example.foodfrontendservice.config;
-
-import com.example.foodfrontendservice.Client.UserServiceClient;
+package com.example.foodfrontendservice.Client;
+import com.example.foodfrontendservice.dto.AuthResponseDto;
+import com.example.foodfrontendservice.dto.LoginRequestDto;
 import com.example.foodfrontendservice.dto.UserRegistrationDto;
 import com.example.foodfrontendservice.dto.UserResponseDto;
 import com.example.foodfrontendservice.enums.UserRole;
@@ -11,10 +11,8 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * 🛡️ Fallback для UserServiceClient при недоступности User Service
- */
-@Component
+
+@Component("userServiceClientFallback")
 @Slf4j
 public class UserServiceClientFallback implements UserServiceClient {
 
@@ -33,7 +31,7 @@ public class UserServiceClientFallback implements UserServiceClient {
     @Override
     public ResponseEntity<Boolean> checkEmailAvailability(String email) {
         log.warn("User Service недоступен - проверка email невозможна");
-        return ResponseEntity.ok(true); // Предполагаем что email доступен
+        return ResponseEntity.ok(true);
     }
 
     @Override
