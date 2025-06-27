@@ -16,7 +16,7 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*") // Для тестирования
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     private final UserIntegrationService userIntegrationService;

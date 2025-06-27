@@ -150,14 +150,7 @@ class ApiClient {
         console.log('🧹 Все токены и данные очищены');
     }
 
-    // 🧪 Тестовые методы
-    async testRegistration() {
-        return this.request('/api/registration/test');
-    }
 
-    async testAuth() {
-        return this.request('/api/auth/test');
-    }
 }
 
 // Создаем глобальный экземпляр

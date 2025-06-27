@@ -12,14 +12,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 📝 Контроллер для регистрации пользователей
- */
 @RestController
 @RequestMapping("/api/registration")
 @RequiredArgsConstructor
 @Slf4j
-@CrossOrigin(origins = "*") // Для тестирования
+@CrossOrigin(origins = "*")
 public class RegistrationController {
 
     private final UserIntegrationService userIntegrationService;
@@ -43,7 +40,6 @@ public class RegistrationController {
         log.info("Запрос на регистрацию пользователя: {}", registrationDto.getEmail());
 
         try {
-            // Регистрируем пользователя через User Service
             UserResponseDto user = userIntegrationService.registerUser(registrationDto);
 
             log.info("Пользователь {} успешно зарегистрирован", user.getEmail());
@@ -83,7 +79,7 @@ public class RegistrationController {
             log.error("Ошибка проверки email {}: {}", email, e.getMessage());
 
             return ResponseEntity.ok(Map.of(
-                    "available", true, // По умолчанию считаем доступным
+                    "available", true,
                     "email", email,
                     "message", "Не удалось проверить email"
             ));
