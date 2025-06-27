@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🍕 Food Delivery - Доставка еды за 30 минут</title>
+  <link rel="stylesheet" href="/css/main-styles.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<!-- 🚀 НАВИГАЦИЯ -->
+<nav class="navbar">
+  <div class="nav-container">
+    <!-- Логотип -->
+    <div class="nav-logo">
+      <a href="index.html" class="logo-link">
+        <span class="logo-icon">🍕</span>
+        <span class="logo-text">Food<strong>Delivery</strong></span>
+      </a>
+    </div>
+
+    <!-- Основное меню -->
+    <div class="nav-menu" id="navMenu">
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="#home" class="nav-link active">
+            <i class="fas fa-home"></i>
+            Главная
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#restaurants" class="nav-link">
+            <i class="fas fa-utensils"></i>
+            Рестораны
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#delivery" class="nav-link">
+            <i class="fas fa-motorcycle"></i>
+            Доставка
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="#about" class="nav-link">
+            <i class="fas fa-info-circle"></i>
+            О нас
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Правая часть навигации -->
+    <div class="nav-actions">
+      <!-- Поиск -->
+      <div class="search-container">
+        <input type="text" class="search-input" placeholder="Поиск ресторанов или блюд...">
+        <button class="search-btn">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+
+      <!-- Корзина -->
+      <button class="cart-btn">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-count">0</span>
+      </button>
+
+      <!-- Кнопки авторизации -->
+      <div class="auth-buttons">
+        <a href="login.html" class="btn-login">
+          <i class="fas fa-sign-in-alt"></i>
+          Войти
+        </a>
+        <a href="register.html" class="btn-register">
+          <i class="fas fa-user-plus"></i>
+          Регистрация
+        </a>
+      </div>
+
+      <!-- Мобильное меню -->
+      <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <span class="hamburger"></span>
+        <span class="hamburger"></span>
+        <span class="hamburger"></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- 🎯 ОСНОВНОЙ КОНТЕНТ -->
+<main class="main-content">
+  <!-- HERO СЕКЦИЯ -->
+  <section class="hero-section" id="home">
+    <div class="hero-container">
+      <!-- Левая часть с текстом -->
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-icon">⚡</span>
+          <span class="badge-text">Быстрая доставка за 30 минут</span>
+        </div>
+
+        <h1 class="hero-title">
+          Вкусная еда
+          <span class="title-highlight">доставляется быстро</span>
+          прямо к вашей двери
+        </h1>
+
+        <p class="hero-description">
+          Заказывайте любимые блюда из лучших ресторанов города.
+          Свежие ингредиенты, быстрая доставка и отличный сервис -
+          всё это FoodDelivery!
+        </p>
+
+        <!-- CTA кнопки -->
+        <div class="hero-actions">
+          <button class="btn-primary btn-large">
+            <i class="fas fa-utensils"></i>
+            Выбрать ресторан
+          </button>
+          <button class="btn-secondary btn-large">
+            <i class="fas fa-play"></i>
+            Как это работает
+          </button>
+        </div>
+
+        <!-- Статистика -->
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-number">500+</span>
+            <span class="stat-label">Ресторанов</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">50k+</span>
+            <span class="stat-label">Довольных клиентов</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-number">30мин</span>
+            <span class="stat-label">Среднее время доставки</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Правая часть с изображением -->
+      <div class="hero-image">
+        <div class="hero-image-container">
+          <!-- Основное изображение -->
+          <div class="main-image">
+            <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80"
+                 alt="Вкусная пицца" class="food-image">
+          </div>
+
+          <!-- Плавающие элементы -->
+          <div class="floating-elements">
+            <!-- Карточка с рейтингом -->
+            <div class="floating-card rating-card">
+              <div class="card-content">
+                <div class="rating-stars">
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                  <i class="fas fa-star"></i>
+                </div>
+                <span class="rating-text">4.9 (2.1k отзывов)</span>
+              </div>
+            </div>
+
+            <!-- Карточка с доставкой -->
+            <div class="floating-card delivery-card">
+              <div class="card-content">
+                <div class="delivery-icon">
+                  <i class="fas fa-motorcycle"></i>
+                </div>
+                <div class="delivery-info">
+                  <span class="delivery-time">25-30 мин</span>
+                  <span class="delivery-text">Бесплатная доставка</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Карточка с ценой -->
+            <div class="floating-card price-card">
+              <div class="card-content">
+                <span class="price-amount">от 299₽</span>
+                <span class="price-text">за заказ</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Фоновые декоративные элементы -->
+          <div class="bg-decorations">
+            <div class="decoration-circle circle-1"></div>
+            <div class="decoration-circle circle-2"></div>
+            <div class="decoration-circle circle-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Индикатор прокрутки -->
+    <div class="scroll-indicator">
+      <span class="scroll-text">Прокрутите вниз</span>
+      <div class="scroll-arrow">
+        <i class="fas fa-chevron-down"></i>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🏪 ПОПУЛЯРНЫЕ РЕСТОРАНЫ -->
+  <section class="restaurants-section" id="restaurants">
+    <div class="section-container">
+      <div class="section-header">
+        <h2 class="section-title">Популярные рестораны</h2>
+        <p class="section-subtitle">Лучшие заведения города с быстрой доставкой</p>
+        <a href="#" class="view-all-link">
+          Смотреть все
+          <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="restaurants-grid">
+        <!-- Ресторан 1 -->
+        <div class="restaurant-card">
+          <div class="restaurant-image">
+            <img src="https://images.unsplash.com/photo-1513104890138-7c749659a591?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Пиццерия Мама Мия">
+            <div class="restaurant-badge">
+              <span class="badge-text">Топ выбор</span>
+            </div>
+            <button class="favorite-btn">
+              <i class="far fa-heart"></i>
+            </button>
+          </div>
+          <div class="restaurant-info">
+            <h3 class="restaurant-name">Пиццерия "Мама Мия"</h3>
+            <p class="restaurant-cuisine">🍕 Итальянская кухня</p>
+            <div class="restaurant-stats">
+              <div class="rating">
+                <i class="fas fa-star"></i>
+                <span>4.8</span>
+              </div>
+              <div class="delivery-time">
+                <i class="fas fa-clock"></i>
+                <span>25-35 мин</span>
+              </div>
+              <div class="delivery-fee">
+                <i class="fas fa-motorcycle"></i>
+                <span>Бесплатно</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ресторан 2 -->
+        <div class="restaurant-card">
+          <div class="restaurant-image">
+            <img src="https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Суши Токио">
+            <div class="restaurant-badge promo">
+              <span class="badge-text">-20%</span>
+            </div>
+            <button class="favorite-btn">
+              <i class="far fa-heart"></i>
+            </button>
+          </div>
+          <div class="restaurant-info">
+            <h3 class="restaurant-name">Суши "Токио"</h3>
+            <p class="restaurant-cuisine">🍣 Японская кухня</p>
+            <div class="restaurant-stats">
+              <div class="rating">
+                <i class="fas fa-star"></i>
+                <span>4.9</span>
+              </div>
+              <div class="delivery-time">
+                <i class="fas fa-clock"></i>
+                <span>30-40 мин</span>
+              </div>
+              <div class="delivery-fee">
+                <i class="fas fa-motorcycle"></i>
+                <span>99₽</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ресторан 3 -->
+        <div class="restaurant-card">
+          <div class="restaurant-image">
+            <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Бургер Кинг">
+            <div class="restaurant-badge new">
+              <span class="badge-text">Новинка</span>
+            </div>
+            <button class="favorite-btn">
+              <i class="far fa-heart"></i>
+            </button>
+          </div>
+          <div class="restaurant-info">
+            <h3 class="restaurant-name">Burger House</h3>
+            <p class="restaurant-cuisine">🍔 Американская кухня</p>
+            <div class="restaurant-stats">
+              <div class="rating">
+                <i class="fas fa-star"></i>
+                <span>4.7</span>
+              </div>
+              <div class="delivery-time">
+                <i class="fas fa-clock"></i>
+                <span>20-30 мин</span>
+              </div>
+              <div class="delivery-fee">
+                <i class="fas fa-motorcycle"></i>
+                <span>Бесплатно</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ресторан 4 -->
+        <div class="restaurant-card">
+          <div class="restaurant-image">
+            <img src="https://images.unsplash.com/photo-1565299507177-b0ac66763828?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Дон Густо">
+            <button class="favorite-btn">
+              <i class="far fa-heart"></i>
+            </button>
+          </div>
+          <div class="restaurant-info">
+            <h3 class="restaurant-name">Дон Густо</h3>
+            <p class="restaurant-cuisine">🥘 Мексиканская кухня</p>
+            <div class="restaurant-stats">
+              <div class="rating">
+                <i class="fas fa-star"></i>
+                <span>4.6</span>
+              </div>
+              <div class="delivery-time">
+                <i class="fas fa-clock"></i>
+                <span>35-45 мин</span>
+              </div>
+              <div class="delivery-fee">
+                <i class="fas fa-motorcycle"></i>
+                <span>149₽</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🍔 КАТЕГОРИИ ЕДЫ -->
+  <section class="categories-section">
+    <div class="section-container">
+      <div class="section-header">
+        <h2 class="section-title">Что хотите заказать?</h2>
+        <p class="section-subtitle">Выберите любимую категорию блюд</p>
+      </div>
+
+      <div class="categories-grid">
+        <div class="category-card">
+          <div class="category-icon">🍕</div>
+          <h3 class="category-name">Пицца</h3>
+          <p class="category-count">120+ ресторанов</p>
+        </div>
+        <div class="category-card">
+          <div class="category-icon">🍣</div>
+          <h3 class="category-name">Суши</h3>
+          <p class="category-count">85+ ресторанов</p>
+        </div>
+        <div class="category-card">
+          <div class="category-icon">🍔</div>
+          <h3 class="category-name">Бургеры</h3>
+          <p class="category-count">95+ ресторанов</p>
+        </div>
+        <div class="category-card">
+          <div class="category-icon">🍜</div>
+          <h3 class="category-name">Азиатская</h3>
+          <p class="category-count">70+ ресторанов</p>
+        </div>
+        <div class="category-card">
+          <div class="category-icon">🥗</div>
+          <h3 class="category-name">Здоровая еда</h3>
+          <p class="category-count">45+ ресторанов</p>
+        </div>
+        <div class="category-card">
+          <div class="category-icon">🍰</div>
+          <h3 class="category-name">Десерты</h3>
+          <p class="category-count">60+ ресторанов</p>
+        </div>
+        <div class="category-card">
+          <div class="category-icon">☕</div>
+          <h3 class="category-name">Кофе</h3>
+          <p class="category-count">30+ заведений</p>
+        </div>
+        <div class="category-card">
+          <div class="category-icon">🥙</div>
+          <h3 class="category-name">Фастфуд</h3>
+          <p class="category-count">80+ ресторанов</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⚡ КАК ЭТО РАБОТАЕТ -->
+  <section class="how-it-works-section">
+    <div class="section-container">
+      <div class="section-header">
+        <h2 class="section-title">Как это работает</h2>
+        <p class="section-subtitle">Заказать еду легко всего в 3 шага</p>
+      </div>
+
+      <div class="steps-container">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <div class="step-icon">
+            <i class="fas fa-map-marker-alt"></i>
+          </div>
+          <h3 class="step-title">Выберите ресторан</h3>
+          <p class="step-description">
+            Укажите адрес доставки и выберите ресторан из нашего каталога
+          </p>
+        </div>
+
+        <div class="step-arrow">
+          <i class="fas fa-arrow-right"></i>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <div class="step-icon">
+            <i class="fas fa-utensils"></i>
+          </div>
+          <h3 class="step-title">Сделайте заказ</h3>
+          <p class="step-description">
+            Выберите понравившиеся блюда, добавьте их в корзину и оформите заказ
+          </p>
+        </div>
+
+        <div class="step-arrow">
+          <i class="fas fa-arrow-right"></i>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <div class="step-icon">
+            <i class="fas fa-motorcycle"></i>
+          </div>
+          <h3 class="step-title">Получите доставку</h3>
+          <p class="step-description">
+            Курьер привезет ваш заказ горячим прямо к двери в течение 30 минут
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 🎁 АКЦИИ И СКИДКИ -->
+  <section class="promo-section">
+    <div class="section-container">
+      <div class="promo-container">
+        <div class="promo-main">
+          <div class="promo-content">
+            <div class="promo-badge">
+              <span class="badge-icon">🎁</span>
+              <span class="badge-text">Специальное предложение</span>
+            </div>
+            <h2 class="promo-title">
+              Скидка 25% на первый заказ
+            </h2>
+            <p class="promo-description">
+              Зарегистрируйтесь сегодня и получите скидку 25% на ваш первый заказ.
+              Промокод действует при заказе от 500₽.
+            </p>
+            <div class="promo-code">
+              <span class="code-label">Промокод:</span>
+              <span class="code-value">WELCOME25</span>
+              <button class="copy-code-btn" onclick="copyPromoCode()">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+            <button class="btn-primary btn-large promo-btn">
+              <i class="fas fa-gift"></i>
+              Воспользоваться скидкой
+            </button>
+          </div>
+          <div class="promo-image">
+            <img src="https://images.unsplash.com/photo-1571091718767-18b5b1457add?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80" alt="Акция">
+          </div>
+        </div>
+
+        <!-- Дополнительные акции -->
+        <div class="mini-promos">
+          <div class="mini-promo-card">
+            <div class="mini-promo-icon">🍕</div>
+            <div class="mini-promo-content">
+              <h4>Бесплатная пицца</h4>
+              <p>При заказе от 1500₽</p>
+            </div>
+          </div>
+          <div class="mini-promo-card">
+            <div class="mini-promo-icon">🚚</div>
+            <div class="mini-promo-content">
+              <h4>Бесплатная доставка</h4>
+              <p>При заказе от 800₽</p>
+            </div>
+          </div>
+          <div class="mini-promo-card">
+            <div class="mini-promo-icon">⭐</div>
+            <div class="mini-promo-content">
+              <h4>Кэшбэк 10%</h4>
+              <p>Для постоянных клиентов</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 💬 ОТЗЫВЫ КЛИЕНТОВ -->
+  <section class="reviews-section">
+    <div class="section-container">
+      <div class="section-header">
+        <h2 class="section-title">Что говорят наши клиенты</h2>
+        <p class="section-subtitle">Честные отзывы от реальных пользователей</p>
+      </div>
+
+      <div class="reviews-slider" id="reviewsSlider">
+        <div class="reviews-container">
+          <div class="review-card">
+            <div class="review-rating">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+            </div>
+            <p class="review-text">
+              "Отличный сервис! Еда всегда приходит горячей и вовремя.
+              Особенно нравится быстрая доставка и большой выбор ресторанов."
+            </p>
+            <div class="review-author">
+              <img src="https://images.unsplash.com/photo-1494790108755-2616b612b829?ixlib=rb-4.0.3&auto=format&fit=crop&w=50&q=80" alt="Анна" class="author-avatar">
+              <div class="author-info">
+                <span class="author-name">Анна Петрова</span>
+                <span class="author-location">Москва</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-rating">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+            </div>
+            <p class="review-text">
+              "Пользуюсь уже полгода. Удобное приложение, адекватные цены.
+              Курьеры всегда вежливые и пунктуальные. Рекомендую!"
+            </p>
+            <div class="review-author">
+              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=50&q=80" alt="Михаил" class="author-avatar">
+              <div class="author-info">
+                <span class="author-name">Михаил Сидоров</span>
+                <span class="author-location">Санкт-Петербург</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="review-card">
+            <div class="review-rating">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="far fa-star"></i>
+            </div>
+            <p class="review-text">
+              "Очень довольна качеством еды и скоростью доставки.
+              Единственный минус - иногда долго ждешь ответа от поддержки."
+            </p>
+            <div class="review-author">
+              <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=50&q=80" alt="Елена" class="author-avatar">
+              <div class="author-info">
+                <span class="author-name">Елена Козлова</span>
+                <span class="author-location">Екатеринбург</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Навигация слайдера -->
+        <div class="slider-navigation">
+          <button class="slider-btn prev-btn" onclick="previousReview()">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <div class="slider-dots">
+            <span class="dot active" onclick="currentReview(1)"></span>
+            <span class="dot" onclick="currentReview(2)"></span>
+            <span class="dot" onclick="currentReview(3)"></span>
+          </div>
+          <button class="slider-btn next-btn" onclick="nextReview()">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- 📞 FOOTER -->
+<footer class="footer">
+  <div class="footer-container">
+    <!-- Основная информация -->
+    <div class="footer-main">
+      <div class="footer-section">
+        <div class="footer-logo">
+          <span class="logo-icon">🍕</span>
+          <span class="logo-text">Food<strong>Delivery</strong></span>
+        </div>
+        <p class="footer-description">
+          Лучший сервис доставки еды в вашем городе.
+          Быстро, вкусно, надежно!
+        </p>
+        <div class="social-links">
+          <a href="#" class="social-link">
+            <i class="fab fa-facebook-f"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-instagram"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-telegram-plane"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="fab fa-vk"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-section">
+        <h4 class="footer-title">Компания</h4>
+        <ul class="footer-links">
+          <li><a href="#">О нас</a></li>
+          <li><a href="#">Карьера</a></li>
+          <li><a href="#">Новости</a></li>
+          <li><a href="#">Инвесторам</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4 class="footer-title">Поддержка</h4>
+        <ul class="footer-links">
+          <li><a href="#">Помощь</a></li>
+          <li><a href="#">Условия использования</a></li>
+          <li><a href="#">Конфиденциальность</a></li>
+          <li><a href="#">Обратная связь</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4 class="footer-title">Партнерам</h4>
+        <ul class="footer-links">
+          <li><a href="#">Ресторанам</a></li>
+          <li><a href="#">Курьерам</a></li>
+          <li><a href="#">Партнерская программа</a></li>
+          <li><a href="#">API для разработчиков</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-section">
+        <h4 class="footer-title">Контакты</h4>
+        <div class="contact-info">
+          <div class="contact-item">
+            <i class="fas fa-phone"></i>
+            <span>8 (800) 555-35-35</span>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <span>info@fooddelivery.ru</span>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Москва, ул. Примерная, 123</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Мобильные приложения -->
+    <div class="footer-apps">
+      <h4 class="apps-title">Скачайте мобильное приложение</h4>
+      <div class="app-buttons">
+        <a href="#" class="app-button">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Google Play">
+        </a>
+        <a href="#" class="app-button">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="App Store">
+        </a>
+      </div>
+    </div>
+
+    <!-- Подвал -->
+    <div class="footer-bottom">
+      <div class="footer-bottom-content">
+        <p class="copyright">
+          © 2025 FoodDelivery. Все права защищены.
+        </p>
+        <div class="footer-bottom-links">
+          <a href="#">Правовая информация</a>
+          <a href="#">Политика cookies</a>
+          <a href="#">Карта сайта</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- 📱 JavaScript -->
+<script>
+  // Мобильное меню
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const navMenu = document.getElementById('navMenu');
+
+  mobileMenuBtn.addEventListener('click', () => {
+    navMenu.classList.toggle('active');
+    mobileMenuBtn.classList.toggle('active');
+  });
+
+  // Скрытие меню при клике вне его области
+  document.addEventListener('click', (e) => {
+    if (!navMenu.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+      navMenu.classList.remove('active');
+      mobileMenuBtn.classList.remove('active');
+    }
+  });
+
+  // Плавная прокрутка для якорных ссылок
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+
+  // Изменение навигации при прокрутке
+  window.addEventListener('scroll', () => {
+    const navbar = document.querySelector('.navbar');
+    if (window.scrollY > 100) {
+      navbar.classList.add('scrolled');
+    } else {
+      navbar.classList.remove('scrolled');
+    }
+  });
+
+  // Анимация счетчиков статистики
+  const animateCounters = () => {
+    const counters = document.querySelectorAll('.stat-number');
+    counters.forEach(counter => {
+      const target = parseInt(counter.textContent.replace(/\D/g, ''));
+      const increment = target / 100;
+      let current = 0;
+
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= target) {
+          counter.textContent = counter.textContent;
+          clearInterval(timer);
+        } else {
+          const suffix = counter.textContent.match(/\D+$/)?.[0] || '';
+          counter.textContent = Math.floor(current) + suffix;
+        }
+      }, 20);
+    });
+  };
+
+  // Intersection Observer для анимации при появлении
+  const observerOptions = {
+    threshold: 0.5,
+    rootMargin: '0px 0px -100px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animate');
+        if (entry.target.classList.contains('hero-stats')) {
+          animateCounters();
+        }
+      }
+    });
+  }, observerOptions);
+
+  // Наблюдение за элементами для анимации
+  document.querySelectorAll('.hero-content, .hero-image, .floating-card').forEach(el => {
+    observer.observe(el);
+  });
+
+  // Слайдер отзывов
+  let currentReviewIndex = 0;
+  const reviews = document.querySelectorAll('.review-card');
+  const dots = document.querySelectorAll('.dot');
+
+  function showReview(index) {
+    reviews.forEach((review, i) => {
+      review.style.display = i === index ? 'block' : 'none';
+    });
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+  }
+
+  function nextReview() {
+    currentReviewIndex = (currentReviewIndex + 1) % reviews.length;
+    showReview(currentReviewIndex);
+  }
+
+  function previousReview() {
+    currentReviewIndex = (currentReviewIndex - 1 + reviews.length) % reviews.length;
+    showReview(currentReviewIndex);
+  }
+
+  function currentReview(index) {
+    currentReviewIndex = index - 1;
+    showReview(currentReviewIndex);
+  }
+
+  // Автопрокрутка отзывов
+  setInterval(nextReview, 5000);
+
+  // Инициализация слайдера
+  showReview(0);
+
+  // Копирование промокода
+  function copyPromoCode() {
+    navigator.clipboard.writeText('WELCOME25').then(() => {
+      const btn = document.querySelector('.copy-code-btn');
+      const originalIcon = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-check"></i>';
+      setTimeout(() => {
+        btn.innerHTML = originalIcon;
+      }, 2000);
+    });
+  }
+
+  // Анимация при наведении на карточки категорий
+  document.querySelectorAll('.category-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-10px) scale(1.05)';
+    });
+
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0) scale(1)';
+    });
+  });
+
+  // Анимация при наведении на карточки ресторанов
+  document.querySelectorAll('.restaurant-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-5px)';
+      this.style.boxShadow = '0 20px 40px rgba(0,0,0,0.1)';
+    });
+
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0)';
+      this.style.boxShadow = '0 10px 30px rgba(0,0,0,0.05)';
+    });
+  });
+
+  // Добавление в избранное
+  document.querySelectorAll('.favorite-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const icon = this.querySelector('i');
+      if (icon.classList.contains('far')) {
+        icon.classList.remove('far');
+        icon.classList.add('fas');
+        this.style.color = '#ff6b6b';
+      } else {
+        icon.classList.remove('fas');
+        icon.classList.add('far');
+        this.style.color = '';
+      }
+    });
+  });
+</script>
+</body>
+</html>
