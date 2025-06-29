@@ -1,6 +1,6 @@
 package com.example.foodfrontendservice.Client;
 
-import com.example.foodfrontendservice.Client.StoreServiceClientFallback;
+import com.example.foodfrontendservice.Client.Fallback.StoreServiceClientFallback;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreBriefResponseWrapper;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreResponseWrapper;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreUIResponseWrapper;
@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(
         name = "product-service",
         path = "/api/stores",
-        fallback = StoreServiceClientFallback.class
+        fallback = StoreServiceClientFallback.class,
+        contextId = "storeServiceClient"
 )
-
 public interface StoreServiceClient {
 
     // 🏪 Получить магазины для UI (лимит 6)

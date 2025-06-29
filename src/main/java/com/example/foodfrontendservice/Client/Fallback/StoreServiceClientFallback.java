@@ -1,4 +1,5 @@
-package com.example.foodfrontendservice.Client;
+package com.example.foodfrontendservice.Client.Fallback;
+import com.example.foodfrontendservice.Client.StoreServiceClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;

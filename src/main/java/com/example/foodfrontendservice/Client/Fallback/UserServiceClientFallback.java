@@ -1,4 +1,5 @@
-package com.example.foodfrontendservice.Client;
+package com.example.foodfrontendservice.Client.Fallback;
+import com.example.foodfrontendservice.Client.UserServiceClient;
 import com.example.foodfrontendservice.dto.AuthResponseDto;
 import com.example.foodfrontendservice.dto.LoginRequestDto;
 import com.example.foodfrontendservice.dto.UserRegistrationDto;
