@@ -80,25 +80,26 @@ public class CategoryServiceClientFallback implements CategoryServiceClient {
     // ================================
 
     @Override
-    public ResponseEntity<ApiResponse<CategoryResponseDto>> createCategory(Long userId, CreateCategoryDto createCategoryDto) {
-        log.warn("Fallback: Category service unavailable for creating category: {}", createCategoryDto.getName());
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> createCategory(CreateCategoryDto createCategoryDto) {
+        log.warn("Fallback: Category service unavailable for creating category: {}",
+                createCategoryDto != null ? createCategoryDto.getName() : "unknown");
         return ResponseEntity.ok(ApiResponse.error("Создание категории временно недоступно"));
     }
 
     @Override
-    public ResponseEntity<ApiResponse<CategoryResponseDto>> updateCategory(Long id, Long userId, CreateCategoryDto updateCategoryDto) {
-        log.warn("Fallback: Category service unavailable for updating category: {}", id);
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> updateCategory(Long id, CreateCategoryDto updateCategoryDto) {
+        log.warn("Fallback: Category service unavailable for updating category ID: {}", id);
         return ResponseEntity.ok(ApiResponse.error("Обновление категории временно недоступно"));
     }
 
     @Override
-    public ResponseEntity<ApiResponse<Void>> deleteCategory(Long id, Long userId) {
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(Long id) {
         log.warn("Fallback: Category service unavailable for deleting category: {}", id);
         return ResponseEntity.ok(ApiResponse.error("Удаление категории временно недоступно"));
     }
 
     @Override
-    public ResponseEntity<ApiResponse<CategoryResponseDto>> toggleCategoryStatus(Long id, Long userId) {
+    public ResponseEntity<ApiResponse<CategoryResponseDto>> toggleCategoryStatus(Long id) {
         log.warn("Fallback: Category service unavailable for toggling category status: {}", id);
         return ResponseEntity.ok(ApiResponse.error("Изменение статуса категории временно недоступно"));
     }

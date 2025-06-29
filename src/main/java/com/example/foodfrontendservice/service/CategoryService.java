@@ -249,91 +249,103 @@ public class CategoryService {
     // ✏️ СОЗДАНИЕ И ОБНОВЛЕНИЕ КАТЕГОРИЙ (ADMIN ONLY)
     // ================================
 
+
     /**
      * Создать новую категорию
      */
-    public ApiResponse<CategoryResponseDto> createCategory(Long userId, CreateCategoryDto createCategoryDto) {
-        log.debug("Creating category: {} by user: {}", createCategoryDto.getName(), userId);
+    public ApiResponse<CategoryResponseDto> createCategory(CreateCategoryDto createCategoryDto) {
+        log.debug("Creating category: {}", createCategoryDto.getName());
 
         try {
+            // userId автоматически передается через FeignAuthInterceptor в заголовке X-User-Id
             ResponseEntity<ApiResponse<CategoryResponseDto>> response =
-                    categoryServiceClient.createCategory(userId, createCategoryDto);
+                    categoryServiceClient.createCategory(createCategoryDto);
 
             if (response.getBody() != null) {
+                log.debug("Successfully created category: {}", createCategoryDto.getName());
                 return response.getBody();
             } else {
                 return ApiResponse.error("Не удалось создать категорию");
             }
 
         } catch (Exception e) {
-            log.error("Error creating category: {} by user: {}", createCategoryDto.getName(), userId, e);
-            return ApiResponse.error("Ошибка создания категории");
+            log.error("Error creating category: {}", createCategoryDto.getName(), e);
+            return ApiResponse.error("Ошибка создания категории: " + e.getMessage());
         }
     }
 
     /**
      * Обновить существующую категорию
      */
-    public ApiResponse<CategoryResponseDto> updateCategory(Long id, Long userId, CreateCategoryDto updateCategoryDto) {
-        log.debug("Updating category: {} by user: {}", id, userId);
+    public ApiResponse<CategoryResponseDto> updateCategory(Long id, CreateCategoryDto updateCategoryDto) {
+        log.debug("Updating category ID: {} with name: {}", id, updateCategoryDto.getName());
 
         try {
+            // userId автоматически передается через FeignAuthInterceptor в заголовке X-User-Id
             ResponseEntity<ApiResponse<CategoryResponseDto>> response =
-                    categoryServiceClient.updateCategory(id, userId, updateCategoryDto);
+                    categoryServiceClient.updateCategory(id, updateCategoryDto);
 
             if (response.getBody() != null) {
+                log.debug("Successfully updated category ID: {}", id);
                 return response.getBody();
             } else {
                 return ApiResponse.error("Не удалось обновить категорию");
             }
 
         } catch (Exception e) {
-            log.error("Error updating category: {} by user: {}", id, userId, e);
-            return ApiResponse.error("Ошибка обновления категории");
+            log.error("Error updating category ID: {}", id, e);
+            return ApiResponse.error("Ошибка обновления категории: " + e.getMessage());
         }
     }
 
     /**
      * Удалить категорию (мягкое удаление)
+     * userId передается автоматически через FeignAuthInterceptor
      */
-    public ApiResponse<Void> deleteCategory(Long id, Long userId) {
-        log.debug("Deleting category: {} by user: {}", id, userId);
+    public ApiResponse<Void> deleteCategory(Long id) {
+        log.debug("Deleting category: {}", id);
 
         try {
             ResponseEntity<ApiResponse<Void>> response =
-                    categoryServiceClient.deleteCategory(id, userId);
+                    categoryServiceClient.deleteCategory(id);
 
             if (response.getBody() != null) {
+                log.debug("Successfully deleted category ID: {}", id);
                 return response.getBody();
             } else {
                 return ApiResponse.error("Не удалось удалить категорию");
             }
 
         } catch (Exception e) {
-            log.error("Error deleting category: {} by user: {}", id, userId, e);
-            return ApiResponse.error("Ошибка удаления категории");
+            log.error("Error deleting category: {}", id, e);
+            return ApiResponse.error("Ошибка удаления категории: " + e.getMessage());
         }
     }
 
     /**
      * Переключить статус категории
+     * userId передается автоматически через FeignAuthInterceptor
      */
-    public ApiResponse<CategoryResponseDto> toggleCategoryStatus(Long id, Long userId) {
-        log.debug("Toggling category status: {} by user: {}", id, userId);
+    /**
+     * Переключить статус категории
+     */
+    public ApiResponse<CategoryResponseDto> toggleCategoryStatus(Long id) {
+        log.debug("Toggling category status: {}", id);
 
         try {
             ResponseEntity<ApiResponse<CategoryResponseDto>> response =
-                    categoryServiceClient.toggleCategoryStatus(id, userId);
+                    categoryServiceClient.toggleCategoryStatus(id);
 
             if (response.getBody() != null) {
+                log.debug("Successfully toggled status for category ID: {}", id);
                 return response.getBody();
             } else {
                 return ApiResponse.error("Не удалось изменить статус категории");
             }
 
         } catch (Exception e) {
-            log.error("Error toggling category status: {} by user: {}", id, userId, e);
-            return ApiResponse.error("Ошибка изменения статуса категории");
+            log.error("Error toggling category status: {}", id, e);
+            return ApiResponse.error("Ошибка изменения статуса категории: " + e.getMessage());
         }
     }
 

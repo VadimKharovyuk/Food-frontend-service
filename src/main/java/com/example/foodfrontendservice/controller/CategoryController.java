@@ -220,69 +220,89 @@ public class CategoryController {
     // ================================
 
     /**
-     * ➕ Создать новую категорию
+     * ➕ Создать новую категорию (только для админов)
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<CategoryResponseDto>> createCategory(
-            @Valid @ModelAttribute CreateCategoryDto createCategoryDto,
-            @CurrentUser Long userId,
+            @ModelAttribute CreateCategoryDto createCategoryDto,
             HttpServletRequest request) {
 
         log.info("➕ POST /api/frontend/categories - Creating category: {}", createCategoryDto.getName());
 
-        // Проверяем роль
+        // Проверка прав доступа
         String userRole = request.getHeader("X-User-Role");
         if (!"ROLE_ADMIN".equals(userRole)) {
-            log.warn("❌ Access denied for user {} with role {}", userId, userRole);
+            log.warn("🚫 Access denied: user role {} is not ADMIN", userRole);
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.error("Доступ запрещен"));
+                    .body(ApiResponse.error("Недостаточно прав для создания категории"));
         }
 
-        ApiResponse<CategoryResponseDto> response = categoryService.createCategory(userId, createCategoryDto);
+        try {
+            ApiResponse<CategoryResponseDto> response = categoryService.createCategory(createCategoryDto);
 
-        if (response.isSuccess()) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            if (response.isSuccess()) {
+                log.info("✅ Successfully created category: {}", createCategoryDto.getName());
+                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            } else {
+                log.warn("❌ Failed to create category: {} - {}", createCategoryDto.getName(), response.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+
+        } catch (Exception e) {
+            log.error("💥 Error creating category: {}", createCategoryDto.getName(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Внутренняя ошибка при создании категории"));
         }
     }
 
+
+
     /**
-     * ✏️ Обновить категорию
+     * ✏️ Обновить существующую категорию (только для админов)
      */
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<CategoryResponseDto>> updateCategory(
             @PathVariable Long id,
-            @Valid @ModelAttribute CreateCategoryDto updateCategoryDto,
-            @CurrentUser Long userId,
+            @ModelAttribute CreateCategoryDto updateCategoryDto,
             HttpServletRequest request) {
 
-        log.info("✏️ PUT /api/frontend/categories/{} - Updating category", id);
+        log.info("✏️ PUT /api/frontend/categories/{} - Updating category: {}", id, updateCategoryDto.getName());
 
+        // Проверка прав доступа
         String userRole = request.getHeader("X-User-Role");
         if (!"ROLE_ADMIN".equals(userRole)) {
+            log.warn("🚫 Access denied: user role {} is not ADMIN", userRole);
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(ApiResponse.error("Доступ запрещен"));
+                    .body(ApiResponse.error("Недостаточно прав для обновления категории"));
         }
 
-        ApiResponse<CategoryResponseDto> response = categoryService.updateCategory(id, userId, updateCategoryDto);
+        try {
+            ApiResponse<CategoryResponseDto> response = categoryService.updateCategory(id, updateCategoryDto);
 
-        if (response.isSuccess()) {
-            return ResponseEntity.ok(response);
-        } else if (!response.isSuccess() && response.getMessage().contains("не найдена")) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            if (response.isSuccess()) {
+                log.info("✅ Successfully updated category ID: {}", id);
+                return ResponseEntity.ok(response);
+            } else if (response.getMessage() != null && response.getMessage().contains("не найден")) {
+                log.warn("❌ Category ID: {} not found for update", id);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            } else {
+                log.warn("❌ Failed to update category ID: {} - {}", id, response.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+
+        } catch (Exception e) {
+            log.error("💥 Error updating category ID: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Внутренняя ошибка при обновлении категории"));
         }
     }
 
     /**
-     * 🗑️ Удалить категорию
+     * 🗑️ Удалить категорию (убираем @CurrentUser и userId параметры)
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteCategory(
             @PathVariable Long id,
-            @CurrentUser Long userId,
             HttpServletRequest request) {
 
         log.info("🗑️ DELETE /api/frontend/categories/{} - Deleting category", id);
@@ -293,7 +313,8 @@ public class CategoryController {
                     .body(ApiResponse.error("Доступ запрещен"));
         }
 
-        ApiResponse<Void> response = categoryService.deleteCategory(id, userId);
+        // userId передается автоматически через FeignAuthInterceptor
+        ApiResponse<Void> response = categoryService.deleteCategory(id);
 
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
@@ -304,13 +325,10 @@ public class CategoryController {
         }
     }
 
-    /**
-     * 🔄 Переключить статус категории
-     */
-    @PatchMapping("/{id}/toggle")
+
+    @PostMapping("/{id}/toggle")
     public ResponseEntity<ApiResponse<CategoryResponseDto>> toggleCategoryStatus(
             @PathVariable Long id,
-            @CurrentUser Long userId,
             HttpServletRequest request) {
 
         log.info("🔄 PATCH /api/frontend/categories/{}/toggle - Toggling category status", id);
@@ -321,7 +339,8 @@ public class CategoryController {
                     .body(ApiResponse.error("Доступ запрещен"));
         }
 
-        ApiResponse<CategoryResponseDto> response = categoryService.toggleCategoryStatus(id, userId);
+        // userId передается автоматически через FeignAuthInterceptor
+        ApiResponse<CategoryResponseDto> response = categoryService.toggleCategoryStatus(id);
 
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);
