@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍕 Админ-панель - Управление категориями</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+            padding: 30px;
+        }
+        .header-section {
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .token-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+        .category-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        .category-active {
+            border-left: 5px solid #28a745;
+        }
+        .category-inactive {
+            border-left: 5px solid #dc3545;
+            opacity: 0.7;
+        }
+        .btn-modern {
+            border-radius: 25px;
+            padding: 8px 20px;
+            border: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-create {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .btn-create:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .status-badge {
+            border-radius: 15px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        .result-log {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            color: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .image-preview {
+            max-width: 100px;
+            max-height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header-section">
+            <h1><i class="fas fa-crown"></i> Админ-панель управления категориями</h1>
+            <p class="mb-0">Полное управление категориями продуктов</p>
+        </div>
+
+        <!-- Token Section -->
+        <div class="token-section">
+            <label for="tokenInput" class="form-label"><i class="fas fa-key"></i> JWT Токен администратора:</label>
+            <div class="input-group">
+                <input type="password" id="tokenInput" class="form-control"
+                       placeholder="Вставьте ваш JWT токен"
+                       value="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ2YWRpbWtoMTdAZ21haWwuY29tIiwidXNlcklkIjo4LCJyb2xlIjoiUk9MRV9BRE1JTiIsImlhdCI6MTc1MTIzMDYyNCwiZXhwIjoxNzUxMzE3MDI0fQ.P7W6HK_fscZLSJDhx8eqbdfn2s4VirRVwnQWUruhCok">
+                <button class="btn btn-outline-secondary" onclick="toggleTokenVisibility()">
+                    <i class="fas fa-eye" id="tokenToggleIcon"></i>
+                </button>
+                <button class="btn btn-success" onclick="saveToken()">
+                    <i class="fas fa-save"></i> Сохранить
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-list fa-2x mb-2"></i>
+                    <h4 id="totalCount">-</h4>
+                    <p>Всего категорий</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <h4 id="activeCount">-</h4>
+                    <p>Активных</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-times-circle fa-2x mb-2"></i>
+                    <h4 id="inactiveCount">-</h4>
+                    <p>Неактивных</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-heartbeat fa-2x mb-2"></i>
+                    <h4 id="healthStatus">-</h4>
+                    <p>Статус API</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <button class="btn btn-create btn-modern btn-lg" onclick="showCreateModal()">
+                    <i class="fas fa-plus"></i> Создать категорию
+                </button>
+                <button class="btn btn-info btn-modern" onclick="loadCategories()">
+                    <i class="fas fa-sync"></i> Обновить
+                </button>
+                <button class="btn btn-secondary btn-modern" onclick="loadStats()">
+                    <i class="fas fa-chart-bar"></i> Статистика
+                </button>
+            </div>
+            <div>
+                <div class="input-group" style="width: 300px;">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Поиск категорий...">
+                    <button class="btn btn-outline-primary" onclick="searchCategories()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Categories List -->
+        <div class="row" id="categoriesList">
+            <!-- Categories will be loaded here -->
+        </div>
+
+        <!-- Results Log -->
+        <div class="mt-4">
+            <h5><i class="fas fa-terminal"></i> Лог операций:</h5>
+            <div id="resultsLog" class="result-log">
+                > Готов к работе. Загрузите категории для начала...
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create/Edit Category Modal -->
+<div class="modal fade" id="categoryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">
+                    <i class="fas fa-plus"></i> Создать новую категорию
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="categoryForm" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="categoryName" class="form-label">
+                                    <i class="fas fa-tag"></i> Название категории *
+                                </label>
+                                <input type="text" class="form-control" id="categoryName" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="categoryDescription" class="form-label">
+                                    <i class="fas fa-align-left"></i> Описание
+                                </label>
+                                <textarea class="form-control" id="categoryDescription" rows="3"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="categoryImage" class="form-label">
+                                    <i class="fas fa-image"></i> Изображение
+                                </label>
+                                <input type="file" class="form-control" id="categoryImage" accept="image/*" onchange="previewImage(this)">
+                                <small class="text-muted">Форматы: JPG, PNG, GIF (макс. 5MB)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="sortOrder" class="form-label">
+                                    <i class="fas fa-sort-numeric-down"></i> Порядок сортировки
+                                </label>
+                                <input type="number" class="form-control" id="sortOrder" value="0" min="0">
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="isActive" checked>
+                                    <label class="form-check-label" for="isActive">
+                                        <i class="fas fa-toggle-on"></i> Активная категория
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Предварительный просмотр:</label>
+                                <div id="imagePreview" class="text-center">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                    <p class="text-muted">Изображение не выбрано</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Отмена
+                </button>
+                <button type="button" class="btn btn-success" onclick="saveCategory()">
+                    <i class="fas fa-save"></i> Сохранить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container"></div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Global variables
+    let categories = [];
+    let editingCategory = null;
+    const API_BASE = 'http://localhost:8082/api/frontend/categories';
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        loadToken();
+        loadCategories();
+        loadStats();
+
+        // Auto-search on input
+        document.getElementById('searchInput').addEventListener('input', function() {
+            if (this.value.length > 2 || this.value.length === 0) {
+                searchCategories();
+            }
+        });
+    });
+
+    // Token management
+    function getToken() {
+        const token = document.getElementById('tokenInput').value.trim();
+        if (!token) {
+            showToast('❌ Токен не указан!', 'error');
+            return null;
+        }
+        return token;
+    }
+
+    function saveToken() {
+        const token = document.getElementById('tokenInput').value;
+        localStorage.setItem('adminToken', token);
+        showToast('💾 Токен сохранён', 'success');
+    }
+
+    function loadToken() {
+        const token = localStorage.getItem('adminToken');
+        if (token) {
+            document.getElementById('tokenInput').value = token;
+        }
+    }
+
+    function toggleTokenVisibility() {
+        const input = document.getElementById('tokenInput');
+        const icon = document.getElementById('tokenToggleIcon');
+
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+        }
+    }
+
+    // API requests
+    async function apiRequest(url, options = {}) {
+        const token = getToken();
+        if (!token) return null;
+
+        const defaultHeaders = {
+            'Authorization': `Bearer ${token}`,
+            'X-User-Role': 'ROLE_ADMIN',
+            'X-User-Email': 'vadimkh17@gmail.com',
+            'X-User-Id': '8'
+        };
+
+        // For FormData, don't set Content-Type
+        if (!(options.body instanceof FormData)) {
+            defaultHeaders['Content-Type'] = 'application/json';
+        }
+
+        const headers = { ...defaultHeaders, ...options.headers };
+
+        try {
+            const response = await fetch(url, {
+                ...options,
+                headers: headers
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                logResult(`✅ ${options.method || 'GET'} ${url} - Success`, 'success');
+            } else {
+                logResult(`❌ ${options.method || 'GET'} ${url} - Error: ${data.message}`, 'error');
+            }
+
+            return { data, status: response.status, ok: response.ok };
+        } catch (error) {
+            logResult(`💥 Network error: ${error.message}`, 'error');
+            return null;
+        }
+    }
+
+    // Load categories (теперь можно использовать brief эндпоинт с изображениями)
+    async function loadCategories() {
+        showLoading(true);
+        const result = await apiRequest(`${API_BASE}/brief`); // CategoryDto с imageUrl
+
+        if (result && result.ok && result.data.success) {
+            categories = result.data.data;
+            renderCategories(categories);
+            updateStats();
+        }
+
+        showLoading(false);
+    }
+
+    // Load statistics
+    async function loadStats() {
+        const healthResult = await apiRequest(`${API_BASE}/health`);
+        const countResult = await apiRequest(`${API_BASE}/count`);
+
+        if (healthResult && healthResult.ok) {
+            document.getElementById('healthStatus').textContent = '🟢 OK';
+        } else {
+            document.getElementById('healthStatus').textContent = '🔴 Error';
+        }
+
+        if (countResult && countResult.ok) {
+            document.getElementById('activeCount').textContent = countResult.data.data;
+        }
+    }
+
+    function updateStats() {
+        const total = categories.length;
+        const active = categories.filter(cat => cat.isActive).length;
+        const inactive = total - active;
+
+        document.getElementById('totalCount').textContent = total;
+        document.getElementById('activeCount').textContent = active;
+        document.getElementById('inactiveCount').textContent = inactive;
+    }
+
+    // Render categories
+    function renderCategories(categoriesToRender) {
+        const container = document.getElementById('categoriesList');
+
+        if (!categoriesToRender || categoriesToRender.length === 0) {
+            container.innerHTML = `
+                    <div class="col-12 text-center">
+                        <div class="card category-card p-4">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <h5>Категории не найдены</h5>
+                            <p class="text-muted">Создайте первую категорию или проверьте фильтры поиска</p>
+                        </div>
+                    </div>
+                `;
+            return;
+        }
+
+        container.innerHTML = categoriesToRender.map(category => `
+                <div class="col-md-6 col-lg-4">
+                    <div class="card category-card ${category.isActive ? 'category-active' : 'category-inactive'}">
+                        ${category.imageUrl ? `
+                            <img src="${category.imageUrl}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="${category.name}">
+                        ` : `
+                            <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 200px;">
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                            </div>
+                        `}
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-1">
+                                    <i class="fas fa-tag"></i> ${category.name}
+                                </h5>
+                                <span class="status-badge ${category.isActive ? 'bg-success' : 'bg-danger'}">
+                                    ${category.isActive ? 'Активна' : 'Неактивна'}
+                                </span>
+                            </div>
+
+                            ${category.description ? `<p class="card-text text-muted">${category.description}</p>` : ''}
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-hashtag"></i> ID: ${category.id}
+                                    ${category.sortOrder !== undefined ? ` | Порядок: ${category.sortOrder}` : ''}
+                                </small>
+                            </div>
+
+                            ${category.createdAt ? `
+                                <small class="text-muted d-block mt-1">
+                                    <i class="fas fa-calendar"></i> ${new Date(category.createdAt).toLocaleDateString('ru-RU')}
+                                </small>
+                            ` : ''}
+
+                            <div class="mt-3 d-flex gap-1">
+                                <button class="btn btn-sm btn-outline-primary" onclick="editCategory(${category.id})">
+                                    <i class="fas fa-edit"></i> Изменить
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" onclick="toggleCategory(${category.id})">
+                                    <i class="fas fa-toggle-${category.isActive ? 'off' : 'on'}"></i>
+                                    ${category.isActive ? 'Деактивировать' : 'Активировать'}
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteCategory(${category.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+    }
+
+    // Search categories
+    async function searchCategories() {
+        const query = document.getElementById('searchInput').value.trim();
+
+        if (!query) {
+            renderCategories(categories);
+            return;
+        }
+
+        showLoading(true);
+        const result = await apiRequest(`${API_BASE}/search?name=${encodeURIComponent(query)}`);
+
+        if (result && result.ok && result.data.success) {
+            renderCategories(result.data.data);
+        }
+
+        showLoading(false);
+    }
+
+    // Modal functions
+    function showCreateModal() {
+        editingCategory = null;
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-plus"></i> Создать новую категорию';
+        resetForm();
+        new bootstrap.Modal(document.getElementById('categoryModal')).show();
+    }
+
+    function editCategory(id) {
+        const category = categories.find(cat => cat.id === id);
+        if (!category) return;
+
+        editingCategory = category;
+        document.getElementById('modalTitle').innerHTML = '<i class="fas fa-edit"></i> Редактировать категорию';
+
+        document.getElementById('categoryName').value = category.name || '';
+        document.getElementById('categoryDescription').value = category.description || '';
+        document.getElementById('sortOrder').value = category.sortOrder || 0;
+        document.getElementById('isActive').checked = category.isActive !== false;
+
+        new bootstrap.Modal(document.getElementById('categoryModal')).show();
+    }
+
+    function resetForm() {
+        document.getElementById('categoryForm').reset();
+        document.getElementById('sortOrder').value = 0;
+        document.getElementById('isActive').checked = true;
+        document.getElementById('imagePreview').innerHTML = `
+                <i class="fas fa-image fa-3x text-muted"></i>
+                <p class="text-muted">Изображение не выбрано</p>
+            `;
+    }
+
+    function previewImage(input) {
+        const preview = document.getElementById('imagePreview');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `<img src="${e.target.result}" class="image-preview">`;
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.innerHTML = `
+                    <i class="fas fa-image fa-3x text-muted"></i>
+                    <p class="text-muted">Изображение не выбрано</p>
+                `;
+        }
+    }
+
+    // Save category
+    async function saveCategory() {
+        const name = document.getElementById('categoryName').value.trim();
+        if (!name) {
+            showToast('❌ Название категории обязательно!', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('description', document.getElementById('categoryDescription').value);
+        formData.append('isActive', document.getElementById('isActive').checked);
+        formData.append('sortOrder', document.getElementById('sortOrder').value);
+
+        const imageFile = document.getElementById('categoryImage').files[0];
+        if (imageFile) {
+            formData.append('imageFile', imageFile);
+        }
+
+        showLoading(true);
+
+        let result;
+        if (editingCategory) {
+            result = await apiRequest(`${API_BASE}/${editingCategory.id}`, {
+                method: 'POST',
+                body: formData
+            });
+        } else {
+            result = await apiRequest(`${API_BASE}`, {
+                method: 'POST',
+                body: formData
+            });
+        }
+
+        if (result && result.ok && result.data.success) {
+            showToast(`✅ Категория ${editingCategory ? 'обновлена' : 'создана'} успешно!`, 'success');
+            bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
+            loadCategories();
+        } else {
+            showToast(`❌ Ошибка: ${result?.data?.message || 'Неизвестная ошибка'}`, 'error');
+        }
+
+        showLoading(false);
+    }
+
+    // Toggle category status
+    async function toggleCategory(id) {
+        showLoading(true);
+        const result = await apiRequest(`${API_BASE}/${id}/toggle`, { method: 'POST' });
+
+        if (result && result.ok && result.data.success) {
+            showToast('✅ Статус категории изменён!', 'success');
+            loadCategories();
+        }
+
+        showLoading(false);
+    }
+
+    // Delete category
+    async function deleteCategory(id) {
+        const category = categories.find(cat => cat.id === id);
+        if (!confirm(`Вы уверены, что хотите удалить категорию "${category?.name}"?`)) {
+            return;
+        }
+
+        showLoading(true);
+        const result = await apiRequest(`${API_BASE}/${id}`, { method: 'DELETE' });
+
+        if (result && result.ok && result.data.success) {
+            showToast('✅ Категория удалена!', 'success');
+            loadCategories();
+        }
+
+        showLoading(false);
+    }
+
+    // Utility functions
+    function showLoading(show) {
+        document.body.classList.toggle('loading', show);
+    }
+
+    function logResult(message, type = 'info') {
+        const log = document.getElementById('resultsLog');
+        const timestamp = new Date().toLocaleTimeString();
+        const colors = {
+            success: '#00ff00',
+            error: '#ff0000',
+            info: '#00ffff'
+        };
+
+        log.innerHTML += `<div style="color: ${colors[type]}">[${timestamp}] ${message}</div>`;
+        log.scrollTop = log.scrollHeight;
+    }
+
+    function showToast(message, type = 'info') {
+        const toastContainer = document.querySelector('.toast-container');
+        const toastId = 'toast-' + Date.now();
+
+        const bgClass = {
+            success: 'bg-success',
+            error: 'bg-danger',
+            info: 'bg-info'
+        }[type] || 'bg-info';
+
+        toastContainer.innerHTML += `
+                <div id="${toastId}" class="toast ${bgClass} text-white" role="alert">
+                    <div class="toast-body">
+                        ${message}
+                        <button type="button" class="btn-close btn-close-white float-end" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+
+        const toast = new bootstrap.Toast(document.getElementById(toastId));
+        toast.show();
+
+        setTimeout(() => {
+            document.getElementById(toastId)?.remove();
+        }, 5000);
+    }
+</script>
+</body>
+</html>
