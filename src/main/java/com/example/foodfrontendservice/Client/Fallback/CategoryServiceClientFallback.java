@@ -12,9 +12,6 @@ import java.util.List;
 @Slf4j
 public class CategoryServiceClientFallback implements CategoryServiceClient {
 
-    // ================================
-    // 📋 ПОЛУЧЕНИЕ СПИСКОВ - ПОЛНАЯ ИНФОРМАЦИЯ
-    // ================================
 
     @Override
     public ResponseEntity<ListApiResponse<CategoryResponseDto>> getAllActiveCategories() {

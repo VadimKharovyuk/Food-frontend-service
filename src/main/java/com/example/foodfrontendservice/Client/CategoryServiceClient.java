@@ -1,6 +1,7 @@
 package com.example.foodfrontendservice.Client;
 
 import com.example.foodfrontendservice.Client.Fallback.CategoryServiceClientFallback;
+import com.example.foodfrontendservice.config.FeignConfig;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -18,9 +19,20 @@ import java.util.List;
 )
 public interface CategoryServiceClient {
 
-    // ================================
-    // 📋 ПОЛУЧЕНИЕ СПИСКОВ - ПОЛНАЯ ИНФОРМАЦИЯ
-    // ================================
+    /**
+     * 📋 Получить все категории включая неактивные (полная информация)
+     * Требует: роль ADMIN
+     */
+    @GetMapping("/all")
+    ResponseEntity<ListApiResponse<CategoryResponseDto>> getAllCategories();
+
+//    @GetMapping("/all")
+//    ResponseEntity<ListApiResponse<CategoryResponseDto>> getAllCategories(
+//            @RequestHeader("Authorization") String authorization,
+//            @RequestHeader("X-User-Role") String userRole,
+//            @RequestHeader("X-User-Email") String userEmail
+//    );
+
 
     /**
      * 📋 Получить все активные категории (полная информация)
@@ -28,12 +40,6 @@ public interface CategoryServiceClient {
     @GetMapping
     ResponseEntity<ListApiResponse<CategoryResponseDto>> getAllActiveCategories();
 
-    /**
-     * 📋 Получить все категории включая неактивные (полная информация)
-     * Требует: роль ADMIN
-     */
-    @GetMapping("/all")
-    ResponseEntity<ListApiResponse<CategoryResponseDto>> getAllCategories();
 
     /**
      * 🔍 Поиск категорий по названию (полная информация)

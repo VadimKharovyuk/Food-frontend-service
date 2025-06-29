@@ -1,0 +1,2211 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>Frontend Category API Tester</title>-->
+<!--  <style>-->
+<!--    * {-->
+<!--      margin: 0;-->
+<!--      padding: 0;-->
+<!--      box-sizing: border-box;-->
+<!--    }-->
+
+<!--    body {-->
+<!--      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;-->
+<!--      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);-->
+<!--      min-height: 100vh;-->
+<!--      padding: 20px;-->
+<!--    }-->
+
+<!--    .container {-->
+<!--      max-width: 1400px;-->
+<!--      margin: 0 auto;-->
+<!--      background: rgba(255, 255, 255, 0.95);-->
+<!--      border-radius: 20px;-->
+<!--      padding: 30px;-->
+<!--      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);-->
+<!--    }-->
+
+<!--    h1 {-->
+<!--      text-align: center;-->
+<!--      color: #2c3e50;-->
+<!--      margin-bottom: 10px;-->
+<!--      font-size: 2.5em;-->
+<!--      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);-->
+<!--    }-->
+
+<!--    .subtitle {-->
+<!--      text-align: center;-->
+<!--      color: #7f8c8d;-->
+<!--      margin-bottom: 30px;-->
+<!--      font-size: 1.2em;-->
+<!--    }-->
+
+<!--    .config-section {-->
+<!--      background: #f8f9fa;-->
+<!--      padding: 20px;-->
+<!--      border-radius: 10px;-->
+<!--      margin-bottom: 30px;-->
+<!--      border-left: 4px solid #007bff;-->
+<!--    }-->
+
+<!--    .config-section h3 {-->
+<!--      color: #495057;-->
+<!--      margin-bottom: 15px;-->
+<!--    }-->
+
+<!--    .input-group {-->
+<!--      margin-bottom: 15px;-->
+<!--    }-->
+
+<!--    label {-->
+<!--      display: block;-->
+<!--      margin-bottom: 5px;-->
+<!--      font-weight: 600;-->
+<!--      color: #495057;-->
+<!--    }-->
+
+<!--    input, textarea, select {-->
+<!--      width: 100%;-->
+<!--      padding: 12px;-->
+<!--      border: 2px solid #e9ecef;-->
+<!--      border-radius: 8px;-->
+<!--      font-size: 14px;-->
+<!--      transition: border-color 0.3s ease;-->
+<!--    }-->
+
+<!--    input:focus, textarea:focus, select:focus {-->
+<!--      outline: none;-->
+<!--      border-color: #007bff;-->
+<!--      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);-->
+<!--    }-->
+
+<!--    .quick-tests {-->
+<!--      background: #e3f2fd;-->
+<!--      padding: 20px;-->
+<!--      border-radius: 10px;-->
+<!--      margin-bottom: 30px;-->
+<!--      border-left: 4px solid #2196f3;-->
+<!--    }-->
+
+<!--    .quick-test-buttons {-->
+<!--      display: flex;-->
+<!--      gap: 10px;-->
+<!--      flex-wrap: wrap;-->
+<!--      margin-top: 15px;-->
+<!--    }-->
+
+<!--    .quick-test-button {-->
+<!--      background: #2196f3;-->
+<!--      color: white;-->
+<!--      border: none;-->
+<!--      padding: 10px 15px;-->
+<!--      border-radius: 6px;-->
+<!--      cursor: pointer;-->
+<!--      font-size: 0.9em;-->
+<!--      transition: all 0.3s ease;-->
+<!--    }-->
+
+<!--    .quick-test-button:hover {-->
+<!--      background: #1976d2;-->
+<!--      transform: translateY(-2px);-->
+<!--    }-->
+
+<!--    .endpoints-grid {-->
+<!--      display: grid;-->
+<!--      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));-->
+<!--      gap: 20px;-->
+<!--      margin-bottom: 30px;-->
+<!--    }-->
+
+<!--    .endpoint-card {-->
+<!--      background: white;-->
+<!--      border-radius: 12px;-->
+<!--      padding: 20px;-->
+<!--      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);-->
+<!--      border: 1px solid #e9ecef;-->
+<!--      transition: transform 0.3s ease, box-shadow 0.3s ease;-->
+<!--    }-->
+
+<!--    .endpoint-card:hover {-->
+<!--      transform: translateY(-5px);-->
+<!--      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);-->
+<!--    }-->
+
+<!--    .endpoint-title {-->
+<!--      font-size: 1.2em;-->
+<!--      font-weight: bold;-->
+<!--      margin-bottom: 10px;-->
+<!--      color: #2c3e50;-->
+<!--    }-->
+
+<!--    .method-badge {-->
+<!--      display: inline-block;-->
+<!--      padding: 4px 8px;-->
+<!--      border-radius: 4px;-->
+<!--      font-size: 0.8em;-->
+<!--      font-weight: bold;-->
+<!--      margin-right: 10px;-->
+<!--    }-->
+
+<!--    .GET { background: #28a745; color: white; }-->
+<!--    .POST { background: #007bff; color: white; }-->
+<!--    .PUT { background: #ffc107; color: #212529; }-->
+<!--    .DELETE { background: #dc3545; color: white; }-->
+<!--    .PATCH { background: #6f42c1; color: white; }-->
+
+<!--    .endpoint-url {-->
+<!--      font-family: 'Courier New', monospace;-->
+<!--      background: #f8f9fa;-->
+<!--      padding: 8px;-->
+<!--      border-radius: 4px;-->
+<!--      margin-bottom: 15px;-->
+<!--      font-size: 0.9em;-->
+<!--      word-break: break-all;-->
+<!--    }-->
+
+<!--    .test-button {-->
+<!--      background: linear-gradient(45deg, #667eea, #764ba2);-->
+<!--      color: white;-->
+<!--      border: none;-->
+<!--      padding: 12px 20px;-->
+<!--      border-radius: 8px;-->
+<!--      cursor: pointer;-->
+<!--      font-weight: 600;-->
+<!--      transition: all 0.3s ease;-->
+<!--      width: 100%;-->
+<!--    }-->
+
+<!--    .test-button:hover {-->
+<!--      transform: translateY(-2px);-->
+<!--      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);-->
+<!--    }-->
+
+<!--    .test-button:disabled {-->
+<!--      background: #6c757d;-->
+<!--      cursor: not-allowed;-->
+<!--      transform: none;-->
+<!--    }-->
+
+<!--    .response-section {-->
+<!--      background: #f8f9fa;-->
+<!--      border-radius: 10px;-->
+<!--      padding: 20px;-->
+<!--      margin-top: 30px;-->
+<!--      border-left: 4px solid #28a745;-->
+<!--    }-->
+
+<!--    .response-header {-->
+<!--      display: flex;-->
+<!--      justify-content: space-between;-->
+<!--      align-items: center;-->
+<!--      margin-bottom: 15px;-->
+<!--    }-->
+
+<!--    .response-title {-->
+<!--      font-size: 1.3em;-->
+<!--      font-weight: bold;-->
+<!--      color: #495057;-->
+<!--    }-->
+
+<!--    .clear-button {-->
+<!--      background: #dc3545;-->
+<!--      color: white;-->
+<!--      border: none;-->
+<!--      padding: 8px 16px;-->
+<!--      border-radius: 6px;-->
+<!--      cursor: pointer;-->
+<!--      font-size: 0.9em;-->
+<!--    }-->
+
+<!--    .response-content {-->
+<!--      background: #2d3748;-->
+<!--      color: #e6fffa;-->
+<!--      padding: 20px;-->
+<!--      border-radius: 8px;-->
+<!--      font-family: 'Courier New', monospace;-->
+<!--      font-size: 0.9em;-->
+<!--      line-height: 1.6;-->
+<!--      overflow-x: auto;-->
+<!--      max-height: 500px;-->
+<!--      overflow-y: auto;-->
+<!--    }-->
+
+<!--    .status-success { color: #28a745; }-->
+<!--    .status-error { color: #dc3545; }-->
+<!--    .status-warning { color: #ffc107; }-->
+
+<!--    .form-controls {-->
+<!--      display: none;-->
+<!--      margin-top: 15px;-->
+<!--      padding: 15px;-->
+<!--      background: #f8f9fa;-->
+<!--      border-radius: 8px;-->
+<!--    }-->
+
+<!--    .form-controls.active {-->
+<!--      display: block;-->
+<!--    }-->
+
+<!--    .admin-required {-->
+<!--      color: #dc3545;-->
+<!--      font-size: 0.8em;-->
+<!--      font-weight: bold;-->
+<!--    }-->
+
+<!--    .stats-section {-->
+<!--      background: #fff3cd;-->
+<!--      padding: 20px;-->
+<!--      border-radius: 10px;-->
+<!--      margin-bottom: 30px;-->
+<!--      border-left: 4px solid #ffc107;-->
+<!--    }-->
+
+<!--    .two-column {-->
+<!--      display: grid;-->
+<!--      grid-template-columns: 1fr 1fr;-->
+<!--      gap: 15px;-->
+<!--    }-->
+
+<!--    .loading {-->
+<!--      display: inline-block;-->
+<!--      width: 20px;-->
+<!--      height: 20px;-->
+<!--      border: 3px solid #f3f3f3;-->
+<!--      border-top: 3px solid #007bff;-->
+<!--      border-radius: 50%;-->
+<!--      animation: spin 1s linear infinite;-->
+<!--    }-->
+
+<!--    @keyframes spin {-->
+<!--      0% { transform: rotate(0deg); }-->
+<!--      100% { transform: rotate(360deg); }-->
+<!--    }-->
+
+<!--    .icon { margin-right: 8px; }-->
+<!--  </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--  <h1>🎯 Frontend Category API Tester</h1>-->
+<!--  <div class="subtitle">Тестирование UI микросервиса категорий</div>-->
+
+<!--  <div class="config-section">-->
+<!--    <h3>⚙️ Конфигурация микросервисов</h3>-->
+<!--    <div class="input-group">-->
+<!--      <label for="serviceType">Выберите сервис для тестирования:</label>-->
+<!--      <select id="serviceType" onchange="updateServiceUrl()">-->
+<!--        <option value="frontend">Frontend Service (8082) - /api/frontend/categories</option>-->
+<!--        <option value="backend">Backend Service (8083) - /api/categories</option>-->
+<!--      </select>-->
+<!--    </div>-->
+<!--    <div class="input-group">-->
+<!--      <label for="baseUrl">API URL:</label>-->
+<!--      <input type="text" id="baseUrl" value="http://localhost:8082/api/frontend/categories">-->
+<!--      <small style="color: #6c757d; font-size: 0.9em;" id="serviceDescription">-->
+<!--        🎯 Frontend Service API endpoint (UI микросервис)-->
+<!--      </small>-->
+<!--    </div>-->
+<!--    <div class="input-group">-->
+<!--      <label for="currentPort">Тестер запущен на:</label>-->
+<!--      <input type="text" id="currentPort" readonly style="background: #f8f9fa;">-->
+<!--    </div>-->
+<!--    <div class="input-group">-->
+<!--      <label for="authToken">Токен администратора:</label>-->
+<!--      <input type="text" id="authToken" value="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ2YWRpbWtoMTdAZ21haWwuY29tIiwidXNlcklkIjo4LCJyb2xlIjoiUk9MRV9BRE1JTiIsImlhdCI6MTc1MTIxNTM5OSwiZXhwIjoxNzUxMzAxNzk5fQ.fbRgOTWYdLYokWLKKN6kSkbjl2aA1Xdq8FxonN_y2KE">-->
+<!--      <small style="color: #6c757d; font-size: 0.9em;">-->
+<!--        🔐 Admin: vadimkh17@gmail.com | Expires: 2025-06-30-->
+<!--      </small>-->
+<!--    </div>-->
+<!--  </div>-->
+
+<!--  <div class="quick-tests">-->
+<!--    <h3>🚀 Быстрое тестирование</h3>-->
+<!--    <p>Нажмите для быстрого тестирования основных функций UI микросервиса:</p>-->
+<!--    <div class="quick-test-buttons">-->
+<!--      <button class="quick-test-button" onclick="testEndpoint('GET', '/health')">-->
+<!--        <span class="icon">🔧</span>Health Check-->
+<!--      </button>-->
+<!--      <button class="quick-test-button" onclick="testEndpoint('GET', '')">-->
+<!--        <span class="icon">📋</span>Активные категории-->
+<!--      </button>-->
+<!--      <button class="quick-test-button" onclick="testEndpoint('GET', '/brief')">-->
+<!--        <span class="icon">📊</span>Краткий список-->
+<!--      </button>-->
+<!--      <button class="quick-test-button" onclick="testEndpoint('GET', '/count')">-->
+<!--        <span class="icon">📊</span>Количество-->
+<!--      </button>-->
+<!--      <button class="quick-test-button" onclick="testEndpoint('GET', '/all', null, true)">-->
+<!--        <span class="icon">📋</span>Все категории (Admin)-->
+<!--      </button>-->
+<!--      <button class="quick-test-button" onclick="runFullTest()">-->
+<!--        <span class="icon">🎯</span>Полный тест-->
+<!--      </button>-->
+<!--    </div>-->
+<!--  </div>-->
+
+<!--  <div class="endpoints-grid">-->
+<!--    &lt;!&ndash; GET Endpoints - Базовые &ndash;&gt;-->
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge GET">GET</span>-->
+<!--        Все активные категории-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories</div>-->
+<!--      <button class="test-button" onclick="testEndpoint('GET', '')">-->
+<!--        Тестировать-->
+<!--      </button>-->
+<!--    </div>-->
+
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge GET">GET</span>-->
+<!--        Все категории <span class="admin-required">(ADMIN)</span>-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/all</div>-->
+<!--      <button class="test-button" onclick="testEndpoint('GET', '/all', null, true)">-->
+<!--        Тестировать-->
+<!--      </button>-->
+<!--    </div>-->
+
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge GET">GET</span>-->
+<!--        Поиск категорий-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/search</div>-->
+<!--      <button class="test-button" onclick="toggleForm('search-form')">-->
+<!--        Настроить и тестировать-->
+<!--      </button>-->
+<!--      <div id="search-form" class="form-controls">-->
+<!--        <div class="input-group">-->
+<!--          <label>Название для поиска:</label>-->
+<!--          <input type="text" id="searchName" value="пицца" placeholder="Введите название">-->
+<!--        </div>-->
+<!--        <button class="test-button" onclick="testSearch()">Поиск</button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; GET Endpoints - Краткая информация &ndash;&gt;-->
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge GET">GET</span>-->
+<!--        Краткий список активных-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/brief</div>-->
+<!--      <button class="test-button" onclick="testEndpoint('GET', '/brief')">-->
+<!--        Тестировать-->
+<!--      </button>-->
+<!--    </div>-->
+
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge GET">GET</span>-->
+<!--        Краткий список всех <span class="admin-required">(ADMIN)</span>-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/brief/all</div>-->
+<!--      <button class="test-button" onclick="testEndpoint('GET', '/brief/all', null, true)">-->
+<!--        Тестировать-->
+<!--      </button>-->
+<!--    </div>-->
+
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge GET">GET</span>-->
+<!--        Поиск кратких данных-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/brief/search</div>-->
+<!--      <button class="test-button" onclick="toggleForm('brief-search-form')">-->
+<!--        Настроить и тестировать-->
+<!--      </button>-->
+<!--      <div id="brief-search-form" class="form-controls">-->
+<!--        <div class="input-group">-->
+<!--          <label>Название для поиска:</label>-->
+<!--          <input type="text" id="briefSearchName" value="бургер" placeholder="Введите название">-->
+<!--        </div>-->
+<!--        <button class="test-button" onclick="testBriefSearch()">Поиск кратких данных</button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; GET Endpoints - Отдельные категории &ndash;&gt;-->
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge GET">GET</span>-->
+<!--        Категория по ID-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/{id}</div>-->
+<!--      <button class="test-button" onclick="toggleForm('get-by-id-form')">-->
+<!--        Настроить и тестировать-->
+<!--      </button>-->
+<!--      <div id="get-by-id-form" class="form-controls">-->
+<!--        <div class="input-group">-->
+<!--          <label>ID категории:</label>-->
+<!--          <input type="number" id="getCategoryId" value="1" placeholder="Введите ID">-->
+<!--        </div>-->
+<!--        <button class="test-button" onclick="testGetById()">Получить категорию</button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge GET">GET</span>-->
+<!--        Краткая информация по ID-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/{id}/brief</div>-->
+<!--      <button class="test-button" onclick="toggleForm('get-brief-by-id-form')">-->
+<!--        Настроить и тестировать-->
+<!--      </button>-->
+<!--      <div id="get-brief-by-id-form" class="form-controls">-->
+<!--        <div class="input-group">-->
+<!--          <label>ID категории:</label>-->
+<!--          <input type="number" id="getBriefCategoryId" value="1" placeholder="Введите ID">-->
+<!--        </div>-->
+<!--        <button class="test-button" onclick="testGetBriefById()">Получить краткую информацию</button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; POST Endpoints &ndash;&gt;-->
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge POST">POST</span>-->
+<!--        Категории по списку ID-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/brief/by-ids</div>-->
+<!--      <button class="test-button" onclick="toggleForm('by-ids-form')">-->
+<!--        Настроить и тестировать-->
+<!--      </button>-->
+<!--      <div id="by-ids-form" class="form-controls">-->
+<!--        <div class="input-group">-->
+<!--          <label>ID категорий (через запятую):</label>-->
+<!--          <input type="text" id="categoryIds" value="1,2,3" placeholder="1,2,3">-->
+<!--        </div>-->
+<!--        <button class="test-button" onclick="testByIds()">Получить категории</button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge POST">POST</span>-->
+<!--        Создать категорию <span class="admin-required">(ADMIN)</span>-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories</div>-->
+<!--      <button class="test-button" onclick="toggleForm('create-form')">-->
+<!--        Настроить и тестировать-->
+<!--      </button>-->
+<!--      <div id="create-form" class="form-controls">-->
+<!--        <div class="input-group">-->
+<!--          <label>Название:</label>-->
+<!--          <input type="text" id="createName" value="Бургеры" placeholder="Название категории">-->
+<!--        </div>-->
+<!--        <div class="input-group">-->
+<!--          <label>Описание:</label>-->
+<!--          <textarea id="createDescription" placeholder="Описание категории">Сочные бургеры с мясными и вегетарианскими котлетами, свежими овощами и фирменными соусами.</textarea>-->
+<!--        </div>-->
+<!--        <div class="input-group">-->
+<!--          <label>Порядок сортировки:</label>-->
+<!--          <input type="number" id="createSortOrder" value="5" placeholder="Порядок">-->
+<!--        </div>-->
+<!--        <div class="input-group">-->
+<!--          <label>Изображение (опционально):</label>-->
+<!--          <input type="file" id="createImage" accept="image/*">-->
+<!--        </div>-->
+<!--        <button class="test-button" onclick="testCreateCategory()">Создать категорию</button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; PUT Endpoints &ndash;&gt;-->
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge PUT">PUT</span>-->
+<!--        Обновить категорию <span class="admin-required">(ADMIN)</span>-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/{id}</div>-->
+<!--      <button class="test-button" onclick="toggleForm('update-form')">-->
+<!--        Настроить и тестировать-->
+<!--      </button>-->
+<!--      <div id="update-form" class="form-controls">-->
+<!--        <div class="input-group">-->
+<!--          <label>ID категории для обновления:</label>-->
+<!--          <input type="number" id="updateId" value="1" placeholder="ID">-->
+<!--        </div>-->
+<!--        <div class="input-group">-->
+<!--          <label>Название:</label>-->
+<!--          <input type="text" id="updateName" value="Обновленная категория" placeholder="Название">-->
+<!--        </div>-->
+<!--        <div class="input-group">-->
+<!--          <label>Описание:</label>-->
+<!--          <textarea id="updateDescription" placeholder="Описание">Обновленное описание категории</textarea>-->
+<!--        </div>-->
+<!--        <div class="input-group">-->
+<!--          <label>Порядок сортировки:</label>-->
+<!--          <input type="number" id="updateSortOrder" value="1" placeholder="Порядок">-->
+<!--        </div>-->
+<!--        <button class="test-button" onclick="testUpdateCategory()">Обновить категорию</button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; DELETE и PATCH Endpoints &ndash;&gt;-->
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge DELETE">DELETE</span>-->
+<!--        Удалить категорию <span class="admin-required">(ADMIN)</span>-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/{id}</div>-->
+<!--      <button class="test-button" onclick="toggleForm('delete-form')">-->
+<!--        Настроить и тестировать-->
+<!--      </button>-->
+<!--      <div id="delete-form" class="form-controls">-->
+<!--        <div class="input-group">-->
+<!--          <label>ID категории для удаления:</label>-->
+<!--          <input type="number" id="deleteId" value="5" placeholder="ID">-->
+<!--        </div>-->
+<!--        <button class="test-button" onclick="testDeleteCategory()" style="background: #dc3545;">-->
+<!--          Удалить категорию-->
+<!--        </button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge PATCH">PATCH</span>-->
+<!--        Переключить статус <span class="admin-required">(ADMIN)</span>-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/{id}/toggle</div>-->
+<!--      <button class="test-button" onclick="toggleForm('toggle-form')">-->
+<!--        Настроить и тестировать-->
+<!--      </button>-->
+<!--      <div id="toggle-form" class="form-controls">-->
+<!--        <div class="input-group">-->
+<!--          <label>ID категории:</label>-->
+<!--          <input type="number" id="toggleId" value="1" placeholder="ID">-->
+<!--        </div>-->
+<!--        <button class="test-button" onclick="testToggleStatus()">Переключить статус</button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Вспомогательные Endpoints &ndash;&gt;-->
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge GET">GET</span>-->
+<!--        Количество активных категорий-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/count</div>-->
+<!--      <button class="test-button" onclick="testEndpoint('GET', '/count')">-->
+<!--        Тестировать-->
+<!--      </button>-->
+<!--    </div>-->
+
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge GET">GET</span>-->
+<!--        Проверка существования-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/exists</div>-->
+<!--      <button class="test-button" onclick="toggleForm('exists-form')">-->
+<!--        Настроить и тестировать-->
+<!--      </button>-->
+<!--      <div id="exists-form" class="form-controls">-->
+<!--        <div class="input-group">-->
+<!--          <label>Название для проверки:</label>-->
+<!--          <input type="text" id="existsName" value="Пицца" placeholder="Введите название">-->
+<!--        </div>-->
+<!--        <button class="test-button" onclick="testCategoryExists()">Проверить существование</button>-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    <div class="endpoint-card">-->
+<!--      <div class="endpoint-title">-->
+<!--        <span class="method-badge GET">GET</span>-->
+<!--        Проверка работоспособности-->
+<!--      </div>-->
+<!--      <div class="endpoint-url">/api/frontend/categories/health</div>-->
+<!--      <button class="test-button" onclick="testEndpoint('GET', '/health')">-->
+<!--        Тестировать-->
+<!--      </button>-->
+<!--    </div>-->
+<!--  </div>-->
+
+<!--  <div class="response-section">-->
+<!--    <div class="response-header">-->
+<!--      <div class="response-title">📋 Ответы Frontend API</div>-->
+<!--      <button class="clear-button" onclick="clearResponses()">Очистить</button>-->
+<!--    </div>-->
+<!--    <div id="responses" class="response-content">-->
+<!--      Здесь будут отображаться ответы от Frontend API...-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!--<script>-->
+<!--  let responseCount = 0;-->
+
+<!--  // Функция для переключения между сервисами-->
+<!--  function updateServiceUrl() {-->
+<!--    const serviceType = document.getElementById('serviceType').value;-->
+<!--    const baseUrlInput = document.getElementById('baseUrl');-->
+<!--    const description = document.getElementById('serviceDescription');-->
+
+<!--    if (serviceType === 'frontend') {-->
+<!--      baseUrlInput.value = 'http://localhost:8082/api/frontend/categories';-->
+<!--      description.textContent = '🎯 Frontend Service API endpoint (UI микросервис)';-->
+<!--      description.style.color = '#28a745';-->
+<!--    } else {-->
+<!--      baseUrlInput.value = 'http://localhost:8083/api/categories';-->
+<!--      description.textContent = '🎯 Backend Service API endpoint (основной микросервис)';-->
+<!--      description.style.color = '#007bff';-->
+<!--    }-->
+
+<!--    console.log('🔄 Переключено на:', serviceType === 'frontend' ? 'Frontend Service' : 'Backend Service');-->
+<!--    console.log('📍 Новый URL:', baseUrlInput.value);-->
+<!--  }-->
+
+<!--  function getBaseUrl() {-->
+<!--    return document.getElementById('baseUrl').value.trim();-->
+<!--  }-->
+
+<!--  function getAuthToken() {-->
+<!--    return document.getElementById('authToken').value.trim();-->
+<!--  }-->
+
+<!--  function getHeaders(isAdmin = false) {-->
+<!--    const headers = {-->
+<!--      'Content-Type': 'application/json',-->
+<!--      'Authorization': `Bearer ${getAuthToken()}`-->
+<!--    };-->
+
+<!--    if (isAdmin) {-->
+<!--      headers['X-User-Role'] = 'ROLE_ADMIN';-->
+<!--      headers['X-User-Email'] = 'vadimkh17@gmail.com';-->
+<!--    }-->
+
+<!--    return headers;-->
+<!--  }-->
+
+<!--  function getMultipartHeaders(isAdmin = false) {-->
+<!--    const headers = {-->
+<!--      'Authorization': `Bearer ${getAuthToken()}`-->
+<!--    };-->
+
+<!--    if (isAdmin) {-->
+<!--      headers['X-User-Role'] = 'ROLE_ADMIN';-->
+<!--      headers['X-User-Email'] = 'vadimkh17@gmail.com';-->
+<!--    }-->
+
+<!--    return headers;-->
+<!--  }-->
+
+<!--  function toggleForm(formId) {-->
+<!--    const form = document.getElementById(formId);-->
+<!--    form.classList.toggle('active');-->
+<!--  }-->
+
+<!--  function addResponse(method, url, status, data, error = null) {-->
+<!--    responseCount++;-->
+<!--    const responsesDiv = document.getElementById('responses');-->
+
+<!--    const timestamp = new Date().toLocaleString();-->
+<!--    const statusClass = status >= 200 && status < 300 ? 'status-success' :-->
+<!--            status >= 400 && status < 500 ? 'status-warning' : 'status-error';-->
+
+<!--    const responseHtml = `-->
+<!--                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #4a5568; border-radius: 8px; background: #2d3748;">-->
+<!--                    <div style="margin-bottom: 10px;">-->
+<!--                        <strong>${responseCount}. ${method} ${url}</strong>-->
+<!--                        <span style="float: right; font-size: 0.9em; color: #a0aec0;">${timestamp}</span>-->
+<!--                    </div>-->
+<!--                    <div style="margin-bottom: 10px;">-->
+<!--                        <span class="${statusClass}">Status: ${status}</span>-->
+<!--                    </div>-->
+<!--                    ${error ? `<div style="color: #fc8181; margin-bottom: 10px;">Error: ${error}</div>` : ''}-->
+<!--                    <pre style="white-space: pre-wrap; word-wrap: break-word;">${JSON.stringify(data, null, 2)}</pre>-->
+<!--                </div>-->
+<!--            `;-->
+
+<!--    responsesDiv.innerHTML = responseHtml + responsesDiv.innerHTML;-->
+<!--  }-->
+
+<!--  function clearResponses() {-->
+<!--    document.getElementById('responses').innerHTML = 'Здесь будут отображаться ответы от Frontend API...';-->
+<!--    responseCount = 0;-->
+<!--  }-->
+
+<!--  async function testEndpoint(method, endpoint, body = null, isAdmin = false) {-->
+<!--    const url = getBaseUrl() + endpoint;-->
+
+<!--    try {-->
+<!--      const options = {-->
+<!--        method: method,-->
+<!--        headers: getHeaders(isAdmin)-->
+<!--      };-->
+
+<!--      if (body) {-->
+<!--        options.body = JSON.stringify(body);-->
+<!--      }-->
+
+<!--      const response = await fetch(url, options);-->
+<!--      let data;-->
+
+<!--      try {-->
+<!--        data = await response.json();-->
+<!--      } catch (e) {-->
+<!--        data = await response.text();-->
+<!--      }-->
+
+<!--      addResponse(method, url, response.status, data);-->
+
+<!--    } catch (error) {-->
+<!--      addResponse(method, url, 0, null, error.message);-->
+<!--    }-->
+<!--  }-->
+
+<!--  // Специфичные тесты-->
+<!--  async function testSearch() {-->
+<!--    const name = document.getElementById('searchName').value;-->
+<!--    const endpoint = `/search?name=${encodeURIComponent(name)}`;-->
+<!--    await testEndpoint('GET', endpoint);-->
+<!--  }-->
+
+<!--  async function testBriefSearch() {-->
+<!--    const name = document.getElementById('briefSearchName').value;-->
+<!--    const endpoint = `/brief/search?name=${encodeURIComponent(name)}`;-->
+<!--    await testEndpoint('GET', endpoint);-->
+<!--  }-->
+
+<!--  async function testGetById() {-->
+<!--    const id = document.getElementById('getCategoryId').value;-->
+<!--    const endpoint = `/${id}`;-->
+<!--    await testEndpoint('GET', endpoint);-->
+<!--  }-->
+
+<!--  async function testGetBriefById() {-->
+<!--    const id = document.getElementById('getBriefCategoryId').value;-->
+<!--    const endpoint = `/${id}/brief`;-->
+<!--    await testEndpoint('GET', endpoint);-->
+<!--  }-->
+
+<!--  async function testByIds() {-->
+<!--    const ids = document.getElementById('categoryIds').value-->
+<!--            .split(',')-->
+<!--            .map(id => parseInt(id.trim()))-->
+<!--            .filter(id => !isNaN(id));-->
+
+<!--    await testEndpoint('POST', '/brief/by-ids', ids);-->
+<!--  }-->
+
+<!--  async function testCreateCategory() {-->
+<!--    const formData = new FormData();-->
+<!--    formData.append('name', document.getElementById('createName').value);-->
+<!--    formData.append('description', document.getElementById('createDescription').value);-->
+<!--    formData.append('sortOrder', document.getElementById('createSortOrder').value);-->
+
+<!--    const imageFile = document.getElementById('createImage').files[0];-->
+<!--    if (imageFile) {-->
+<!--      formData.append('image', imageFile);-->
+<!--    }-->
+
+<!--    const url = getBaseUrl();-->
+
+<!--    try {-->
+<!--      const response = await fetch(url, {-->
+<!--        method: 'POST',-->
+<!--        headers: getMultipartHeaders(true),-->
+<!--        body: formData-->
+<!--      });-->
+
+<!--      let data;-->
+<!--      try {-->
+<!--        data = await response.json();-->
+<!--      } catch (e) {-->
+<!--        data = await response.text();-->
+<!--      }-->
+
+<!--      addResponse('POST', url, response.status, data);-->
+
+<!--    } catch (error) {-->
+<!--      addResponse('POST', url, 0, null, error.message);-->
+<!--    }-->
+<!--  }-->
+
+<!--  async function testUpdateCategory() {-->
+<!--    const id = document.getElementById('updateId').value;-->
+<!--    const formData = new FormData();-->
+<!--    formData.append('name', document.getElementById('updateName').value);-->
+<!--    formData.append('description', document.getElementById('updateDescription').value);-->
+<!--    formData.append('sortOrder', document.getElementById('updateSortOrder').value);-->
+
+<!--    const url = getBaseUrl() + `/${id}`;-->
+
+<!--    try {-->
+<!--      const response = await fetch(url, {-->
+<!--        method: 'PUT',-->
+<!--        headers: getMultipartHeaders(true),-->
+<!--        body: formData-->
+<!--      });-->
+
+<!--      let data;-->
+<!--      try {-->
+<!--        data = await response.json();-->
+<!--      } catch (e) {-->
+<!--        data = await response.text();-->
+<!--      }-->
+
+<!--      addResponse('PUT', url, response.status, data);-->
+
+<!--    } catch (error) {-->
+<!--      addResponse('PUT', url, 0, null, error.message);-->
+<!--    }-->
+<!--  }-->
+
+<!--  async function testDeleteCategory() {-->
+<!--    const id = document.getElementById('deleteId').value;-->
+<!--    const endpoint = `/${id}`;-->
+<!--    await testEndpoint('DELETE', endpoint, null, true);-->
+<!--  }-->
+
+<!--  async function testToggleStatus() {-->
+<!--    const id = document.getElementById('toggleId').value;-->
+<!--    const endpoint = `/${id}/toggle`;-->
+<!--    await testEndpoint('PATCH', endpoint, null, true);-->
+<!--  }-->
+
+<!--  async function testCategoryExists() {-->
+<!--    const name = document.getElementById('existsName').value;-->
+<!--    const endpoint = `/exists?name=${encodeURIComponent(name)}`;-->
+<!--    await testEndpoint('GET', endpoint);-->
+<!--  }-->
+
+<!--  // Полный тест всех основных функций-->
+<!--  async function runFullTest() {-->
+<!--    if (confirm('Запустить полный тест всех эндпоинтов? Это может занять некоторое время.')) {-->
+<!--      const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));-->
+
+<!--      console.log('🚀 Начинаем полный тест Frontend Category API...');-->
+
+<!--      // 1. Health Check-->
+<!--      await testEndpoint('GET', '/health');-->
+<!--      await delay(500);-->
+
+<!--      // 2. Основные GET запросы-->
+<!--      await testEndpoint('GET', '');-->
+<!--      await delay(500);-->
+
+<!--      await testEndpoint('GET', '/brief');-->
+<!--      await delay(500);-->
+
+<!--      await testEndpoint('GET', '/count');-->
+<!--      await delay(500);-->
+
+<!--      // 3. Admin запросы-->
+<!--      await testEndpoint('GET', '/all', null, true);-->
+<!--      await delay(500);-->
+
+<!--      await testEndpoint('GET', '/brief/all', null, true);-->
+<!--      await delay(500);-->
+
+<!--      // 4. Поиск-->
+<!--      await testEndpoint('GET', '/search?name=пицца');-->
+<!--      await delay(500);-->
+
+<!--      await testEndpoint('GET', '/brief/search?name=десерт');-->
+<!--      await delay(500);-->
+
+<!--      // 5. Получение по ID-->
+<!--      await testEndpoint('GET', '/1');-->
+<!--      await delay(500);-->
+
+<!--      await testEndpoint('GET', '/1/brief');-->
+<!--      await delay(500);-->
+
+<!--      // 6. Получение по списку ID-->
+<!--      await testEndpoint('POST', '/brief/by-ids', [1, 2, 3]);-->
+<!--      await delay(500);-->
+
+<!--      // 7. Проверка существования-->
+<!--      await testEndpoint('GET', '/exists?name=Пицца');-->
+<!--      await delay(500);-->
+
+<!--      console.log('✅ Полный тест завершен!');-->
+<!--      alert('Полный тест завершен! Проверьте результаты в секции ответов.');-->
+<!--    }-->
+<!--  }-->
+
+<!--  // Тест создания и управления категориями-->
+<!--  async function runCRUDTest() {-->
+<!--    if (confirm('Запустить тест CRUD операций? Будет создана тестовая категория.')) {-->
+<!--      const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));-->
+
+<!--      // 1. Создаем тестовую категорию-->
+<!--      const createFormData = new FormData();-->
+<!--      createFormData.append('name', 'Тестовая категория CRUD');-->
+<!--      createFormData.append('description', 'Категория для тестирования CRUD операций');-->
+<!--      createFormData.append('sortOrder', '999');-->
+
+<!--      const createUrl = getBaseUrl();-->
+<!--      try {-->
+<!--        const createResponse = await fetch(createUrl, {-->
+<!--          method: 'POST',-->
+<!--          headers: getMultipartHeaders(true),-->
+<!--          body: createFormData-->
+<!--        });-->
+
+<!--        const createData = await createResponse.json();-->
+<!--        addResponse('POST', createUrl, createResponse.status, createData);-->
+
+<!--        if (createResponse.ok && createData.data && createData.data.id) {-->
+<!--          const newId = createData.data.id;-->
+<!--          await delay(1000);-->
+
+<!--          // 2. Читаем созданную категорию-->
+<!--          await testEndpoint('GET', `/${newId}`);-->
+<!--          await delay(500);-->
+
+<!--          // 3. Обновляем категорию-->
+<!--          const updateFormData = new FormData();-->
+<!--          updateFormData.append('name', 'Обновленная тестовая категория');-->
+<!--          updateFormData.append('description', 'Обновленное описание');-->
+<!--          updateFormData.append('sortOrder', '888');-->
+
+<!--          const updateUrl = getBaseUrl() + `/${newId}`;-->
+<!--          const updateResponse = await fetch(updateUrl, {-->
+<!--            method: 'PUT',-->
+<!--            headers: getMultipartHeaders(true),-->
+<!--            body: updateFormData-->
+<!--          });-->
+
+<!--          const updateData = await updateResponse.json();-->
+<!--          addResponse('PUT', updateUrl, updateResponse.status, updateData);-->
+<!--          await delay(500);-->
+
+<!--          // 4. Переключаем статус-->
+<!--          await testEndpoint('PATCH', `/${newId}/toggle`, null, true);-->
+<!--          await delay(500);-->
+
+<!--          // 5. Удаляем категорию-->
+<!--          await testEndpoint('DELETE', `/${newId}`, null, true);-->
+
+<!--          alert('CRUD тест завершен! Проверьте результаты.');-->
+<!--        } else {-->
+<!--          alert('Не удалось создать тестовую категорию для CRUD теста.');-->
+<!--        }-->
+<!--      } catch (error) {-->
+<!--        addResponse('POST', createUrl, 0, null, error.message);-->
+<!--        alert('Ошибка при выполнении CRUD теста: ' + error.message);-->
+<!--      }-->
+<!--    }-->
+<!--  }-->
+
+<!--  // Инициализация - показать приветствие-->
+<!--  window.addEventListener('load', function() {-->
+<!--    // Показать текущий порт-->
+<!--    document.getElementById('currentPort').value = window.location.origin;-->
+
+<!--    setTimeout(() => {-->
+<!--      console.log('🎯 Frontend Category API Tester готов к работе!');-->
+<!--      console.log('🌐 Тестер запущен на:', window.location.origin);-->
+<!--      console.log('📍 Доступные сервисы:');-->
+<!--      console.log('   Frontend Service: http://localhost:8082/api/frontend/categories');-->
+<!--      console.log('   Backend Service: http://localhost:8083/api/categories');-->
+
+<!--      // Определяем рекомендуемую конфигурацию-->
+<!--      if (window.location.port === '8082') {-->
+<!--        console.log('✅ Тестер на Frontend Service - тестируем Frontend API');-->
+<!--        document.getElementById('serviceType').value = 'frontend';-->
+<!--        updateServiceUrl();-->
+<!--      } else if (window.location.port === '8083') {-->
+<!--        console.log('✅ Тестер на Backend Service - тестируем Backend API');-->
+<!--        document.getElementById('serviceType').value = 'backend';-->
+<!--        updateServiceUrl();-->
+<!--      } else {-->
+<!--        console.log('⚠️ Тестер на нестандартном порту:', window.location.port);-->
+<!--        console.log('💡 Можете выбрать любой сервис для тестирования');-->
+<!--      }-->
+
+<!--      console.log('🚀 Начинаем с Health Check...');-->
+<!--      // Автоматически запускаем health check при загрузке-->
+<!--      testEndpoint('GET', '/health');-->
+<!--    }, 1000);-->
+<!--  });-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontend Category API Tester</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #7f8c8d;
+      margin-bottom: 30px;
+      font-size: 1.2em;
+    }
+
+    .config-section {
+      background: #f8f9fa;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      border-left: 4px solid #007bff;
+    }
+
+    .config-section h3 {
+      color: #495057;
+      margin-bottom: 15px;
+    }
+
+    .input-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #495057;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #007bff;
+      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+    }
+
+    .quick-tests {
+      background: #e3f2fd;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      border-left: 4px solid #2196f3;
+    }
+
+    .quick-test-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 15px;
+    }
+
+    .quick-test-button {
+      background: #2196f3;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: all 0.3s ease;
+    }
+
+    .quick-test-button:hover {
+      background: #1976d2;
+      transform: translateY(-2px);
+    }
+
+    .endpoints-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .endpoint-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e9ecef;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .endpoint-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .endpoint-title {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+
+    .method-badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .GET { background: #28a745; color: white; }
+    .POST { background: #007bff; color: white; }
+    .PUT { background: #ffc107; color: #212529; }
+    .DELETE { background: #dc3545; color: white; }
+    .PATCH { background: #6f42c1; color: white; }
+
+    .endpoint-url {
+      font-family: 'Courier New', monospace;
+      background: #f8f9fa;
+      padding: 8px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      font-size: 0.9em;
+      word-break: break-all;
+    }
+
+    .test-button {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+
+    .test-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .test-button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .response-section {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 30px;
+      border-left: 4px solid #28a745;
+    }
+
+    .response-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .response-title {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #495057;
+    }
+
+    .clear-button {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
+    .response-content {
+      background: #2d3748;
+      color: #e6fffa;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      line-height: 1.6;
+      overflow-x: auto;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .status-success { color: #28a745; }
+    .status-error { color: #dc3545; }
+    .status-warning { color: #ffc107; }
+
+    .form-controls {
+      display: none;
+      margin-top: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .form-controls.active {
+      display: block;
+    }
+
+    .admin-required {
+      color: #dc3545;
+      font-size: 0.8em;
+      font-weight: bold;
+    }
+
+    .stats-section {
+      background: #fff3cd;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      border-left: 4px solid #ffc107;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #007bff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .icon { margin-right: 8px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>🎯 Frontend Category API Tester</h1>
+  <div class="subtitle">Тестирование UI микросервиса категорий</div>
+
+  <div class="config-section">
+    <h3>⚙️ Конфигурация микросервисов</h3>
+    <div class="input-group">
+      <label for="serviceType">Выберите сервис для тестирования:</label>
+      <select id="serviceType" onchange="updateServiceUrl()">
+        <option value="frontend">Frontend Service (8082) - /api/frontend/categories</option>
+        <option value="backend">Backend Service (8083) - /api/categories</option>
+      </select>
+    </div>
+    <div class="input-group">
+      <label for="baseUrl">API URL:</label>
+      <input type="text" id="baseUrl" value="http://localhost:8082/api/frontend/categories">
+      <small style="color: #6c757d; font-size: 0.9em;" id="serviceDescription">
+        🎯 Frontend Service API endpoint (UI микросервис)
+      </small>
+    </div>
+    <div class="input-group">
+      <label for="currentPort">Тестер запущен на:</label>
+      <input type="text" id="currentPort" readonly style="background: #f8f9fa;">
+    </div>
+    <div class="input-group">
+      <label for="authToken">Токен администратора:</label>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" id="authToken" value="eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ2YWRpbWtoMTdAZ21haWwuY29tIiwidXNlcklkIjo4LCJyb2xlIjoiUk9MRV9BRE1JTiIsImlhdCI6MTc1MTIxNTM5OSwiZXhwIjoxNzUxMzAxNzk5fQ.fbRgOTWYdLYokWLKKN6kSkbjl2aA1Xdq8FxonN_y2KE" style="flex: 1;">
+        <button type="button" onclick="getTokenFromStorage()" style="background: #28a745; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em;">
+          📥 Получить токен
+        </button>
+        <button type="button" onclick="clearToken()" style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9em;">
+          🗑️ Очистить
+        </button>
+      </div>
+      <small style="color: #6c757d; font-size: 0.9em;" id="tokenInfo">
+        🔐 Admin: vadimkh17@gmail.com | Expires: 2025-06-30
+      </small>
+    </div>
+  </div>
+
+  <div class="quick-tests">
+    <h3>🚀 Быстрое тестирование</h3>
+    <p>Нажмите для быстрого тестирования основных функций UI микросервиса:</p>
+    <div class="quick-test-buttons">
+      <button class="quick-test-button" onclick="testEndpoint('GET', '/health')">
+        <span class="icon">🔧</span>Health Check
+      </button>
+      <button class="quick-test-button" onclick="testEndpoint('GET', '')">
+        <span class="icon">📋</span>Активные категории
+      </button>
+      <button class="quick-test-button" onclick="testEndpoint('GET', '/brief')">
+        <span class="icon">📊</span>Краткий список
+      </button>
+      <button class="quick-test-button" onclick="testEndpoint('GET', '/count')">
+        <span class="icon">📊</span>Количество
+      </button>
+      <button class="quick-test-button" onclick="testEndpoint('GET', '/all', null, true)">
+        <span class="icon">📋</span>Все категории (Admin)
+      </button>
+      <button class="quick-test-button" onclick="runFullTest()">
+        <span class="icon">🎯</span>Полный тест
+      </button>
+    </div>
+  </div>
+
+  <div class="endpoints-grid">
+    <!-- GET Endpoints - Базовые -->
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge GET">GET</span>
+        Все активные категории
+      </div>
+      <div class="endpoint-url">/api/frontend/categories</div>
+      <button class="test-button" onclick="testEndpoint('GET', '')">
+        Тестировать
+      </button>
+    </div>
+
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge GET">GET</span>
+        Все категории <span class="admin-required">(ADMIN)</span>
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/all</div>
+      <button class="test-button" onclick="testEndpoint('GET', '/all', null, true)">
+        Тестировать
+      </button>
+    </div>
+
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge GET">GET</span>
+        Поиск категорий
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/search</div>
+      <button class="test-button" onclick="toggleForm('search-form')">
+        Настроить и тестировать
+      </button>
+      <div id="search-form" class="form-controls">
+        <div class="input-group">
+          <label>Название для поиска:</label>
+          <input type="text" id="searchName" value="пицца" placeholder="Введите название">
+        </div>
+        <button class="test-button" onclick="testSearch()">Поиск</button>
+      </div>
+    </div>
+
+    <!-- GET Endpoints - Краткая информация -->
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge GET">GET</span>
+        Краткий список активных
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/brief</div>
+      <button class="test-button" onclick="testEndpoint('GET', '/brief')">
+        Тестировать
+      </button>
+    </div>
+
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge GET">GET</span>
+        Краткий список всех <span class="admin-required">(ADMIN)</span>
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/brief/all</div>
+      <button class="test-button" onclick="testEndpoint('GET', '/brief/all', null, true)">
+        Тестировать
+      </button>
+    </div>
+
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge GET">GET</span>
+        Поиск кратких данных
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/brief/search</div>
+      <button class="test-button" onclick="toggleForm('brief-search-form')">
+        Настроить и тестировать
+      </button>
+      <div id="brief-search-form" class="form-controls">
+        <div class="input-group">
+          <label>Название для поиска:</label>
+          <input type="text" id="briefSearchName" value="бургер" placeholder="Введите название">
+        </div>
+        <button class="test-button" onclick="testBriefSearch()">Поиск кратких данных</button>
+      </div>
+    </div>
+
+    <!-- GET Endpoints - Отдельные категории -->
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge GET">GET</span>
+        Категория по ID
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/{id}</div>
+      <button class="test-button" onclick="toggleForm('get-by-id-form')">
+        Настроить и тестировать
+      </button>
+      <div id="get-by-id-form" class="form-controls">
+        <div class="input-group">
+          <label>ID категории:</label>
+          <input type="number" id="getCategoryId" value="1" placeholder="Введите ID">
+        </div>
+        <button class="test-button" onclick="testGetById()">Получить категорию</button>
+      </div>
+    </div>
+
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge GET">GET</span>
+        Краткая информация по ID
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/{id}/brief</div>
+      <button class="test-button" onclick="toggleForm('get-brief-by-id-form')">
+        Настроить и тестировать
+      </button>
+      <div id="get-brief-by-id-form" class="form-controls">
+        <div class="input-group">
+          <label>ID категории:</label>
+          <input type="number" id="getBriefCategoryId" value="1" placeholder="Введите ID">
+        </div>
+        <button class="test-button" onclick="testGetBriefById()">Получить краткую информацию</button>
+      </div>
+    </div>
+
+    <!-- POST Endpoints -->
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge POST">POST</span>
+        Категории по списку ID
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/brief/by-ids</div>
+      <button class="test-button" onclick="toggleForm('by-ids-form')">
+        Настроить и тестировать
+      </button>
+      <div id="by-ids-form" class="form-controls">
+        <div class="input-group">
+          <label>ID категорий (через запятую):</label>
+          <input type="text" id="categoryIds" value="1,2,3" placeholder="1,2,3">
+        </div>
+        <button class="test-button" onclick="testByIds()">Получить категории</button>
+      </div>
+    </div>
+
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge POST">POST</span>
+        Создать категорию <span class="admin-required">(ADMIN)</span>
+      </div>
+      <div class="endpoint-url">/api/frontend/categories</div>
+      <button class="test-button" onclick="toggleForm('create-form')">
+        Настроить и тестировать
+      </button>
+      <div id="create-form" class="form-controls">
+        <div class="input-group">
+          <label>Название:</label>
+          <input type="text" id="createName" value="Бургеры" placeholder="Название категории">
+        </div>
+        <div class="input-group">
+          <label>Описание:</label>
+          <textarea id="createDescription" placeholder="Описание категории">Сочные бургеры с мясными и вегетарианскими котлетами, свежими овощами и фирменными соусами.</textarea>
+        </div>
+        <div class="input-group">
+          <label>Порядок сортировки:</label>
+          <input type="number" id="createSortOrder" value="5" placeholder="Порядок">
+        </div>
+        <div class="input-group">
+          <label>Изображение (опционально):</label>
+          <input type="file" id="createImage" accept="image/*">
+        </div>
+        <button class="test-button" onclick="testCreateCategory()">Создать категорию</button>
+      </div>
+    </div>
+
+    <!-- PUT Endpoints -->
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge PUT">PUT</span>
+        Обновить категорию <span class="admin-required">(ADMIN)</span>
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/{id}</div>
+      <button class="test-button" onclick="toggleForm('update-form')">
+        Настроить и тестировать
+      </button>
+      <div id="update-form" class="form-controls">
+        <div class="input-group">
+          <label>ID категории для обновления:</label>
+          <input type="number" id="updateId" value="1" placeholder="ID">
+        </div>
+        <div class="input-group">
+          <label>Название:</label>
+          <input type="text" id="updateName" value="Обновленная категория" placeholder="Название">
+        </div>
+        <div class="input-group">
+          <label>Описание:</label>
+          <textarea id="updateDescription" placeholder="Описание">Обновленное описание категории</textarea>
+        </div>
+        <div class="input-group">
+          <label>Порядок сортировки:</label>
+          <input type="number" id="updateSortOrder" value="1" placeholder="Порядок">
+        </div>
+        <button class="test-button" onclick="testUpdateCategory()">Обновить категорию</button>
+      </div>
+    </div>
+
+    <!-- DELETE и PATCH Endpoints -->
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge DELETE">DELETE</span>
+        Удалить категорию <span class="admin-required">(ADMIN)</span>
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/{id}</div>
+      <button class="test-button" onclick="toggleForm('delete-form')">
+        Настроить и тестировать
+      </button>
+      <div id="delete-form" class="form-controls">
+        <div class="input-group">
+          <label>ID категории для удаления:</label>
+          <input type="number" id="deleteId" value="5" placeholder="ID">
+        </div>
+        <button class="test-button" onclick="testDeleteCategory()" style="background: #dc3545;">
+          Удалить категорию
+        </button>
+      </div>
+    </div>
+
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge PATCH">PATCH</span>
+        Переключить статус <span class="admin-required">(ADMIN)</span>
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/{id}/toggle</div>
+      <button class="test-button" onclick="toggleForm('toggle-form')">
+        Настроить и тестировать
+      </button>
+      <div id="toggle-form" class="form-controls">
+        <div class="input-group">
+          <label>ID категории:</label>
+          <input type="number" id="toggleId" value="1" placeholder="ID">
+        </div>
+        <button class="test-button" onclick="testToggleStatus()">Переключить статус</button>
+      </div>
+    </div>
+
+    <!-- Вспомогательные Endpoints -->
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge GET">GET</span>
+        Количество активных категорий
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/count</div>
+      <button class="test-button" onclick="testEndpoint('GET', '/count')">
+        Тестировать
+      </button>
+    </div>
+
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge GET">GET</span>
+        Проверка существования
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/exists</div>
+      <button class="test-button" onclick="toggleForm('exists-form')">
+        Настроить и тестировать
+      </button>
+      <div id="exists-form" class="form-controls">
+        <div class="input-group">
+          <label>Название для проверки:</label>
+          <input type="text" id="existsName" value="Пицца" placeholder="Введите название">
+        </div>
+        <button class="test-button" onclick="testCategoryExists()">Проверить существование</button>
+      </div>
+    </div>
+
+    <div class="endpoint-card">
+      <div class="endpoint-title">
+        <span class="method-badge GET">GET</span>
+        Проверка работоспособности
+      </div>
+      <div class="endpoint-url">/api/frontend/categories/health</div>
+      <button class="test-button" onclick="testEndpoint('GET', '/health')">
+        Тестировать
+      </button>
+    </div>
+  </div>
+
+  <div class="response-section">
+    <div class="response-header">
+      <div class="response-title">📋 Ответы Frontend API</div>
+      <button class="clear-button" onclick="clearResponses()">Очистить</button>
+    </div>
+    <div id="responses" class="response-content">
+      Здесь будут отображаться ответы от Frontend API...
+    </div>
+  </div>
+</div>
+
+<script>
+  let responseCount = 0;
+
+  // Функция для переключения между сервисами
+  function updateServiceUrl() {
+    const serviceType = document.getElementById('serviceType').value;
+    const baseUrlInput = document.getElementById('baseUrl');
+    const description = document.getElementById('serviceDescription');
+
+    if (serviceType === 'frontend') {
+      baseUrlInput.value = 'http://localhost:8082/api/frontend/categories';
+      description.textContent = '🎯 Frontend Service API endpoint (UI микросервис)';
+      description.style.color = '#28a745';
+    } else {
+      baseUrlInput.value = 'http://localhost:8083/api/categories';
+      description.textContent = '🎯 Backend Service API endpoint (основной микросервис)';
+      description.style.color = '#007bff';
+    }
+
+    console.log('🔄 Переключено на:', serviceType === 'frontend' ? 'Frontend Service' : 'Backend Service');
+    console.log('📍 Новый URL:', baseUrlInput.value);
+  }
+
+  // Функция для получения токена из различных источников
+  function getTokenFromStorage() {
+    let token = null;
+    let source = '';
+
+    try {
+      // 1. Пробуем получить из localStorage
+      const authData = localStorage.getItem('authToken') || localStorage.getItem('token') || localStorage.getItem('jwt');
+      if (authData) {
+        try {
+          const parsed = JSON.parse(authData);
+          token = parsed.token || parsed.accessToken || parsed.jwt || authData;
+          source = 'localStorage';
+        } catch {
+          token = authData;
+          source = 'localStorage';
+        }
+      }
+
+      // 2. Пробуем получить из sessionStorage
+      if (!token) {
+        const sessionAuth = sessionStorage.getItem('authToken') || sessionStorage.getItem('token') || sessionStorage.getItem('jwt');
+        if (sessionAuth) {
+          try {
+            const parsed = JSON.parse(sessionAuth);
+            token = parsed.token || parsed.accessToken || parsed.jwt || sessionAuth;
+            source = 'sessionStorage';
+          } catch {
+            token = sessionAuth;
+            source = 'sessionStorage';
+          }
+        }
+      }
+
+      // 3. Пробуем получить из cookies
+      if (!token) {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+          const [name, value] = cookie.trim().split('=');
+          if (name === 'authToken' || name === 'token' || name === 'jwt') {
+            token = decodeURIComponent(value);
+            source = 'cookies';
+            break;
+          }
+        }
+      }
+
+      // 4. Пробуем получить из URL параметров
+      if (!token) {
+        const urlParams = new URLSearchParams(window.location.search);
+        token = urlParams.get('token') || urlParams.get('jwt') || urlParams.get('authToken');
+        if (token) {
+          source = 'URL параметры';
+        }
+      }
+
+      if (token) {
+        document.getElementById('authToken').value = token;
+        updateTokenInfo(token);
+        console.log(`✅ Токен получен из: ${source}`);
+        console.log(`🔑 Токен: ${token.substring(0, 50)}...`);
+
+        // Показываем уведомление
+        const tokenInfo = document.getElementById('tokenInfo');
+        tokenInfo.style.color = '#28a745';
+        tokenInfo.textContent = `✅ Токен получен из: ${source}`;
+
+        setTimeout(() => {
+          updateTokenInfo(token);
+        }, 3000);
+      } else {
+        console.log('❌ Токен не найден в доступных источниках');
+        alert('Токен не найден!\n\nПроверенные источники:\n• localStorage\n• sessionStorage\n• cookies\n• URL параметры');
+      }
+
+    } catch (error) {
+      console.error('❌ Ошибка при получении токена:', error);
+      alert('Ошибка при получении токена: ' + error.message);
+    }
+  }
+
+  // Функция для очистки токена
+  function clearToken() {
+    document.getElementById('authToken').value = '';
+    const tokenInfo = document.getElementById('tokenInfo');
+    tokenInfo.style.color = '#dc3545';
+    tokenInfo.textContent = '❌ Токен очищен';
+    console.log('🗑️ Токен очищен');
+  }
+
+  // Функция для парсинга и отображения информации о токене
+  function updateTokenInfo(token) {
+    try {
+      if (!token) {
+        document.getElementById('tokenInfo').textContent = '❌ Токен отсутствует';
+        return;
+      }
+
+      // Парсим JWT токен
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const exp = new Date(payload.exp * 1000);
+      const now = new Date();
+      const isExpired = exp < now;
+
+      const userEmail = payload.sub || payload.email || 'Неизвестно';
+      const userRole = payload.role || payload.authorities || 'Неизвестно';
+      const userId = payload.userId || payload.id || 'Неизвестно';
+
+      const tokenInfo = document.getElementById('tokenInfo');
+      if (isExpired) {
+        tokenInfo.style.color = '#dc3545';
+        tokenInfo.textContent = `❌ ТОКЕН ИСТЕК! User: ${userEmail} | Role: ${userRole} | Expired: ${exp.toLocaleString()}`;
+      } else {
+        tokenInfo.style.color = '#28a745';
+        tokenInfo.textContent = `✅ User: ${userEmail} | Role: ${userRole} | ID: ${userId} | Expires: ${exp.toLocaleDateString()}`;
+      }
+
+      console.log('🔍 Информация о токене:');
+      console.log('  Email:', userEmail);
+      console.log('  Role:', userRole);
+      console.log('  User ID:', userId);
+      console.log('  Expires:', exp.toLocaleString());
+      console.log('  Is Expired:', isExpired);
+
+    } catch (error) {
+      document.getElementById('tokenInfo').textContent = '⚠️ Ошибка парсинга токена';
+      console.error('❌ Ошибка парсинга JWT:', error);
+    }
+  }
+
+  function getBaseUrl() {
+    return document.getElementById('baseUrl').value.trim();
+  }
+
+  function getAuthToken() {
+    return document.getElementById('authToken').value.trim();
+  }
+
+  function getHeaders(isAdmin = false) {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${getAuthToken()}`
+    };
+
+    if (isAdmin) {
+      headers['X-User-Role'] = 'ROLE_ADMIN';
+      headers['X-User-Email'] = 'vadimkh17@gmail.com';
+    }
+
+    return headers;
+  }
+
+  function getMultipartHeaders(isAdmin = false) {
+    const headers = {
+      'Authorization': `Bearer ${getAuthToken()}`
+    };
+
+    if (isAdmin) {
+      headers['X-User-Role'] = 'ROLE_ADMIN';
+      headers['X-User-Email'] = 'vadimkh17@gmail.com';
+    }
+
+    return headers;
+  }
+
+  function toggleForm(formId) {
+    const form = document.getElementById(formId);
+    form.classList.toggle('active');
+  }
+
+  function addResponse(method, url, status, data, error = null) {
+    responseCount++;
+    const responsesDiv = document.getElementById('responses');
+
+    const timestamp = new Date().toLocaleString();
+    const statusClass = status >= 200 && status < 300 ? 'status-success' :
+            status >= 400 && status < 500 ? 'status-warning' : 'status-error';
+
+    const responseHtml = `
+                <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #4a5568; border-radius: 8px; background: #2d3748;">
+                    <div style="margin-bottom: 10px;">
+                        <strong>${responseCount}. ${method} ${url}</strong>
+                        <span style="float: right; font-size: 0.9em; color: #a0aec0;">${timestamp}</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span class="${statusClass}">Status: ${status}</span>
+                    </div>
+                    ${error ? `<div style="color: #fc8181; margin-bottom: 10px;">Error: ${error}</div>` : ''}
+                    <pre style="white-space: pre-wrap; word-wrap: break-word;">${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+
+    responsesDiv.innerHTML = responseHtml + responsesDiv.innerHTML;
+  }
+
+  function clearResponses() {
+    document.getElementById('responses').innerHTML = 'Здесь будут отображаться ответы от Frontend API...';
+    responseCount = 0;
+  }
+
+  async function testEndpoint(method, endpoint, body = null, isAdmin = false) {
+    const url = getBaseUrl() + endpoint;
+
+    try {
+      const options = {
+        method: method,
+        headers: getHeaders(isAdmin)
+      };
+
+      if (body) {
+        options.body = JSON.stringify(body);
+      }
+
+      const response = await fetch(url, options);
+      let data;
+
+      try {
+        data = await response.json();
+      } catch (e) {
+        data = await response.text();
+      }
+
+      addResponse(method, url, response.status, data);
+
+    } catch (error) {
+      addResponse(method, url, 0, null, error.message);
+    }
+  }
+
+  // Специфичные тесты
+  async function testSearch() {
+    const name = document.getElementById('searchName').value;
+    const endpoint = `/search?name=${encodeURIComponent(name)}`;
+    await testEndpoint('GET', endpoint);
+  }
+
+  async function testBriefSearch() {
+    const name = document.getElementById('briefSearchName').value;
+    const endpoint = `/brief/search?name=${encodeURIComponent(name)}`;
+    await testEndpoint('GET', endpoint);
+  }
+
+  async function testGetById() {
+    const id = document.getElementById('getCategoryId').value;
+    const endpoint = `/${id}`;
+    await testEndpoint('GET', endpoint);
+  }
+
+  async function testGetBriefById() {
+    const id = document.getElementById('getBriefCategoryId').value;
+    const endpoint = `/${id}/brief`;
+    await testEndpoint('GET', endpoint);
+  }
+
+  async function testByIds() {
+    const ids = document.getElementById('categoryIds').value
+            .split(',')
+            .map(id => parseInt(id.trim()))
+            .filter(id => !isNaN(id));
+
+    await testEndpoint('POST', '/brief/by-ids', ids);
+  }
+
+  async function testCreateCategory() {
+    const formData = new FormData();
+    formData.append('name', document.getElementById('createName').value);
+    formData.append('description', document.getElementById('createDescription').value);
+    formData.append('sortOrder', document.getElementById('createSortOrder').value);
+
+    const imageFile = document.getElementById('createImage').files[0];
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+
+    const url = getBaseUrl();
+
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: getMultipartHeaders(true),
+        body: formData
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        data = await response.text();
+      }
+
+      addResponse('POST', url, response.status, data);
+
+    } catch (error) {
+      addResponse('POST', url, 0, null, error.message);
+    }
+  }
+
+  async function testUpdateCategory() {
+    const id = document.getElementById('updateId').value;
+    const formData = new FormData();
+    formData.append('name', document.getElementById('updateName').value);
+    formData.append('description', document.getElementById('updateDescription').value);
+    formData.append('sortOrder', document.getElementById('updateSortOrder').value);
+
+    const url = getBaseUrl() + `/${id}`;
+
+    try {
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: getMultipartHeaders(true),
+        body: formData
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        data = await response.text();
+      }
+
+      addResponse('PUT', url, response.status, data);
+
+    } catch (error) {
+      addResponse('PUT', url, 0, null, error.message);
+    }
+  }
+
+  async function testDeleteCategory() {
+    const id = document.getElementById('deleteId').value;
+    const endpoint = `/${id}`;
+    await testEndpoint('DELETE', endpoint, null, true);
+  }
+
+  async function testToggleStatus() {
+    const id = document.getElementById('toggleId').value;
+    const endpoint = `/${id}/toggle`;
+    await testEndpoint('PATCH', endpoint, null, true);
+  }
+
+  async function testCategoryExists() {
+    const name = document.getElementById('existsName').value;
+    const endpoint = `/exists?name=${encodeURIComponent(name)}`;
+    await testEndpoint('GET', endpoint);
+  }
+
+  // Полный тест всех основных функций
+  async function runFullTest() {
+    if (confirm('Запустить полный тест всех эндпоинтов? Это может занять некоторое время.')) {
+      const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+      console.log('🚀 Начинаем полный тест Frontend Category API...');
+
+      // 1. Health Check
+      await testEndpoint('GET', '/health');
+      await delay(500);
+
+      // 2. Основные GET запросы
+      await testEndpoint('GET', '');
+      await delay(500);
+
+      await testEndpoint('GET', '/brief');
+      await delay(500);
+
+      await testEndpoint('GET', '/count');
+      await delay(500);
+
+      // 3. Admin запросы
+      await testEndpoint('GET', '/all', null, true);
+      await delay(500);
+
+      await testEndpoint('GET', '/brief/all', null, true);
+      await delay(500);
+
+      // 4. Поиск
+      await testEndpoint('GET', '/search?name=пицца');
+      await delay(500);
+
+      await testEndpoint('GET', '/brief/search?name=десерт');
+      await delay(500);
+
+      // 5. Получение по ID
+      await testEndpoint('GET', '/1');
+      await delay(500);
+
+      await testEndpoint('GET', '/1/brief');
+      await delay(500);
+
+      // 6. Получение по списку ID
+      await testEndpoint('POST', '/brief/by-ids', [1, 2, 3]);
+      await delay(500);
+
+      // 7. Проверка существования
+      await testEndpoint('GET', '/exists?name=Пицца');
+      await delay(500);
+
+      console.log('✅ Полный тест завершен!');
+      alert('Полный тест завершен! Проверьте результаты в секции ответов.');
+    }
+  }
+
+  // Тест создания и управления категориями
+  async function runCRUDTest() {
+    if (confirm('Запустить тест CRUD операций? Будет создана тестовая категория.')) {
+      const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+      // 1. Создаем тестовую категорию
+      const createFormData = new FormData();
+      createFormData.append('name', 'Тестовая категория CRUD');
+      createFormData.append('description', 'Категория для тестирования CRUD операций');
+      createFormData.append('sortOrder', '999');
+
+      const createUrl = getBaseUrl();
+      try {
+        const createResponse = await fetch(createUrl, {
+          method: 'POST',
+          headers: getMultipartHeaders(true),
+          body: createFormData
+        });
+
+        const createData = await createResponse.json();
+        addResponse('POST', createUrl, createResponse.status, createData);
+
+        if (createResponse.ok && createData.data && createData.data.id) {
+          const newId = createData.data.id;
+          await delay(1000);
+
+          // 2. Читаем созданную категорию
+          await testEndpoint('GET', `/${newId}`);
+          await delay(500);
+
+          // 3. Обновляем категорию
+          const updateFormData = new FormData();
+          updateFormData.append('name', 'Обновленная тестовая категория');
+          updateFormData.append('description', 'Обновленное описание');
+          updateFormData.append('sortOrder', '888');
+
+          const updateUrl = getBaseUrl() + `/${newId}`;
+          const updateResponse = await fetch(updateUrl, {
+            method: 'PUT',
+            headers: getMultipartHeaders(true),
+            body: updateFormData
+          });
+
+          const updateData = await updateResponse.json();
+          addResponse('PUT', updateUrl, updateResponse.status, updateData);
+          await delay(500);
+
+          // 4. Переключаем статус
+          await testEndpoint('PATCH', `/${newId}/toggle`, null, true);
+          await delay(500);
+
+          // 5. Удаляем категорию
+          await testEndpoint('DELETE', `/${newId}`, null, true);
+
+          alert('CRUD тест завершен! Проверьте результаты.');
+        } else {
+          alert('Не удалось создать тестовую категорию для CRUD теста.');
+        }
+      } catch (error) {
+        addResponse('POST', createUrl, 0, null, error.message);
+        alert('Ошибка при выполнении CRUD теста: ' + error.message);
+      }
+    }
+  }
+
+  // Инициализация - показать приветствие
+  window.addEventListener('load', function() {
+    // Показать текущий порт
+    document.getElementById('currentPort').value = window.location.origin;
+
+    // Проверяем токен при загрузке
+    const currentToken = document.getElementById('authToken').value;
+    if (currentToken) {
+      updateTokenInfo(currentToken);
+    }
+
+    setTimeout(() => {
+      console.log('🎯 Frontend Category API Tester готов к работе!');
+      console.log('🌐 Тестер запущен на:', window.location.origin);
+      console.log('📍 Доступные сервисы:');
+      console.log('   Frontend Service: http://localhost:8082/api/frontend/categories');
+      console.log('   Backend Service: http://localhost:8083/api/categories');
+      console.log('💡 Функции работы с токеном:');
+      console.log('   📥 Получить токен - из localStorage/sessionStorage/cookies/URL');
+      console.log('   🗑️ Очистить - для ввода нового токена');
+
+      // Определяем рекомендуемую конфигурацию
+      if (window.location.port === '8082') {
+        console.log('✅ Тестер на Frontend Service - тестируем Frontend API');
+        document.getElementById('serviceType').value = 'frontend';
+        updateServiceUrl();
+      } else if (window.location.port === '8083') {
+        console.log('✅ Тестер на Backend Service - тестируем Backend API');
+        document.getElementById('serviceType').value = 'backend';
+        updateServiceUrl();
+      } else {
+        console.log('⚠️ Тестер на нестандартном порту:', window.location.port);
+        console.log('💡 Можете выбрать любой сервис для тестирования');
+      }
+
+      console.log('🚀 Начинаем с Health Check...');
+      // Автоматически запускаем health check при загрузке
+      testEndpoint('GET', '/health');
+    }, 1000);
+  });
+</script>
+</body>
+</html>

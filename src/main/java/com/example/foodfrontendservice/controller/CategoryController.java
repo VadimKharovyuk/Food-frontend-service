@@ -363,6 +363,7 @@ public class CategoryController {
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
+
     /**
      * 🔧 Проверка работоспособности
      */

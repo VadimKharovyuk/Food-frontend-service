@@ -15,4 +15,14 @@ public class FoodFrontendServiceApplication {
         SpringApplication.run(FoodFrontendServiceApplication.class, args);
     }
 
+
+
+//1. JwtUtil.java
+//2. JwtAuthenticationFilter.java
+//3. FeignAuthInterceptor.java
+//4. FeignConfig.java
+//
+//// application.yml
+//    jwt:
+//    secret: ${JWT_SECRET}
 }
