@@ -29,8 +29,8 @@ public class StoreServiceClientFallback implements StoreServiceClient {
     }
 
     @Override
-    public ResponseEntity<StoreResponseWrapper> getMyStores(int page, int size) {
-        log.warn("Fallback: Store service unavailable for my stores");
-        return ResponseEntity.ok(StoreResponseWrapper.error("Сервис магазинов временно недоступен"));
+    public ResponseEntity<StoreResponseWrapper> getMyStores(Long userId, int page, int size) {
+        log.warn("Fallback: Store service unavailable for user {} stores", userId);
+        return ResponseEntity.ok(StoreResponseWrapper.error("Ваши магазины временно недоступны"));
     }
 }

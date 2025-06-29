@@ -1,4 +1,5 @@
 package com.example.foodfrontendservice.controller;
+import com.example.foodfrontendservice.config.CurrentUser;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,35 @@ import com.example.foodfrontendservice.service.StoreService;
 public class StoreController {
 
     private final StoreService storeService;
+    /**
+     * 🏪 Получить магазины текущего пользователя
+     */
+    @GetMapping("/my")
+    public ResponseEntity<StoreResponseWrapper> getMyStores(
+            @CurrentUser Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        log.info("👤 GET /api/frontend/stores/my - userId={}, page={}, size={}",
+                userId, page, size);
+        StoreResponseWrapper response = storeService.getMyStores(userId, page, size);
+
+        if (userId == null) {
+            log.warn("❌ User not authenticated for /my stores");
+            return ResponseEntity.status(401)
+                    .body(StoreResponseWrapper.error("Требуется авторизация"));
+        }
+
+        if (response.getSuccess()) {
+            log.info("✅ Retrieved {} my stores for user {}, hasNext: {}",
+                    response.getTotalCount(), userId, response.getHasNext());
+            return ResponseEntity.ok(response);
+        } else {
+            log.warn("❌ Failed to get my stores for user {}: {}",
+                    userId, response.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
 
     /**
      * 🏪 Получить магазины для главной страницы
@@ -84,27 +114,7 @@ public class StoreController {
         }
     }
 
-    /**
-     * 🏪 Получить магазины текущего пользователя
-     */
-    @GetMapping("/my")
-    public ResponseEntity<StoreResponseWrapper> getMyStores(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
 
-        log.info("👤 GET /api/frontend/stores/my - page={}, size={}", page, size);
-
-        StoreResponseWrapper response = storeService.getMyStores(page, size);
-
-        if (response.getSuccess()) {
-            log.info("✅ Retrieved {} my stores, hasNext: {}",
-                    response.getTotalCount(), response.getHasNext());
-            return ResponseEntity.ok(response);
-        } else {
-            log.warn("❌ Failed to get my stores: {}", response.getMessage());
-            return ResponseEntity.status(500).body(response);
-        }
-    }
 
     /**
      * 📊 Получить статистику магазинов

@@ -108,25 +108,26 @@ public class StoreService {
      * @param size размер страницы
      * @return магазины владельца
      */
-    public StoreResponseWrapper getMyStores(int page, int size) {
-        log.debug("Getting my stores from product service: page={}, size={}", page, size);
+    public StoreResponseWrapper getMyStores(Long userId, int page, int size) {
+        log.debug("Getting my stores for user {} from product service: page={}, size={}",
+                userId, page, size);
 
         try {
             ResponseEntity<StoreResponseWrapper> response =
-                    storeServiceClient.getMyStores(page, size);
+                    storeServiceClient.getMyStores(userId, page, size);
 
             if (response.getBody() != null) {
-                log.debug("Successfully retrieved {} my stores for page {}",
-                        response.getBody().getTotalCount(), page);
+                log.debug("Successfully retrieved {} my stores for user {} on page {}",
+                        response.getBody().getTotalCount(), userId, page);
                 return response.getBody();
             } else {
-                log.warn("Empty response from product service for my stores");
+                log.warn("Empty response from product service for user {} stores", userId);
                 return StoreResponseWrapper.error("Не удалось получить ваши магазины");
             }
 
         } catch (Exception e) {
-            log.error("Error calling product service for my stores: page={}, size={}",
-                    page, size, e);
+            log.error("Error calling product service for user {} stores: page={}, size={}",
+                    userId, page, size, e);
             return StoreResponseWrapper.error("Ошибка связи с сервисом продуктов");
         }
     }
