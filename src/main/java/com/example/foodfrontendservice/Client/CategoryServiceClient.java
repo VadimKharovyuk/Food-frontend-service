@@ -19,20 +19,19 @@ import java.util.List;
 )
 public interface CategoryServiceClient {
 
+
+    /**
+     * 📊 Получить краткий список активных категорий (для dropdown/селекторов)
+     */
+    @GetMapping("/brief")
+    ResponseEntity<ListApiResponse<CategoryDto>> getActiveCategoriesBrief();
+
     /**
      * 📋 Получить все категории включая неактивные (полная информация)
      * Требует: роль ADMIN
      */
     @GetMapping("/all")
     ResponseEntity<ListApiResponse<CategoryResponseDto>> getAllCategories();
-
-//    @GetMapping("/all")
-//    ResponseEntity<ListApiResponse<CategoryResponseDto>> getAllCategories(
-//            @RequestHeader("Authorization") String authorization,
-//            @RequestHeader("X-User-Role") String userRole,
-//            @RequestHeader("X-User-Email") String userEmail
-//    );
-
 
     /**
      * 📋 Получить все активные категории (полная информация)
@@ -51,30 +50,25 @@ public interface CategoryServiceClient {
     // 📊 ПОЛУЧЕНИЕ СПИСКОВ - КРАТКАЯ ИНФОРМАЦИЯ (ПРОЕКЦИИ)
     // ================================
 
-    /**
-     * 📊 Получить краткий список активных категорий (для dropdown/селекторов)
-     */
-    @GetMapping("/brief")
-    ResponseEntity<ListApiResponse<CategoryBaseProjection>> getActiveCategoriesBrief();
 
     /**
      * 📊 Получить краткий список всех категорий (включая неактивные)
      * Требует: роль ADMIN
      */
     @GetMapping("/brief/all")
-    ResponseEntity<ListApiResponse<CategoryBaseProjection>> getAllCategoriesBrief();
+    ResponseEntity<ListApiResponse<CategoryDto>> getAllCategoriesBrief();
 
     /**
      * 🔍 Поиск кратких данных категорий по названию
      */
     @GetMapping("/brief/search")
-    ResponseEntity<ListApiResponse<CategoryBaseProjection>> searchCategoriesBrief(@RequestParam String name);
+    ResponseEntity<ListApiResponse<CategoryDto>> searchCategoriesBrief(@RequestParam String name);
 
     /**
      * 📊 Получить краткие данные категорий по списку ID
      */
     @PostMapping("/brief/by-ids")
-    ResponseEntity<ListApiResponse<CategoryBaseProjection>> getCategoriesBriefByIds(@RequestBody List<Long> ids);
+    ResponseEntity<ListApiResponse<CategoryDto>> getCategoriesBriefByIds(@RequestBody List<Long> ids);
 
     // ================================
     // 🔍 ПОЛУЧЕНИЕ ОТДЕЛЬНЫХ КАТЕГОРИЙ
@@ -90,7 +84,7 @@ public interface CategoryServiceClient {
      * 📊 Получить краткую информацию о категории по ID
      */
     @GetMapping("/{id}/brief")
-    ResponseEntity<ApiResponse<CategoryBaseProjection>> getCategoryBrief(@PathVariable Long id);
+    ResponseEntity<ApiResponse<CategoryDto>> getCategoryBrief(@PathVariable Long id);
 
     // ================================
     // ✏️ СОЗДАНИЕ И ОБНОВЛЕНИЕ КАТЕГОРИЙ (ADMIN ONLY)
@@ -136,11 +130,6 @@ public interface CategoryServiceClient {
             @PathVariable Long id,
             @RequestHeader("X-User-Id") Long userId
     );
-
-    // ================================
-    // 📊 СТАТИСТИКА И АНАЛИТИКА
-    // ================================
-
 
 
     // ================================

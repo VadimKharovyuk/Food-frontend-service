@@ -88,6 +88,7 @@ public class CategoryController {
         }
     }
 
+
     // ================================
     // 📊 ПОЛУЧЕНИЕ СПИСКОВ - КРАТКАЯ ИНФОРМАЦИЯ
     // ================================
@@ -96,10 +97,10 @@ public class CategoryController {
      * 📊 Получить краткий список активных категорий (для dropdown/селекторов)
      */
     @GetMapping("/brief")
-    public ResponseEntity<ListApiResponse<CategoryBaseProjection>> getActiveCategoriesBrief() {
+    public ResponseEntity<ListApiResponse<CategoryDto>> getActiveCategoriesBrief() {
         log.info("📊 GET /api/frontend/categories/brief - Getting brief categories");
 
-        ListApiResponse<CategoryBaseProjection> response = categoryService.getActiveCategoriesBrief();
+        ListApiResponse<CategoryDto> response = categoryService.getActiveCategoriesBrief();
 
         if (response.isSuccess()) {
             log.info("✅ Retrieved {} brief categories", response.getTotalCount());
@@ -114,7 +115,7 @@ public class CategoryController {
      * 📊 Получить краткий список всех категорий (только для админов)
      */
     @GetMapping("/brief/all")
-    public ResponseEntity<ListApiResponse<CategoryBaseProjection>> getAllCategoriesBrief(
+    public ResponseEntity<ListApiResponse<CategoryDto>> getAllCategoriesBrief(
             HttpServletRequest request) {
 
         log.info("📊 GET /api/frontend/categories/brief/all - Getting all brief categories");
@@ -125,7 +126,7 @@ public class CategoryController {
                     .body(ListApiResponse.error("Доступ запрещен"));
         }
 
-        ListApiResponse<CategoryBaseProjection> response = categoryService.getAllCategoriesBrief();
+        ListApiResponse<CategoryDto> response = categoryService.getAllCategoriesBrief();
 
         return response.isSuccess() ?
                 ResponseEntity.ok(response) :
@@ -136,7 +137,7 @@ public class CategoryController {
      * 🔍 Поиск кратких данных категорий
      */
     @GetMapping("/brief/search")
-    public ResponseEntity<ListApiResponse<CategoryBaseProjection>> searchCategoriesBrief(
+    public ResponseEntity<ListApiResponse<CategoryDto>> searchCategoriesBrief(
             @RequestParam String name) {
 
         log.info("🔍 GET /api/frontend/categories/brief/search - Searching brief categories: {}", name);
@@ -146,7 +147,7 @@ public class CategoryController {
                     .body(ListApiResponse.error("Параметр поиска не может быть пустым"));
         }
 
-        ListApiResponse<CategoryBaseProjection> response = categoryService.searchCategoriesBrief(name.trim());
+        ListApiResponse<CategoryDto> response = categoryService.searchCategoriesBrief(name.trim());
 
         return response.isSuccess() ?
                 ResponseEntity.ok(response) :
@@ -157,7 +158,7 @@ public class CategoryController {
      * 📊 Получить краткие данные категорий по списку ID
      */
     @PostMapping("/brief/by-ids")
-    public ResponseEntity<ListApiResponse<CategoryBaseProjection>> getCategoriesBriefByIds(
+    public ResponseEntity<ListApiResponse<CategoryDto>> getCategoriesBriefByIds(
             @RequestBody List<Long> ids) {
 
         log.info("📊 POST /api/frontend/categories/brief/by-ids - Getting categories by IDs: {}", ids);
@@ -167,7 +168,7 @@ public class CategoryController {
                     .body(ListApiResponse.error("Список ID не может быть пустым"));
         }
 
-        ListApiResponse<CategoryBaseProjection> response = categoryService.getCategoriesBriefByIds(ids);
+        ListApiResponse<CategoryDto> response = categoryService.getCategoriesBriefByIds(ids);
 
         return response.isSuccess() ?
                 ResponseEntity.ok(response) :
@@ -200,10 +201,10 @@ public class CategoryController {
      * 📊 Получить краткую информацию о категории по ID
      */
     @GetMapping("/{id}/brief")
-    public ResponseEntity<ApiResponse<CategoryBaseProjection>> getCategoryBrief(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<CategoryDto>> getCategoryBrief(@PathVariable Long id) {
         log.info("📊 GET /api/frontend/categories/{}/brief - Getting brief category", id);
 
-        ApiResponse<CategoryBaseProjection> response = categoryService.getCategoryBrief(id);
+        ApiResponse<CategoryDto> response = categoryService.getCategoryBrief(id);
 
         if (response.isSuccess()) {
             return ResponseEntity.ok(response);

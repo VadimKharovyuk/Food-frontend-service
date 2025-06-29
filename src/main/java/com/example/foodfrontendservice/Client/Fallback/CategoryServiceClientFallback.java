@@ -36,25 +36,25 @@ public class CategoryServiceClientFallback implements CategoryServiceClient {
     // ================================
 
     @Override
-    public ResponseEntity<ListApiResponse<CategoryBaseProjection>> getActiveCategoriesBrief() {
+    public ResponseEntity<ListApiResponse<CategoryDto>> getActiveCategoriesBrief() {
         log.warn("Fallback: Category service unavailable for brief categories");
         return ResponseEntity.ok(ListApiResponse.error("Сервис категорий временно недоступен"));
     }
 
     @Override
-    public ResponseEntity<ListApiResponse<CategoryBaseProjection>> getAllCategoriesBrief() {
+    public ResponseEntity<ListApiResponse<CategoryDto>> getAllCategoriesBrief() {
         log.warn("Fallback: Category service unavailable for all brief categories");
         return ResponseEntity.ok(ListApiResponse.error("Сервис категорий временно недоступен"));
     }
 
     @Override
-    public ResponseEntity<ListApiResponse<CategoryBaseProjection>> searchCategoriesBrief(String name) {
+    public ResponseEntity<ListApiResponse<CategoryDto>> searchCategoriesBrief(String name) {
         log.warn("Fallback: Category service unavailable for brief search: {}", name);
         return ResponseEntity.ok(ListApiResponse.error("Поиск категорий временно недоступен"));
     }
 
     @Override
-    public ResponseEntity<ListApiResponse<CategoryBaseProjection>> getCategoriesBriefByIds(List<Long> ids) {
+    public ResponseEntity<ListApiResponse<CategoryDto>> getCategoriesBriefByIds(List<Long> ids) {
         log.warn("Fallback: Category service unavailable for categories by IDs: {}", ids);
         return ResponseEntity.ok(ListApiResponse.error("Сервис категорий временно недоступен"));
     }
@@ -70,7 +70,7 @@ public class CategoryServiceClientFallback implements CategoryServiceClient {
     }
 
     @Override
-    public ResponseEntity<ApiResponse<CategoryBaseProjection>> getCategoryBrief(Long id) {
+    public ResponseEntity<ApiResponse<CategoryDto>> getCategoryBrief(Long id) {
         log.warn("Fallback: Category service unavailable for brief category ID: {}", id);
         return ResponseEntity.ok(ApiResponse.error("Категория временно недоступна"));
     }

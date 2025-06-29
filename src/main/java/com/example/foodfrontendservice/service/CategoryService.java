@@ -2,6 +2,7 @@
 package com.example.foodfrontendservice.service;
 import com.example.foodfrontendservice.Client.CategoryServiceClient;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.*;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -99,12 +100,18 @@ public class CategoryService {
     /**
      * Получить краткий список активных категорий (для dropdown/селекторов)
      */
-    public ListApiResponse<CategoryBaseProjection> getActiveCategoriesBrief() {
+    public ListApiResponse<CategoryDto> getActiveCategoriesBrief() {
         log.debug("Getting brief active categories from product service");
 
         try {
-            ResponseEntity<ListApiResponse<CategoryBaseProjection>> response =
+            // Добавьте подробное логирование
+            log.info("Calling product-service at /api/categories/brief");
+
+            ResponseEntity<ListApiResponse<CategoryDto>> response =
                     categoryServiceClient.getActiveCategoriesBrief();
+
+            log.info("Response status: {}", response.getStatusCode());
+            log.info("Response body is null: {}", response.getBody() == null);
 
             if (response.getBody() != null) {
                 log.debug("Successfully retrieved {} brief categories",
@@ -115,20 +122,23 @@ public class CategoryService {
                 return ListApiResponse.error("Не удалось получить краткие данные категорий");
             }
 
+        } catch (FeignException e) {
+            log.error("Feign error calling product service: status={}, message={}",
+                    e.status(), e.getMessage());
+            return ListApiResponse.error("Ошибка связи с сервисом продуктов: " + e.getMessage());
         } catch (Exception e) {
-            log.error("Error calling product service for brief categories", e);
-            return ListApiResponse.error("Ошибка связи с сервисом продуктов");
+            log.error("Unexpected error calling product service", e);
+            return ListApiResponse.error("Ошибка связи с сервисом продуктов: " + e.getClass().getSimpleName());
         }
     }
-
     /**
      * Получить краткий список всех категорий (только для админов)
      */
-    public ListApiResponse<CategoryBaseProjection> getAllCategoriesBrief() {
+    public ListApiResponse<CategoryDto> getAllCategoriesBrief() {
         log.debug("Getting all brief categories from product service");
 
         try {
-            ResponseEntity<ListApiResponse<CategoryBaseProjection>> response =
+            ResponseEntity<ListApiResponse<CategoryDto>> response =
                     categoryServiceClient.getAllCategoriesBrief();
 
             if (response.getBody() != null) {
@@ -146,11 +156,11 @@ public class CategoryService {
     /**
      * Поиск кратких данных категорий по названию
      */
-    public ListApiResponse<CategoryBaseProjection> searchCategoriesBrief(String name) {
+    public ListApiResponse<CategoryDto> searchCategoriesBrief(String name) {
         log.debug("Searching brief categories by name: {}", name);
 
         try {
-            ResponseEntity<ListApiResponse<CategoryBaseProjection>> response =
+            ResponseEntity<ListApiResponse<CategoryDto>> response =
                     categoryServiceClient.searchCategoriesBrief(name);
 
             if (response.getBody() != null) {
@@ -168,11 +178,11 @@ public class CategoryService {
     /**
      * Получить краткие данные категорий по списку ID
      */
-    public ListApiResponse<CategoryBaseProjection> getCategoriesBriefByIds(List<Long> ids) {
+    public ListApiResponse<CategoryDto> getCategoriesBriefByIds(List<Long> ids) {
         log.debug("Getting brief categories by IDs: {}", ids);
 
         try {
-            ResponseEntity<ListApiResponse<CategoryBaseProjection>> response =
+            ResponseEntity<ListApiResponse<CategoryDto>> response =
                     categoryServiceClient.getCategoriesBriefByIds(ids);
 
             if (response.getBody() != null) {
@@ -216,11 +226,11 @@ public class CategoryService {
     /**
      * Получить краткую информацию о категории по ID
      */
-    public ApiResponse<CategoryBaseProjection> getCategoryBrief(Long id) {
+    public ApiResponse<CategoryDto> getCategoryBrief(Long id) {
         log.debug("Getting brief category by ID: {}", id);
 
         try {
-            ResponseEntity<ApiResponse<CategoryBaseProjection>> response =
+            ResponseEntity<ApiResponse<CategoryDto>> response =
                     categoryServiceClient.getCategoryBrief(id);
 
             if (response.getBody() != null) {

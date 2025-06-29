@@ -1,18 +1,17 @@
 package com.example.foodfrontendservice.dto.PRODUCTSERVICE.category;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import java.time.LocalDateTime;
+import lombok.NoArgsConstructor;
+
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CategoryResponseDto {
+public class CategoryDto {
     private Long id;
     private String name;
-    private String description;
-    private String imageUrl;
     private Boolean isActive;
-    private Integer sortOrder;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 }
