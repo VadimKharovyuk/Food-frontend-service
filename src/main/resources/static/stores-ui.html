@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏪 Food Delivery - Магазины</title>
+    <link rel="stylesheet" href="/css/store.css">
+</head>
+<body>
+<div class="header">
+    <h1>🏪 Food Delivery</h1>
+    <p>Откройте для себя лучшие рестораны и магазины</p>
+</div>
+
+<div class="container">
+    <div class="controls">
+        <div class="controls-grid">
+            <div class="auth-inputs">
+                <div class="form-group">
+                    <label for="authToken">🔐 Authorization Token:</label>
+                    <input type="text" id="authToken"
+                           value="Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXNpbmVzc0BleGFtcGxlLmNvbSIsInVzZXJJZCI6OSwicm9sZSI6IlJPTEVfQlVTSU5FU1MiLCJpYXQiOjE3NTEyNjQyMzUsImV4cCI6MTc1MTM1MDYzNX0.0AuCD7BvZ2isOLuAve-FMyt3rLnDoEHlHYDj-Gq7UmQ"
+                           placeholder="Bearer token...">
+                </div>
+                <div class="form-group">
+                    <label for="userId">👤 User ID:</label>
+                    <input type="number" id="userId" value="9" placeholder="User ID">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="endpoint">📍 Эндпоинт:</label>
+                <select id="endpoint">
+                    <option value="my">👤 Мои магазины</option>
+                    <option value="ui" selected>🏠 Для главной</option>
+                    <option value="brief">📋 Краткие данные</option>
+                    <option value="full">📚 Полные данные</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="loadStores()">
+                🚀 Загрузить
+            </button>
+        </div>
+    </div>
+
+    <div id="error-container"></div>
+    <div id="loading-container"></div>
+    <div id="stores-container"></div>
+    <div id="pagination-container"></div>
+</div>
+
+<script>
+    const BASE_URL = 'http://localhost:8082/api/frontend/stores';
+    let currentPage = 0;
+    let pageSize = 12;
+    let totalCount = 0;
+    let hasNext = false;
+    let hasPrevious = false;
+
+    function getAuthHeaders() {
+        const token = document.getElementById('authToken').value;
+        const userId = document.getElementById('userId').value;
+
+        return {
+            'Authorization': token,
+            'X-User-Id': userId,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    function showLoading() {
+        document.getElementById('loading-container').innerHTML = `
+                <div class="loading">
+                    Загружаем магазины...
+                </div>
+            `;
+        document.getElementById('stores-container').innerHTML = '';
+        document.getElementById('pagination-container').innerHTML = '';
+        document.getElementById('error-container').innerHTML = '';
+    }
+
+    function hideLoading() {
+        document.getElementById('loading-container').innerHTML = '';
+    }
+
+    function showError(message) {
+        document.getElementById('error-container').innerHTML = `
+                <div class="error-message">
+                    <strong>❌ Ошибка:</strong> ${message}
+                </div>
+            `;
+    }
+
+    function formatAddress(address) {
+        if (!address) return 'Адрес не указан';
+
+        const parts = [
+            address.street,
+            address.city,
+            address.state,
+            address.zipCode,
+            address.country
+        ].filter(part => part && part.trim());
+
+        return parts.join(', ') || 'Адрес не указан';
+    }
+
+    function createStoreCard(store) {
+        const address = formatAddress(store.address);
+        const rating = store.rating ? parseFloat(store.rating).toFixed(1) : 'N/A';
+        const deliveryTime = store.estimatedDeliveryTime || 'N/A';
+        const deliveryFee = store.deliveryFee ? `$${parseFloat(store.deliveryFee).toFixed(2)}` : 'Free';
+        const deliveryRadius = store.deliveryRadius || 'N/A';
+
+        return `
+                <div class="store-card">
+                    <img src="${store.picUrl || 'https://via.placeholder.com/400x200/f0f0f0/999999?text=Store+Image'}"
+                         alt="${store.name}"
+                         class="store-image"
+                         onerror="this.src='https://via.placeholder.com/400x200/f0f0f0/999999?text=No+Image'">
+
+                    <div class="store-content">
+                        <div class="store-header">
+                            <h3 class="store-name">${store.name}</h3>
+                            <div class="rating-badge">
+                                ⭐ ${rating}
+                            </div>
+                        </div>
+
+                        <p class="store-description">${store.description || 'Описание не доступно'}</p>
+
+                        <div class="store-details">
+                            <div class="detail-item">
+                                <span class="detail-icon">🕒</span>
+                                <span>${deliveryTime} мин</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-icon">🚚</span>
+                                <span>${deliveryFee}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-icon">📞</span>
+                                <span>${store.phone || 'N/A'}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-icon">📍</span>
+                                <span>${deliveryRadius} км</span>
+                            </div>
+                        </div>
+
+                        <div class="store-address">
+                            <div class="address-text">
+                                <strong>📍 Адрес:</strong><br>
+                                ${address}
+                            </div>
+                        </div>
+
+                        <div class="store-footer">
+                            <div class="delivery-info">
+                                <span class="delivery-badge">ID: ${store.id}</span>
+                                <span class="delivery-badge">Owner: ${store.ownerId}</span>
+                            </div>
+                            <span class="${store.isActive ? 'status-active' : 'status-inactive'}">
+                                ${store.isActive ? '✅ Активен' : '❌ Неактивен'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+    }
+
+    function displayStores(stores) {
+        const container = document.getElementById('stores-container');
+
+        if (!stores || stores.length === 0) {
+            container.innerHTML = `
+                    <div class="no-stores">
+                        <div class="no-stores-icon">🏪</div>
+                        <h3>Магазины не найдены</h3>
+                        <p>Попробуйте изменить параметры поиска</p>
+                    </div>
+                `;
+            return;
+        }
+
+        const storesHTML = stores.map(store => createStoreCard(store)).join('');
+        container.innerHTML = `<div class="stores-grid">${storesHTML}</div>`;
+    }
+
+    function displayPagination() {
+        const container = document.getElementById('pagination-container');
+        const endpoint = document.getElementById('endpoint').value;
+
+        // Не показываем пагинацию для UI эндпоинта
+        if (endpoint === 'ui') {
+            container.innerHTML = '';
+            return;
+        }
+
+        container.innerHTML = `
+                <div class="pagination">
+                    <button onclick="loadPage(${currentPage - 1})" ${!hasPrevious ? 'disabled' : ''}>
+                        ← Предыдущая
+                    </button>
+                    <span class="pagination-info">
+                        Страница ${currentPage + 1} • Всего: ${totalCount} магазинов
+                    </span>
+                    <button onclick="loadPage(${currentPage + 1})" ${!hasNext ? 'disabled' : ''}>
+                        Следующая →
+                    </button>
+                </div>
+            `;
+    }
+
+    async function loadStores() {
+        const endpoint = document.getElementById('endpoint').value;
+        let url = `${BASE_URL}/${endpoint}`;
+
+        // Добавляем параметры пагинации для соответствующих эндпоинтов
+        if (['my', 'brief', 'full'].includes(endpoint)) {
+            const size = endpoint === 'brief' ? 12 : 12; // Настраиваем размер под UI
+            url += `?page=${currentPage}&size=${size}`;
+        }
+
+        showLoading();
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: getAuthHeaders()
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+
+            if (!data.success) {
+                throw new Error(data.message || 'Неизвестная ошибка');
+            }
+
+            // Обновляем пагинацию данные
+            totalCount = data.totalCount || 0;
+            hasNext = data.hasNext || false;
+            hasPrevious = data.hasPrevious || false;
+
+            // Отображаем магазины
+            const stores = endpoint === 'ui' ? data.stores : data.data || data.stores;
+            displayStores(stores);
+            displayPagination();
+
+        } catch (error) {
+            showError(error.message);
+        } finally {
+            hideLoading();
+        }
+    }
+
+    function loadPage(page) {
+        currentPage = page;
+        loadStores();
+    }
+
+    // Сброс страницы при смене эндпоинта
+    document.getElementById('endpoint').addEventListener('change', function() {
+        currentPage = 0;
+    });
+
+    // Автоматическая загрузка при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        loadStores();
+    });
+</script>
+</body>
+</html>

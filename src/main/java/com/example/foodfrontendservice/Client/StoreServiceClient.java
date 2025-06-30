@@ -31,6 +31,7 @@ public interface StoreServiceClient {
     @GetMapping("/ui")
     ResponseEntity<StoreUIResponseWrapper> getStoresForUI();
 
+
     // 🏪 Получить краткие данные магазинов с пагинацией
     @GetMapping("/brief")
     ResponseEntity<StoreBriefResponseWrapper> getStoresBrief(
