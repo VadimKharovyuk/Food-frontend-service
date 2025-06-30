@@ -1,22 +1,31 @@
 package com.example.foodfrontendservice.Client;
 
 import com.example.foodfrontendservice.Client.Fallback.StoreServiceClientFallback;
+import com.example.foodfrontendservice.config.FeignAuthInterceptor;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreBriefResponseWrapper;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreResponseWrapper;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreUIResponseWrapper;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(
         name = "product-service",
         path = "/api/stores",
         fallback = StoreServiceClientFallback.class,
-        contextId = "storeServiceClient"
+        contextId = "storeServiceClient",
+        configuration = FeignAuthInterceptor.class
 )
 public interface StoreServiceClient {
+
+    // 🏪 Получить магазины текущего пользователя
+
+    @GetMapping("/my")
+    ResponseEntity<StoreResponseWrapper> getMyStores(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    );
 
     // 🏪 Получить магазины для UI (лимит 6)
     @GetMapping("/ui")
@@ -32,14 +41,6 @@ public interface StoreServiceClient {
     // 🏪 Получить полные данные магазинов с пагинацией
     @GetMapping
     ResponseEntity<StoreResponseWrapper> getActiveStores(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    );
-
-    // 🏪 Получить магазины владельца (требует авторизации)
-    @GetMapping("/my")
-    ResponseEntity<StoreResponseWrapper> getMyStores(
-            @RequestHeader("X-User-Id") Long userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     );
