@@ -7,7 +7,9 @@ import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreResponseDto;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreResponseWrapper;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreUIResponseWrapper;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreDto;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreRequest;
+import feign.Headers;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -28,11 +30,10 @@ import org.springframework.web.multipart.MultipartFile;
 public interface StoreServiceClient {
 
 
-
-
-    @PostMapping(value = "/api/stores", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Headers("Content-Type: multipart/form-data")
     ApiResponse<StoreResponseDto> createStore(
-            @RequestPart("store") CreateStoreRequest createStoreRequest,
+            @RequestPart("store") CreateStoreDto createStoreDto,
             @RequestPart("imageFile") MultipartFile imageFile,
             @RequestHeader("X-User-Id") Long userId
     );

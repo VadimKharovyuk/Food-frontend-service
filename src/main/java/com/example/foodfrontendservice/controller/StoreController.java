@@ -38,9 +38,6 @@ public class StoreController {
         log.info("➕ POST /api/frontend/stores (MULTIPART) - Creating store: {}", createStoreRequest.getName());
 
         try {
-            // Логируем данные магазина
-            log.info("📋 Store data: {}", createStoreRequest);
-
             // Логируем информацию о файле
             if (imageFile != null && !imageFile.isEmpty()) {
                 log.info("📸 Image file: {} (size: {} bytes, type: {})",
@@ -64,13 +61,14 @@ public class StoreController {
                         .body(ApiResponse.error("Недостаточно прав для создания магазина"));
             }
 
+            // Передаем в сервис
             ApiResponse<StoreResponseDto> response = storeService.createStore(createStoreRequest);
 
             if (response.isSuccess()) {
-                log.info("✅ Successfully created store with image: {}", createStoreRequest.getName());
+                log.info("✅ Successfully created store via backend: {}", createStoreRequest.getName());
                 return ResponseEntity.status(HttpStatus.CREATED).body(response);
             } else {
-                log.warn("❌ Failed to create store: {} - {}", createStoreRequest.getName(), response.getMessage());
+                log.warn("❌ Failed to create store: {}", response.getMessage());
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Создание магазина</title>
+    <title>Frontend Client - Создание магазина</title>
     <style>
         * {
             margin: 0;
@@ -73,8 +73,7 @@
         input[type="email"],
         input[type="tel"],
         input[type="number"],
-        textarea,
-        select {
+        textarea {
             width: 100%;
             padding: 12px 16px;
             border: 2px solid #e1e5e9;
@@ -85,8 +84,7 @@
         }
 
         input:focus,
-        textarea:focus,
-        select:focus {
+        textarea:focus {
             outline: none;
             border-color: #4facfe;
             background: white;
@@ -245,6 +243,25 @@
             border: 1px solid #f5c6cb;
         }
 
+        .client-info {
+            background: #e8f4f8;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4facfe;
+        }
+
+        .endpoint-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid #4facfe;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
@@ -265,23 +282,37 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>🏪 Создание магазина</h1>
-        <p>Заполните форму для регистрации нового магазина</p>
+        <h1>🏪 Frontend Client</h1>
+        <p>Создание магазина через Frontend Service</p>
     </div>
 
     <div class="form-container">
+        <div class="client-info">
+            <strong>🔄 Frontend Client Mode:</strong> Форма отправляет данные на frontend-service (порт 8082), который передает их на backend через Feign Client.
+        </div>
+
+        <div class="endpoint-info">
+            <strong>Frontend Endpoint:</strong> POST /api/frontend/stores<br>
+            <strong>Content-Type:</strong> multipart/form-data<br>
+            <strong>Parts:</strong><br>
+            - store: JSON (CreateStoreRequest)<br>
+            - imageFile: MultipartFile<br>
+            <strong>Headers:</strong> X-User-Role: ROLE_ADMIN, X-User-Id: 9<br>
+            <strong>Flow:</strong> Browser → Frontend-Service (8082) → Product-Service (8083)
+        </div>
+
         <div id="alert" class="alert"></div>
 
-        <form id="storeForm" enctype="multipart/form-data">
+        <form id="storeForm">
             <!-- Основная информация -->
             <div class="form-group">
                 <label for="name">Название магазина *</label>
-                <input type="text" id="name" name="name" required maxlength="100">
+                <input type="text" id="name" name="name" required maxlength="100" value="Frontend Store">
             </div>
 
             <div class="form-group">
                 <label for="description">Описание</label>
-                <textarea id="description" name="description" maxlength="500" placeholder="Опишите ваш магазин..."></textarea>
+                <textarea id="description" name="description" maxlength="500" placeholder="Опишите ваш магазин...">Магазин созданный через Frontend Service</textarea>
             </div>
 
             <!-- Адрес -->
@@ -290,28 +321,28 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="street">Улица *</label>
-                    <input type="text" id="street" name="street" required maxlength="200">
+                    <input type="text" id="street" name="street" required maxlength="200" value="Frontend Street 123">
                 </div>
                 <div class="form-group">
                     <label for="city">Город *</label>
-                    <input type="text" id="city" name="city" required maxlength="100">
+                    <input type="text" id="city" name="city" required maxlength="100" value="Frontend City">
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label for="region">Регион</label>
-                    <input type="text" id="region" name="region" maxlength="100">
+                    <input type="text" id="region" name="region" maxlength="100" value="Frontend Region">
                 </div>
                 <div class="form-group">
                     <label for="postalCode">Почтовый индекс</label>
-                    <input type="text" id="postalCode" name="postalCode" pattern="[0-9]{5,10}">
+                    <input type="text" id="postalCode" name="postalCode" pattern="[0-9]{5,10}" value="54321">
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="country">Страна *</label>
-                <input type="text" id="country" name="country" required maxlength="100">
+                <input type="text" id="country" name="country" required maxlength="100" value="Frontend Country">
             </div>
 
             <!-- Контакты -->
@@ -320,11 +351,11 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="phone">Телефон</label>
-                    <input type="tel" id="phone" name="phone" pattern="[+]?[0-9\s\-\(\)]{10,20}">
+                    <input type="tel" id="phone" name="phone" pattern="[+]?[0-9\s\-\(\)]{10,20}" value="+1 (555) 987-6543">
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" maxlength="100">
+                    <input type="email" id="email" name="email" maxlength="100" value="frontend@store.com">
                 </div>
             </div>
 
@@ -334,28 +365,28 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="deliveryRadius">Радиус доставки (км) *</label>
-                    <input type="number" id="deliveryRadius" name="deliveryRadius" required min="1" max="50">
+                    <input type="number" id="deliveryRadius" name="deliveryRadius" required min="1" max="50" value="20">
                 </div>
                 <div class="form-group">
                     <label for="deliveryFee">Стоимость доставки (₽) *</label>
-                    <input type="number" id="deliveryFee" name="deliveryFee" required min="0" max="99999.99" step="0.01">
+                    <input type="number" id="deliveryFee" name="deliveryFee" required min="0" max="99999.99" step="0.01" value="300">
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="estimatedDeliveryTime">Время доставки (минуты) *</label>
-                <input type="number" id="estimatedDeliveryTime" name="estimatedDeliveryTime" required min="10" max="180">
+                <input type="number" id="estimatedDeliveryTime" name="estimatedDeliveryTime" required min="10" max="180" value="60">
             </div>
 
             <!-- Изображение -->
-            <h3 style="margin: 30px 0 20px 0; color: #333;">📸 Изображение магазина</h3>
+            <h3 style="margin: 30px 0 20px 0; color: #333;">📸 Изображение магазина *</h3>
 
             <div class="form-group">
                 <div class="image-upload" id="imageUpload">
                     <div class="upload-icon">📷</div>
                     <div class="upload-text">Нажмите или перетащите изображение</div>
-                    <div class="upload-hint">Поддерживаются форматы: JPG, PNG, WEBP (макс. 5MB)</div>
-                    <input type="file" id="imageFile" name="imageFile" accept="image/*">
+                    <div class="upload-hint">Поддерживаются форматы: JPG, PNG, WEBP (макс. 10MB)</div>
+                    <input type="file" id="imageFile" name="imageFile" accept="image/*" required>
                 </div>
                 <div id="imagePreview" class="image-preview"></div>
             </div>
@@ -369,13 +400,13 @@
             </div>
 
             <button type="submit" class="submit-btn" id="submitBtn">
-                Создать магазин
+                🚀 Создать через Frontend Service
             </button>
         </form>
 
         <div id="loading" class="loading">
             <div class="spinner"></div>
-            <p>Создание магазина...</p>
+            <p>Отправка через Frontend Service...</p>
         </div>
     </div>
 </div>
@@ -427,9 +458,9 @@
             return;
         }
 
-        // Проверка размера файла (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            showAlert('Размер файла не должен превышать 5MB', 'error');
+        // Проверка размера файла (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            showAlert('Размер файла не должен превышать 10MB', 'error');
             return;
         }
 
@@ -462,7 +493,7 @@
         // Проверяем, что выбран файл
         const imageFileInput = document.getElementById('imageFile');
         if (!imageFileInput.files || imageFileInput.files.length === 0) {
-            showAlert('Пожалуйста, выберите изображение для загрузки', 'error');
+            showAlert('Пожалуйста, выберите изображение для загрузки!', 'error');
             return;
         }
 
@@ -472,11 +503,11 @@
         form.style.display = 'none';
 
         try {
-            // Создание FormData с правильной структурой для сервера
+            // Создание FormData для frontend-service
             const formData = new FormData();
 
-            // Создаем объект с данными магазина (соответствует CreateStoreDto)
-            const storeData = {
+            // Создаем объект CreateStoreRequest
+            const storeRequest = {
                 name: document.getElementById('name').value || '',
                 description: document.getElementById('description').value || '',
                 street: document.getElementById('street').value || '',
@@ -492,19 +523,21 @@
                 isActive: document.getElementById('isActive').checked
             };
 
-            // Добавляем данные магазина как JSON blob с именем "store"
-            formData.append('store', new Blob([JSON.stringify(storeData)], {
+            // Добавляем store как JSON blob
+            formData.append('store', new Blob([JSON.stringify(storeRequest)], {
                 type: 'application/json'
             }));
 
-            // Добавляем файл изображения с именем "imageFile"
+            // Добавляем imageFile
             formData.append('imageFile', imageFileInput.files[0]);
 
-            console.log('Sending FormData with:');
-            console.log('- store:', storeData);
+            console.log('🚀 Отправляем на Frontend Service:');
+            console.log('- URL: /api/frontend/stores');
+            console.log('- store:', storeRequest);
             console.log('- imageFile:', imageFileInput.files[0].name, imageFileInput.files[0].size, 'bytes');
+            console.log('- Headers: X-User-Role=ROLE_ADMIN, X-User-Id=9');
 
-            // Отправка на сервер
+            // Отправка на frontend-service
             const response = await fetch('/api/frontend/stores', {
                 method: 'POST',
                 headers: {
@@ -515,7 +548,8 @@
                 body: formData
             });
 
-            console.log('Response status:', response.status);
+            console.log('📡 Response status:', response.status);
+            console.log('📡 Response headers:', [...response.headers.entries()]);
 
             let result;
             const contentType = response.headers.get('content-type');
@@ -525,20 +559,30 @@
             } else {
                 const textResult = await response.text();
                 console.error('Non-JSON response:', textResult);
-                throw new Error('Сервер вернул некорректный ответ: ' + textResult.substring(0, 200));
+                result = { success: false, message: 'Сервер вернул: ' + textResult.substring(0, 100) };
             }
 
             if (response.ok && result.success) {
-                showAlert('Магазин с изображением успешно создан! 🎉', 'success');
-                form.reset();
-                removeImage();
+                showAlert('🎉 SUCCESS! Магазин создан через Frontend Service → Backend Service!', 'success');
+                console.log('✅ Success response:', result);
+
+                // Показываем детали созданного магазина
+                if (result.data) {
+                    console.log('📊 Created store details:', result.data);
+                    showAlert(`✅ Магазин "${result.data.name}" создан! ID: ${result.data.id}`, 'success');
+                }
             } else {
-                showAlert(result.message || `Ошибка при создании магазина (${response.status})`, 'error');
+                showAlert(`❌ Ошибка: ${result.message || 'Unknown error'} (${response.status})`, 'error');
+                console.error('❌ Error response:', result);
             }
 
         } catch (error) {
-            console.error('Error:', error);
-            showAlert('Произошла ошибка при отправке данных: ' + error.message, 'error');
+            console.error('💥 Error:', error);
+            if (error.message.includes('Failed to fetch')) {
+                showAlert('🔌 Не удалось подключиться к Frontend Service. Проверьте, что сервер запущен.', 'error');
+            } else {
+                showAlert('💥 Ошибка: ' + error.message, 'error');
+            }
         } finally {
             // Скрыть загрузку
             submitBtn.disabled = false;
@@ -552,10 +596,10 @@
         alert.className = `alert ${type}`;
         alert.style.display = 'block';
 
-        // Автоматически скрыть через 5 секунд
+        // Автоматически скрыть через 10 секунд для успеха, 15 для ошибки
         setTimeout(() => {
             alert.style.display = 'none';
-        }, 5000);
+        }, type === 'success' ? 10000 : 15000);
     }
 
     // Автоматическое скрытие алертов при клике

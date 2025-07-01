@@ -2,6 +2,7 @@ package com.example.foodfrontendservice.Client.Fallback;
 
 import com.example.foodfrontendservice.Client.StoreServiceClient;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreDto;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -37,12 +38,23 @@ public class StoreServiceClientFallback implements StoreServiceClient {
 
 
     @Override
-    public ApiResponse<StoreResponseDto> createStore(CreateStoreRequest createStoreRequest, MultipartFile imageFile, Long userId) {
-        log.error("🚨 Fallback: StoreService недоступен для создания магазина: {}",
-                createStoreRequest != null ? createStoreRequest.getName() : "unknown");
+    public ApiResponse<StoreResponseDto> createStore(CreateStoreDto createStoreDto, MultipartFile imageFile, Long userId) {
+        String storeName = createStoreDto != null ? createStoreDto.getName() : "Неизвестный магазин";
+        String imageInfo = imageFile != null ?
+                String.format("%s (%s bytes)", imageFile.getOriginalFilename(), imageFile.getSize()) :
+                "Нет изображения";
 
-        // Возвращаем ApiResponse, а не ResponseEntity
-        return ApiResponse.error("Сервис магазинов временно недоступен");
+        log.error("🚨 FALLBACK ACTIVATED - Product Service Connection Failed");
+        log.error("📊 Request Details:");
+        log.error("   🏪 Store: {}", storeName);
+        log.error("   📸 Image: {}", imageInfo);
+        log.error("   👤 User ID: {}", userId);
+        log.error("   ⏰ Timestamp: {}", java.time.LocalDateTime.now());
+
+
+        return ApiResponse.error(
+                String.format("Не удалось создать магазин '%s'. Сервис временно недоступен.", storeName)
+        );
     }
 
     @Override

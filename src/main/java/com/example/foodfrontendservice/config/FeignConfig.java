@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-
 @Configuration
 @Slf4j
 public class FeignConfig {
@@ -22,8 +21,8 @@ public class FeignConfig {
     /**
      * ✅ ЕДИНСТВЕННЫЙ Encoder для поддержки multipart/form-data
      */
-    @Bean("feignMultipartEncoder") // Уникальное имя
-    public Encoder multipartFormEncoder(ObjectFactory<HttpMessageConverters> messageConverters) {
+    @Bean
+    public Encoder feignFormEncoder(ObjectFactory<HttpMessageConverters> messageConverters) {
         log.info("🔧 Настройка SpringFormEncoder для поддержки multipart в Feign");
         return new SpringFormEncoder(new SpringEncoder(messageConverters));
     }
@@ -31,7 +30,7 @@ public class FeignConfig {
     /**
      * ✅ Interceptor для передачи заголовков аутентификации
      */
-    @Bean("feignAuthInterceptor") // Уникальное имя
+    @Bean
     public RequestInterceptor authInterceptor() {
         return new FeignAuthInterceptor();
     }

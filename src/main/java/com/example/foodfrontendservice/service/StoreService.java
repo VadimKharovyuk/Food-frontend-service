@@ -3,6 +3,7 @@ package com.example.foodfrontendservice.service;
 import com.example.foodfrontendservice.Client.StoreServiceClient;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.*;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreDto;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreRequest;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.StoreCreationResponse;
 import feign.FeignException;
@@ -25,6 +26,7 @@ public class StoreService {
 
 
 
+
     public ApiResponse<StoreResponseDto> createStore(CreateStoreRequest createStoreRequest) {
         log.debug("Creating store: {}", createStoreRequest.getName());
 
@@ -37,31 +39,35 @@ public class StoreService {
                 return ApiResponse.error("Изображение магазина обязательно");
             }
 
-            // Получаем userId из контекста (из заголовка)
-            Long userId = getCurrentUserId(); // Получите из SecurityContext или Request
+            // Получаем userId из контекста
+            Long userId = getCurrentUserId();
+            if (userId == null) {
+                log.error("❌ No user ID found in request context");
+                return ApiResponse.error("Не удалось определить пользователя");
+            }
 
-            // Конвертируем CreateStoreRequest в CreateStoreDto
-            CreateStoreRequest createStoreDto = convertToDto(createStoreRequest);
+            // Конвертируем в CreateStoreDto для backend
+            CreateStoreDto storeDto = convertToDto(createStoreRequest);
 
-            log.info("📸 Sending store with image: {} ({}) for user: {}",
+            log.info("📸 Sending store to backend: {} ({}) for user: {}",
                     createStoreRequest.getName(),
                     imageFile.getOriginalFilename(),
                     userId);
 
             // Отправляем на product-service
-            ApiResponse<StoreResponseDto> response = storeServiceClient.createStore(createStoreDto, imageFile, userId);
+            ApiResponse<StoreResponseDto> response = storeServiceClient.createStore(storeDto, imageFile, userId);
 
             if (response != null && response.isSuccess()) {
-                log.info("✅ Successfully created store: {}", createStoreRequest.getName());
+                log.info("✅ Successfully created store via backend: {}", createStoreRequest.getName());
                 return response;
             } else {
-                log.error("❌ Failed to create store: {}", response != null ? response.getMessage() : "null response");
+                log.error("❌ Backend failed to create store: {}", response != null ? response.getMessage() : "null response");
                 return response != null ? response : ApiResponse.error("Не удалось создать магазин");
             }
 
         } catch (FeignException e) {
             log.error("🔥 Feign error creating store: {}", createStoreRequest.getName(), e);
-            return ApiResponse.error("Ошибка связи с сервисом: " + e.getMessage());
+            return ApiResponse.error("Ошибка связи с backend сервисом: " + e.getMessage());
         } catch (Exception e) {
             log.error("💥 Error creating store: {}", createStoreRequest.getName(), e);
             return ApiResponse.error("Ошибка создания магазина: " + e.getMessage());
@@ -69,15 +75,18 @@ public class StoreService {
     }
 
     private Long getCurrentUserId() {
-        // Получите userId из текущего HTTP запроса
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
-        String userIdHeader = request.getHeader("X-User-Id");
-        return userIdHeader != null ? Long.parseLong(userIdHeader) : null;
+        try {
+            HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+            String userIdHeader = request.getHeader("X-User-Id");
+            return userIdHeader != null ? Long.parseLong(userIdHeader) : null;
+        } catch (Exception e) {
+            log.error("Error getting current user ID", e);
+            return null;
+        }
     }
 
-    private CreateStoreRequest convertToDto(CreateStoreRequest request) {
-        // Конвертируйте CreateStoreRequest в CreateStoreDto
-        CreateStoreRequest  dto = new CreateStoreRequest();
+    private CreateStoreDto convertToDto(CreateStoreRequest request) {
+        CreateStoreDto dto = new CreateStoreDto();
         dto.setName(request.getName());
         dto.setDescription(request.getDescription());
         dto.setStreet(request.getStreet());
@@ -91,7 +100,7 @@ public class StoreService {
         dto.setDeliveryFee(request.getDeliveryFee());
         dto.setEstimatedDeliveryTime(request.getEstimatedDeliveryTime());
         dto.setIsActive(request.getIsActive());
-        // НЕ копируем imageFile - он передается отдельно
+        // НЕ копируем imageFile - он передается отдельно в Feign
         return dto;
     }
 
