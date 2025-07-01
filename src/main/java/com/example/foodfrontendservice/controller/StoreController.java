@@ -29,6 +29,58 @@ public class StoreController {
 
     private final StoreService storeService;
 
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ApiResponse<StoreResponseDto>> createStore(
+            @RequestPart("store") CreateStoreRequest createStoreRequest,
+            @RequestPart("imageFile") MultipartFile imageFile,
+            HttpServletRequest request) {
+
+        log.info("➕ POST /api/frontend/stores (MULTIPART) - Creating store: {}", createStoreRequest.getName());
+
+        try {
+            // Логируем данные магазина
+            log.info("📋 Store data: {}", createStoreRequest);
+
+            // Логируем информацию о файле
+            if (imageFile != null && !imageFile.isEmpty()) {
+                log.info("📸 Image file: {} (size: {} bytes, type: {})",
+                        imageFile.getOriginalFilename(),
+                        imageFile.getSize(),
+                        imageFile.getContentType());
+
+                // Устанавливаем файл в объект запроса
+                createStoreRequest.setImageFile(imageFile);
+            } else {
+                log.warn("📸 No image file provided");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponse.error("Изображение магазина обязательно"));
+            }
+
+            // Проверка прав доступа
+            String userRole = request.getHeader("X-User-Role");
+            if (!"ROLE_ADMIN".equals(userRole)) {
+                log.warn("🚫 Access denied: user role {} is not ADMIN", userRole);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(ApiResponse.error("Недостаточно прав для создания магазина"));
+            }
+
+            ApiResponse<StoreResponseDto> response = storeService.createStore(createStoreRequest);
+
+            if (response.isSuccess()) {
+                log.info("✅ Successfully created store with image: {}", createStoreRequest.getName());
+                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            } else {
+                log.warn("❌ Failed to create store: {} - {}", createStoreRequest.getName(), response.getMessage());
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+
+        } catch (Exception e) {
+            log.error("💥 Error creating store with image", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Внутренняя ошибка при создании магазина: " + e.getMessage()));
+        }
+    }
+
     /**
      * 🏪 Получить магазины текущего пользователя
      */
@@ -195,51 +247,6 @@ public class StoreController {
         }
     }
 
-
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<StoreResponseDto> createStore(
-            @ModelAttribute CreateStoreRequest createStoreRequest,
-            HttpServletRequest request) {
-
-        log.info("📥 POST /api/v1/stores - Creating store: {} from IP: {}",
-                createStoreRequest.getName(),
-                getClientIpAddress(request));
-
-
-        try {
-            // ✅ Вызываем сервис для создания магазина
-            StoreResponseDto createdStore = storeService.createStore(createStoreRequest);
-
-            log.info("✅ Store created successfully with ID: {} and name: {}",
-                    createdStore.getId(), createdStore.getName());
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdStore);
-
-        } catch (IllegalArgumentException e) {
-            log.warn("❌ Validation error: {}", e.getMessage());
-            return ResponseEntity.badRequest()
-                    .header("Error-Message", e.getMessage())
-                    .build();
-
-        } catch (SecurityException e) {
-            log.warn("❌ Security error: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .header("Error-Message", e.getMessage())
-                    .build();
-
-        } catch (RuntimeException e) {
-            log.error("❌ Runtime error while creating store: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .header("Error-Message", "Внутренняя ошибка сервера")
-                    .build();
-
-        } catch (Exception e) {
-            log.error("❌ Unexpected error while creating store: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .header("Error-Message", "Произошла непредвиденная ошибка")
-                    .build();
-        }
-    }
     /**
      * ✅ Получение IP адреса клиента для логирования
      */

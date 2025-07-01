@@ -2,14 +2,18 @@ package com.example.foodfrontendservice.service;
 
 import com.example.foodfrontendservice.Client.StoreServiceClient;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.*;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreRequest;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.StoreCreationResponse;
 import feign.FeignException;
 import feign.RetryableException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -20,51 +24,75 @@ public class StoreService {
     private final StoreServiceClient storeServiceClient;
 
 
-    /**
-     * ✅ ОБНОВЛЕНО: Основной метод с @ModelAttribute подходом
-     */
-    public StoreResponseDto createStore(CreateStoreRequest createRequest) {
-        log.info("🚀 UI Service: Creating store: {} for user with image: {}",
-                createRequest.getName(), createRequest.getImageUrl());
+
+    public ApiResponse<StoreResponseDto> createStore(CreateStoreRequest createStoreRequest) {
+        log.debug("Creating store: {}", createStoreRequest.getName());
 
         try {
-            // ✅ Валидация входных данных
-            validateCreateRequest(createRequest);
+            // Проверяем наличие файла изображения
+            MultipartFile imageFile = createStoreRequest.getImageFile();
 
-            // ✅ ИСПРАВЛЕНО: Вызываем Feign клиент с @ModelAttribute
-            StoreResponseDto response = storeServiceClient.createStore(createRequest);
+            if (imageFile == null || imageFile.isEmpty()) {
+                log.warn("⚠️ No image file provided for store: {}", createStoreRequest.getName());
+                return ApiResponse.error("Изображение магазина обязательно");
+            }
 
-            log.info("✅ Store created successfully with ID: {}", response.getId());
-            return response;
+            // Получаем userId из контекста (из заголовка)
+            Long userId = getCurrentUserId(); // Получите из SecurityContext или Request
 
-        } catch (FeignException.InternalServerError e) {
-            log.error("❌ Product Service Error (500): {}", e.contentUTF8());
-            throw new RuntimeException("Внутренняя ошибка Product Service: " + e.contentUTF8());
+            // Конвертируем CreateStoreRequest в CreateStoreDto
+            CreateStoreRequest createStoreDto = convertToDto(createStoreRequest);
 
-        } catch (FeignException.BadRequest e) {
-            log.warn("❌ Validation error (400): {}", e.contentUTF8());
-            throw new IllegalArgumentException("Ошибка валидации: " + e.contentUTF8());
+            log.info("📸 Sending store with image: {} ({}) for user: {}",
+                    createStoreRequest.getName(),
+                    imageFile.getOriginalFilename(),
+                    userId);
 
-        } catch (FeignException.Unauthorized e) {
-            log.warn("❌ Unauthorized (401): {}", e.getMessage());
-            throw new SecurityException("Недостаточно прав для создания магазина");
+            // Отправляем на product-service
+            ApiResponse<StoreResponseDto> response = storeServiceClient.createStore(createStoreDto, imageFile, userId);
 
-        } catch (FeignException.Forbidden e) {
-            log.warn("❌ Forbidden (403): {}", e.getMessage());
-            throw new SecurityException("Доступ запрещен. Требуется роль BUSINESS");
-
-        } catch (RetryableException e) {
-            log.warn("❌ Service unavailable: {}", e.getMessage());
-            throw new RuntimeException("Product Service временно недоступен");
+            if (response != null && response.isSuccess()) {
+                log.info("✅ Successfully created store: {}", createStoreRequest.getName());
+                return response;
+            } else {
+                log.error("❌ Failed to create store: {}", response != null ? response.getMessage() : "null response");
+                return response != null ? response : ApiResponse.error("Не удалось создать магазин");
+            }
 
         } catch (FeignException e) {
-            log.error("❌ Feign error: HTTP {}, body: {}", e.status(), e.contentUTF8());
-            throw new RuntimeException(String.format("Ошибка связи с Product Service (HTTP %d)", e.status()));
-
+            log.error("🔥 Feign error creating store: {}", createStoreRequest.getName(), e);
+            return ApiResponse.error("Ошибка связи с сервисом: " + e.getMessage());
         } catch (Exception e) {
-            log.error("❌ Unexpected error: {}", e.getMessage(), e);
-            throw new RuntimeException("Внутренняя ошибка UI Service: " + e.getMessage());
+            log.error("💥 Error creating store: {}", createStoreRequest.getName(), e);
+            return ApiResponse.error("Ошибка создания магазина: " + e.getMessage());
         }
+    }
+
+    private Long getCurrentUserId() {
+        // Получите userId из текущего HTTP запроса
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        String userIdHeader = request.getHeader("X-User-Id");
+        return userIdHeader != null ? Long.parseLong(userIdHeader) : null;
+    }
+
+    private CreateStoreRequest convertToDto(CreateStoreRequest request) {
+        // Конвертируйте CreateStoreRequest в CreateStoreDto
+        CreateStoreRequest  dto = new CreateStoreRequest();
+        dto.setName(request.getName());
+        dto.setDescription(request.getDescription());
+        dto.setStreet(request.getStreet());
+        dto.setCity(request.getCity());
+        dto.setRegion(request.getRegion());
+        dto.setPostalCode(request.getPostalCode());
+        dto.setCountry(request.getCountry());
+        dto.setPhone(request.getPhone());
+        dto.setEmail(request.getEmail());
+        dto.setDeliveryRadius(request.getDeliveryRadius());
+        dto.setDeliveryFee(request.getDeliveryFee());
+        dto.setEstimatedDeliveryTime(request.getEstimatedDeliveryTime());
+        dto.setIsActive(request.getIsActive());
+        // НЕ копируем imageFile - он передается отдельно
+        return dto;
     }
 
     /**

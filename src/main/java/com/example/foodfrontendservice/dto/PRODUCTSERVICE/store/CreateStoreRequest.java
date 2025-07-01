@@ -60,6 +60,8 @@ public class CreateStoreRequest {
 //    @Max(value = 180, message = "Время доставки не может превышать 180 минут")
     private Integer estimatedDeliveryTime;
 
+    @JsonIgnore
+    private MultipartFile imageFile;
 
     // ✅ Результат загрузки изображения (если уже загружено)
     private String imageUrl;

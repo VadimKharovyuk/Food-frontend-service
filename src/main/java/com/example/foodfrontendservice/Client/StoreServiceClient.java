@@ -6,6 +6,7 @@ import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreBriefResponseWrap
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreResponseDto;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreResponseWrapper;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreUIResponseWrapper;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -27,12 +28,14 @@ import org.springframework.web.multipart.MultipartFile;
 public interface StoreServiceClient {
 
 
-    /**
-     * ✅ ИСПРАВЛЕНО: Создание магазина с @ModelAttribute (как в категориях)
-     */
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    StoreResponseDto createStore(@ModelAttribute CreateStoreRequest createStoreRequest);
 
+
+    @PostMapping(value = "/api/stores", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ApiResponse<StoreResponseDto> createStore(
+            @RequestPart("store") CreateStoreRequest createStoreRequest,
+            @RequestPart("imageFile") MultipartFile imageFile,
+            @RequestHeader("X-User-Id") Long userId
+    );
 
 
     // 🏪 Получить магазины текущего пользователя

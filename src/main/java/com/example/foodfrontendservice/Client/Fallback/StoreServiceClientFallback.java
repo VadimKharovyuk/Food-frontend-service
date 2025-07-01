@@ -1,6 +1,7 @@
 package com.example.foodfrontendservice.Client.Fallback;
 
 import com.example.foodfrontendservice.Client.StoreServiceClient;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Component
 @Slf4j
 public class StoreServiceClientFallback implements StoreServiceClient {
-
 
 
 
@@ -36,21 +36,13 @@ public class StoreServiceClientFallback implements StoreServiceClient {
     }
 
 
-    /**
-     * ✅ ИСПРАВЛЕНО: Fallback для @ModelAttribute метода
-     */
     @Override
-    public StoreResponseDto createStore(CreateStoreRequest createStoreRequest) {
-        log.error("❌ Fallback: Product Service недоступен для создания магазина: {}",
+    public ApiResponse<StoreResponseDto> createStore(CreateStoreRequest createStoreRequest, MultipartFile imageFile, Long userId) {
+        log.error("🚨 Fallback: StoreService недоступен для создания магазина: {}",
                 createStoreRequest != null ? createStoreRequest.getName() : "unknown");
 
-        // Возвращаем объект с ID = -1 как индикатор ошибки fallback
-        StoreResponseDto fallbackResponse = new StoreResponseDto();
-        fallbackResponse.setId(-1L); // Индикатор fallback
-        fallbackResponse.setName(createStoreRequest != null ? createStoreRequest.getName() : "Error");
-        // Заполните другие обязательные поля по необходимости
-
-        return fallbackResponse;
+        // Возвращаем ApiResponse, а не ResponseEntity
+        return ApiResponse.error("Сервис магазинов временно недоступен");
     }
 
     @Override

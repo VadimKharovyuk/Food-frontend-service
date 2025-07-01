@@ -24,9 +24,10 @@ public class StoreResponseDto {
     private Integer deliveryRadius;
     private BigDecimal deliveryFee;
     private Integer estimatedDeliveryTime;
-    @JsonIgnore
-    private MultipartFile imageFile;
+
+    private String imageUrl;
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
+

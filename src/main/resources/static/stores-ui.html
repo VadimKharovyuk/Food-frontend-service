@@ -15,247 +15,210 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 20px;
         }
 
-        .form-container {
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
-            padding: 40px;
-        }
-
-        .form-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .form-header h1 {
-            color: #333;
-            font-size: 2rem;
-            margin-bottom: 10px;
-        }
-
-        .form-header p {
-            color: #666;
-            font-size: 1rem;
-        }
-
-        /* Приоритетная секция загрузки фото */
-        .photo-upload-priority {
-            background: linear-gradient(135deg, #ff9a56 0%, #ffad56 100%);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            text-align: center;
-            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
-        .photo-upload-priority::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-            animation: shimmer 3s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .photo-upload-priority h3 {
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
-            font-size: 1.3rem;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .upload-area {
-            border: 3px dashed rgba(255, 255, 255, 0.7);
-            border-radius: 12px;
             padding: 30px;
-            cursor: pointer;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
             transition: all 0.3s ease;
-            position: relative;
-            z-index: 2;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: #f8f9fa;
         }
 
-        .upload-area:hover {
-            border-color: white;
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #4facfe;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.1);
         }
 
-        .upload-area.dragover {
-            border-color: #4CAF50;
-            background: rgba(76, 175, 80, 0.1);
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .image-upload {
+            border: 2px dashed #4facfe;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .image-upload:hover {
+            border-color: #00f2fe;
+            background: #f0f8ff;
+        }
+
+        .image-upload.dragover {
+            border-color: #00f2fe;
+            background: #e6f3ff;
+            transform: scale(1.02);
         }
 
         .upload-icon {
             font-size: 3rem;
-            color: white;
+            color: #4facfe;
             margin-bottom: 15px;
         }
 
         .upload-text {
-            color: white;
+            color: #666;
             font-size: 1.1rem;
             margin-bottom: 10px;
-            font-weight: 500;
         }
 
         .upload-hint {
-            color: rgba(255, 255, 255, 0.8);
+            color: #999;
             font-size: 0.9rem;
         }
 
-        #imageInput {
+        #imageFile {
             display: none;
         }
 
         .image-preview {
-            display: none;
             margin-top: 20px;
-            position: relative;
+            text-align: center;
         }
 
-        .image-preview img {
-            max-width: 100%;
+        .preview-image {
+            max-width: 200px;
             max-height: 200px;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 10px;
         }
 
-        .image-preview .remove-image {
-            position: absolute;
-            top: -10px;
-            right: -10px;
+        .remove-image {
             background: #ff4757;
             color: white;
             border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            padding: 8px 16px;
+            border-radius: 5px;
             cursor: pointer;
-            font-size: 1.2rem;
+            font-size: 0.9rem;
+            transition: background 0.3s ease;
+        }
+
+        .remove-image:hover {
+            background: #ff3742;
+        }
+
+        .checkbox-group {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 10px;
         }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .required {
-            color: #ff4757;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-        }
-
-        .form-group input:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-group textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .form-section {
-            border: 2px solid #e1e5e9;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 25px;
-            background: #f8f9fa;
-        }
-
-        .form-section h3 {
-            color: #495057;
-            margin-bottom: 15px;
-            font-size: 1.1rem;
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            transform: scale(1.2);
         }
 
         .submit-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
             border: none;
-            padding: 15px;
+            padding: 16px 40px;
             border-radius: 10px;
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            width: 100%;
             margin-top: 20px;
         }
 
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
         }
 
         .submit-btn:disabled {
-            background: #ccc;
+            opacity: 0.6;
             cursor: not-allowed;
             transform: none;
-            box-shadow: none;
         }
 
-        .error-message {
-            color: #ff4757;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
-        .loading-spinner {
+        .loading {
             display: none;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #ffffff;
-            border-top: 2px solid transparent;
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4facfe;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-right: 10px;
+            margin: 0 auto 10px;
         }
 
         @keyframes spin {
@@ -263,9 +226,34 @@
             100% { transform: rotate(360deg); }
         }
 
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
         @media (max-width: 768px) {
             .form-row {
-                grid-template-columns: 1fr;
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .container {
+                margin: 10px;
+                border-radius: 15px;
             }
 
             .form-container {
@@ -275,269 +263,304 @@
     </style>
 </head>
 <body>
-<div class="form-container">
-    <div class="form-header">
+<div class="container">
+    <div class="header">
         <h1>🏪 Создание магазина</h1>
-        <p>Добавьте свой магазин в нашу платформу</p>
+        <p>Заполните форму для регистрации нового магазина</p>
     </div>
 
-    <form id="createStoreForm" enctype="multipart/form-data">
-        <!-- ПРИОРИТЕТНАЯ СЕКЦИЯ ЗАГРУЗКИ ФОТО -->
-        <div class="photo-upload-priority">
-            <h3>📸 Загрузите фото магазина</h3>
-            <div class="upload-area" id="uploadArea">
-                <div class="upload-icon">📷</div>
-                <div class="upload-text">Нажмите или перетащите фото сюда</div>
-                <div class="upload-hint">JPG, PNG до 5MB</div>
-                <input type="file" id="imageInput" name="image" accept="image/*" required>
-            </div>
-            <div class="image-preview" id="imagePreview">
-                <img id="previewImg" src="" alt="Предпросмотр">
-                <button type="button" class="remove-image" id="removeImage">×</button>
-            </div>
-        </div>
+    <div class="form-container">
+        <div id="alert" class="alert"></div>
 
-        <!-- ОСНОВНАЯ ИНФОРМАЦИЯ -->
-        <div class="form-section">
-            <h3>🏪 Основная информация</h3>
-
+        <form id="storeForm" enctype="multipart/form-data">
+            <!-- Основная информация -->
             <div class="form-group">
-                <label for="name">Название магазина <span class="required">*</span></label>
-                <input type="text" id="name" name="name" required maxlength="100"
-                       placeholder="Введите название вашего магазина">
-                <div class="error-message" id="nameError"></div>
+                <label for="name">Название магазина *</label>
+                <input type="text" id="name" name="name" required maxlength="100">
             </div>
 
             <div class="form-group">
                 <label for="description">Описание</label>
-                <textarea id="description" name="description" maxlength="500"
-                          placeholder="Расскажите о вашем магазине"></textarea>
+                <textarea id="description" name="description" maxlength="500" placeholder="Опишите ваш магазин..."></textarea>
             </div>
-        </div>
 
-        <!-- АДРЕС -->
-        <div class="form-section">
-            <h3>📍 Адрес магазина</h3>
-
-            <div class="form-group">
-                <label for="street">Улица <span class="required">*</span></label>
-                <input type="text" id="street" name="street" required maxlength="200"
-                       placeholder="Улица, дом, квартира">
-            </div>
+            <!-- Адрес -->
+            <h3 style="margin: 30px 0 20px 0; color: #333;">📍 Адрес</h3>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label for="city">Город <span class="required">*</span></label>
-                    <input type="text" id="city" name="city" required maxlength="100"
-                           placeholder="Город">
+                    <label for="street">Улица *</label>
+                    <input type="text" id="street" name="street" required maxlength="200">
                 </div>
+                <div class="form-group">
+                    <label for="city">Город *</label>
+                    <input type="text" id="city" name="city" required maxlength="100">
+                </div>
+            </div>
+
+            <div class="form-row">
                 <div class="form-group">
                     <label for="region">Регион</label>
-                    <input type="text" id="region" name="region" maxlength="100"
-                           placeholder="Регион/Область">
+                    <input type="text" id="region" name="region" maxlength="100">
                 </div>
-            </div>
-
-            <div class="form-row">
                 <div class="form-group">
                     <label for="postalCode">Почтовый индекс</label>
-                    <input type="text" id="postalCode" name="postalCode"
-                           pattern="[0-9]{5,10}" placeholder="123456">
-                </div>
-                <div class="form-group">
-                    <label for="country">Страна <span class="required">*</span></label>
-                    <input type="text" id="country" name="country" required maxlength="100"
-                           placeholder="Страна">
+                    <input type="text" id="postalCode" name="postalCode" pattern="[0-9]{5,10}">
                 </div>
             </div>
-        </div>
 
-        <!-- КОНТАКТЫ И ДОСТАВКА -->
-        <div class="form-section">
-            <h3>📞 Контакты и доставка</h3>
+            <div class="form-group">
+                <label for="country">Страна *</label>
+                <input type="text" id="country" name="country" required maxlength="100">
+            </div>
+
+            <!-- Контакты -->
+            <h3 style="margin: 30px 0 20px 0; color: #333;">📞 Контакты</h3>
 
             <div class="form-row">
                 <div class="form-group">
                     <label for="phone">Телефон</label>
-                    <input type="tel" id="phone" name="phone"
-                           pattern="^[+]?[0-9\s\-\(\)]{10,20}$"
-                           placeholder="+7 (999) 123-45-67">
+                    <input type="tel" id="phone" name="phone" pattern="[+]?[0-9\s\-\(\)]{10,20}">
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" maxlength="100"
-                           placeholder="store@example.com">
+                    <input type="email" id="email" name="email" maxlength="100">
                 </div>
             </div>
 
+            <!-- Доставка -->
+            <h3 style="margin: 30px 0 20px 0; color: #333;">🚚 Доставка</h3>
+
             <div class="form-row">
                 <div class="form-group">
-                    <label for="deliveryRadius">Радиус доставки (км)</label>
-                    <input type="number" id="deliveryRadius" name="deliveryRadius"
-                           min="1" max="50" placeholder="5">
+                    <label for="deliveryRadius">Радиус доставки (км) *</label>
+                    <input type="number" id="deliveryRadius" name="deliveryRadius" required min="1" max="50">
                 </div>
                 <div class="form-group">
-                    <label for="deliveryFee">Стоимость доставки (₽)</label>
-                    <input type="number" id="deliveryFee" name="deliveryFee"
-                           min="0" max="99999.99" step="0.01" placeholder="200.00">
+                    <label for="deliveryFee">Стоимость доставки (₽) *</label>
+                    <input type="number" id="deliveryFee" name="deliveryFee" required min="0" max="99999.99" step="0.01">
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="estimatedDeliveryTime">Время доставки (минуты)</label>
-                <input type="number" id="estimatedDeliveryTime" name="estimatedDeliveryTime"
-                       min="10" max="180" placeholder="30">
+                <label for="estimatedDeliveryTime">Время доставки (минуты) *</label>
+                <input type="number" id="estimatedDeliveryTime" name="estimatedDeliveryTime" required min="10" max="180">
             </div>
-        </div>
 
-        <button type="submit" class="submit-btn" id="submitBtn">
-            <span class="loading-spinner" id="loadingSpinner"></span>
-            <span id="submitText">🚀 Создать магазин</span>
-        </button>
-    </form>
+            <!-- Изображение -->
+            <h3 style="margin: 30px 0 20px 0; color: #333;">📸 Изображение магазина</h3>
+
+            <div class="form-group">
+                <div class="image-upload" id="imageUpload">
+                    <div class="upload-icon">📷</div>
+                    <div class="upload-text">Нажмите или перетащите изображение</div>
+                    <div class="upload-hint">Поддерживаются форматы: JPG, PNG, WEBP (макс. 5MB)</div>
+                    <input type="file" id="imageFile" name="imageFile" accept="image/*">
+                </div>
+                <div id="imagePreview" class="image-preview"></div>
+            </div>
+
+            <!-- Активность -->
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="isActive" name="isActive" checked>
+                    <label for="isActive">Магазин активен</label>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                Создать магазин
+            </button>
+        </form>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Создание магазина...</p>
+        </div>
+    </div>
 </div>
 
 <script>
-    const imageInput = document.getElementById('imageInput');
-    const uploadArea = document.getElementById('uploadArea');
+    // Элементы формы
+    const form = document.getElementById('storeForm');
+    const imageUpload = document.getElementById('imageUpload');
+    const imageFile = document.getElementById('imageFile');
     const imagePreview = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
-    const removeImage = document.getElementById('removeImage');
     const submitBtn = document.getElementById('submitBtn');
-    const loadingSpinner = document.getElementById('loadingSpinner');
-    const submitText = document.getElementById('submitText');
+    const loading = document.getElementById('loading');
+    const alert = document.getElementById('alert');
 
-    // Обработка клика по области загрузки
-    uploadArea.addEventListener('click', () => {
-        imageInput.click();
+    // Обработка загрузки изображения
+    imageUpload.addEventListener('click', () => {
+        imageFile.click();
     });
 
-    // Обработка перетаскивания файлов
-    uploadArea.addEventListener('dragover', (e) => {
+    imageUpload.addEventListener('dragover', (e) => {
         e.preventDefault();
-        uploadArea.classList.add('dragover');
+        imageUpload.classList.add('dragover');
     });
 
-    uploadArea.addEventListener('dragleave', () => {
-        uploadArea.classList.remove('dragover');
+    imageUpload.addEventListener('dragleave', () => {
+        imageUpload.classList.remove('dragover');
     });
 
-    uploadArea.addEventListener('drop', (e) => {
+    imageUpload.addEventListener('drop', (e) => {
         e.preventDefault();
-        uploadArea.classList.remove('dragover');
+        imageUpload.classList.remove('dragover');
 
         const files = e.dataTransfer.files;
         if (files.length > 0) {
-            handleImageUpload(files[0]);
+            handleImageFile(files[0]);
         }
     });
 
-    // Обработка выбора файла
-    imageInput.addEventListener('change', (e) => {
+    imageFile.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
-            handleImageUpload(e.target.files[0]);
+            handleImageFile(e.target.files[0]);
         }
     });
 
-    // Функция обработки загрузки изображения
-    function handleImageUpload(file) {
+    function handleImageFile(file) {
         // Проверка типа файла
         if (!file.type.startsWith('image/')) {
-            alert('Пожалуйста, выберите изображение');
+            showAlert('Пожалуйста, выберите изображение', 'error');
             return;
         }
 
         // Проверка размера файла (5MB)
         if (file.size > 5 * 1024 * 1024) {
-            alert('Размер файла не должен превышать 5MB');
+            showAlert('Размер файла не должен превышать 5MB', 'error');
             return;
         }
 
-        // Показ предпросмотра
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            previewImg.src = e.target.result;
-            uploadArea.style.display = 'none';
-            imagePreview.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-
-        // Обновляем input
+        // Устанавливаем файл в input
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
-        imageInput.files = dataTransfer.files;
+        imageFile.files = dataTransfer.files;
+
+        // Создание превью
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview" class="preview-image">
+                    <br>
+                    <button type="button" class="remove-image" onclick="removeImage()">Удалить</button>
+                `;
+        };
+        reader.readAsDataURL(file);
     }
 
-    // Удаление изображения
-    removeImage.addEventListener('click', () => {
-        imageInput.value = '';
-        uploadArea.style.display = 'block';
-        imagePreview.style.display = 'none';
-        previewImg.src = '';
-    });
+    function removeImage() {
+        imageFile.value = '';
+        imagePreview.innerHTML = '';
+    }
 
     // Обработка отправки формы
-    document.getElementById('createStoreForm').addEventListener('submit', async (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        // Проверка обязательного изображения
-        if (!imageInput.files || imageInput.files.length === 0) {
-            alert('Пожалуйста, загрузите фото магазина');
+        // Проверяем, что выбран файл
+        const imageFileInput = document.getElementById('imageFile');
+        if (!imageFileInput.files || imageFileInput.files.length === 0) {
+            showAlert('Пожалуйста, выберите изображение для загрузки', 'error');
             return;
         }
 
-        // Показ лоадера
+        // Показать загрузку
         submitBtn.disabled = true;
-        loadingSpinner.style.display = 'inline-block';
-        submitText.textContent = 'Создание магазина...';
+        loading.style.display = 'block';
+        form.style.display = 'none';
 
         try {
-            const formData = new FormData(e.target);
+            // Создание FormData с правильной структурой для сервера
+            const formData = new FormData();
 
-            // Отладочная информация
-            console.log('Отправляем данные:');
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value);
-            }
+            // Создаем объект с данными магазина (соответствует CreateStoreDto)
+            const storeData = {
+                name: document.getElementById('name').value || '',
+                description: document.getElementById('description').value || '',
+                street: document.getElementById('street').value || '',
+                city: document.getElementById('city').value || '',
+                region: document.getElementById('region').value || '',
+                postalCode: document.getElementById('postalCode').value || '',
+                country: document.getElementById('country').value || '',
+                phone: document.getElementById('phone').value || '',
+                email: document.getElementById('email').value || '',
+                deliveryRadius: parseInt(document.getElementById('deliveryRadius').value) || 0,
+                deliveryFee: parseFloat(document.getElementById('deliveryFee').value) || 0,
+                estimatedDeliveryTime: parseInt(document.getElementById('estimatedDeliveryTime').value) || 0,
+                isActive: document.getElementById('isActive').checked
+            };
 
+            // Добавляем данные магазина как JSON blob с именем "store"
+            formData.append('store', new Blob([JSON.stringify(storeData)], {
+                type: 'application/json'
+            }));
+
+            // Добавляем файл изображения с именем "imageFile"
+            formData.append('imageFile', imageFileInput.files[0]);
+
+            console.log('Sending FormData with:');
+            console.log('- store:', storeData);
+            console.log('- imageFile:', imageFileInput.files[0].name, imageFileInput.files[0].size, 'bytes');
+
+            // Отправка на сервер
             const response = await fetch('/api/frontend/stores', {
                 method: 'POST',
+                headers: {
+                    'X-User-Role': 'ROLE_ADMIN',
+                    'X-User-Id': '9'
+                    // НЕ ДОБАВЛЯЕМ Content-Type - браузер сам установит с boundary
+                },
                 body: formData
             });
 
-            const responseText = await response.text();
-            console.log('Ответ сервера:', responseText);
+            console.log('Response status:', response.status);
 
-            if (response.ok) {
-                const result = JSON.parse(responseText);
-                alert('✅ Магазин успешно создан!');
+            let result;
+            const contentType = response.headers.get('content-type');
 
-                // Сброс формы
-                e.target.reset();
-                removeImage.click();
-
+            if (contentType && contentType.includes('application/json')) {
+                result = await response.json();
             } else {
-                throw new Error(`HTTP ${response.status}: ${responseText}`);
+                const textResult = await response.text();
+                console.error('Non-JSON response:', textResult);
+                throw new Error('Сервер вернул некорректный ответ: ' + textResult.substring(0, 200));
             }
+
+            if (response.ok && result.success) {
+                showAlert('Магазин с изображением успешно создан! 🎉', 'success');
+                form.reset();
+                removeImage();
+            } else {
+                showAlert(result.message || `Ошибка при создании магазина (${response.status})`, 'error');
+            }
+
         } catch (error) {
-            console.error('Ошибка создания магазина:', error);
-            alert('❌ Ошибка при создании магазина: ' + error.message);
+            console.error('Error:', error);
+            showAlert('Произошла ошибка при отправке данных: ' + error.message, 'error');
         } finally {
-            // Скрытие лоадера
+            // Скрыть загрузку
             submitBtn.disabled = false;
-            loadingSpinner.style.display = 'none';
-            submitText.textContent = '🚀 Создать магазин';
+            loading.style.display = 'none';
+            form.style.display = 'block';
         }
     });
 
-    // Валидация полей в реальном времени
-    document.getElementById('name').addEventListener('input', function() {
-        const nameError = document.getElementById('nameError');
-        if (this.value.length > 100) {
-            nameError.textContent = 'Название не должно превышать 100 символов';
-        } else {
-            nameError.textContent = '';
-        }
+    function showAlert(message, type) {
+        alert.textContent = message;
+        alert.className = `alert ${type}`;
+        alert.style.display = 'block';
+
+        // Автоматически скрыть через 5 секунд
+        setTimeout(() => {
+            alert.style.display = 'none';
+        }, 5000);
+    }
+
+    // Автоматическое скрытие алертов при клике
+    alert.addEventListener('click', () => {
+        alert.style.display = 'none';
     });
 </script>
 </body>
