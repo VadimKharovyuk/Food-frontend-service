@@ -3,272 +3,541 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏪 Food Delivery - Магазины</title>
-    <link rel="stylesheet" href="/css/store.css">
+    <title>Создание магазина</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-header h1 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        /* Приоритетная секция загрузки фото */
+        .photo-upload-priority {
+            background: linear-gradient(135deg, #ff9a56 0%, #ffad56 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .photo-upload-priority::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .photo-upload-priority h3 {
+            color: white;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .upload-area:hover {
+            border-color: white;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.dragover {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .upload-hint {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        .image-preview {
+            display: none;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .image-preview .remove-image {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .required {
+            color: #ff4757;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-section {
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            background: #f8f9fa;
+        }
+
+        .form-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .error-message {
+            color: #ff4757;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .loading-spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="header">
-    <h1>🏪 Food Delivery</h1>
-    <p>Откройте для себя лучшие рестораны и магазины</p>
-</div>
-
-<div class="container">
-    <div class="controls">
-        <div class="controls-grid">
-            <div class="auth-inputs">
-                <div class="form-group">
-                    <label for="authToken">🔐 Authorization Token:</label>
-                    <input type="text" id="authToken"
-                           value="Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXNpbmVzc0BleGFtcGxlLmNvbSIsInVzZXJJZCI6OSwicm9sZSI6IlJPTEVfQlVTSU5FU1MiLCJpYXQiOjE3NTEyNjQyMzUsImV4cCI6MTc1MTM1MDYzNX0.0AuCD7BvZ2isOLuAve-FMyt3rLnDoEHlHYDj-Gq7UmQ"
-                           placeholder="Bearer token...">
-                </div>
-                <div class="form-group">
-                    <label for="userId">👤 User ID:</label>
-                    <input type="number" id="userId" value="9" placeholder="User ID">
-                </div>
-            </div>
-            <div class="form-group">
-                <label for="endpoint">📍 Эндпоинт:</label>
-                <select id="endpoint">
-                    <option value="my">👤 Мои магазины</option>
-                    <option value="ui" selected>🏠 Для главной</option>
-                    <option value="brief">📋 Краткие данные</option>
-                    <option value="full">📚 Полные данные</option>
-                </select>
-            </div>
-            <button class="btn btn-primary" onclick="loadStores()">
-                🚀 Загрузить
-            </button>
-        </div>
+<div class="form-container">
+    <div class="form-header">
+        <h1>🏪 Создание магазина</h1>
+        <p>Добавьте свой магазин в нашу платформу</p>
     </div>
 
-    <div id="error-container"></div>
-    <div id="loading-container"></div>
-    <div id="stores-container"></div>
-    <div id="pagination-container"></div>
+    <form id="createStoreForm" enctype="multipart/form-data">
+        <!-- ПРИОРИТЕТНАЯ СЕКЦИЯ ЗАГРУЗКИ ФОТО -->
+        <div class="photo-upload-priority">
+            <h3>📸 Загрузите фото магазина</h3>
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📷</div>
+                <div class="upload-text">Нажмите или перетащите фото сюда</div>
+                <div class="upload-hint">JPG, PNG до 5MB</div>
+                <input type="file" id="imageInput" name="image" accept="image/*" required>
+            </div>
+            <div class="image-preview" id="imagePreview">
+                <img id="previewImg" src="" alt="Предпросмотр">
+                <button type="button" class="remove-image" id="removeImage">×</button>
+            </div>
+        </div>
+
+        <!-- ОСНОВНАЯ ИНФОРМАЦИЯ -->
+        <div class="form-section">
+            <h3>🏪 Основная информация</h3>
+
+            <div class="form-group">
+                <label for="name">Название магазина <span class="required">*</span></label>
+                <input type="text" id="name" name="name" required maxlength="100"
+                       placeholder="Введите название вашего магазина">
+                <div class="error-message" id="nameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Описание</label>
+                <textarea id="description" name="description" maxlength="500"
+                          placeholder="Расскажите о вашем магазине"></textarea>
+            </div>
+        </div>
+
+        <!-- АДРЕС -->
+        <div class="form-section">
+            <h3>📍 Адрес магазина</h3>
+
+            <div class="form-group">
+                <label for="street">Улица <span class="required">*</span></label>
+                <input type="text" id="street" name="street" required maxlength="200"
+                       placeholder="Улица, дом, квартира">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city">Город <span class="required">*</span></label>
+                    <input type="text" id="city" name="city" required maxlength="100"
+                           placeholder="Город">
+                </div>
+                <div class="form-group">
+                    <label for="region">Регион</label>
+                    <input type="text" id="region" name="region" maxlength="100"
+                           placeholder="Регион/Область">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="postalCode">Почтовый индекс</label>
+                    <input type="text" id="postalCode" name="postalCode"
+                           pattern="[0-9]{5,10}" placeholder="123456">
+                </div>
+                <div class="form-group">
+                    <label for="country">Страна <span class="required">*</span></label>
+                    <input type="text" id="country" name="country" required maxlength="100"
+                           placeholder="Страна">
+                </div>
+            </div>
+        </div>
+
+        <!-- КОНТАКТЫ И ДОСТАВКА -->
+        <div class="form-section">
+            <h3>📞 Контакты и доставка</h3>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phone">Телефон</label>
+                    <input type="tel" id="phone" name="phone"
+                           pattern="^[+]?[0-9\s\-\(\)]{10,20}$"
+                           placeholder="+7 (999) 123-45-67">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" maxlength="100"
+                           placeholder="store@example.com">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="deliveryRadius">Радиус доставки (км)</label>
+                    <input type="number" id="deliveryRadius" name="deliveryRadius"
+                           min="1" max="50" placeholder="5">
+                </div>
+                <div class="form-group">
+                    <label for="deliveryFee">Стоимость доставки (₽)</label>
+                    <input type="number" id="deliveryFee" name="deliveryFee"
+                           min="0" max="99999.99" step="0.01" placeholder="200.00">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="estimatedDeliveryTime">Время доставки (минуты)</label>
+                <input type="number" id="estimatedDeliveryTime" name="estimatedDeliveryTime"
+                       min="10" max="180" placeholder="30">
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+            <span class="loading-spinner" id="loadingSpinner"></span>
+            <span id="submitText">🚀 Создать магазин</span>
+        </button>
+    </form>
 </div>
 
 <script>
-    const BASE_URL = 'http://localhost:8082/api/frontend/stores';
-    let currentPage = 0;
-    let pageSize = 12;
-    let totalCount = 0;
-    let hasNext = false;
-    let hasPrevious = false;
+    const imageInput = document.getElementById('imageInput');
+    const uploadArea = document.getElementById('uploadArea');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const removeImage = document.getElementById('removeImage');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const submitText = document.getElementById('submitText');
 
-    function getAuthHeaders() {
-        const token = document.getElementById('authToken').value;
-        const userId = document.getElementById('userId').value;
-
-        return {
-            'Authorization': token,
-            'X-User-Id': userId,
-            'Content-Type': 'application/json'
-        };
-    }
-
-    function showLoading() {
-        document.getElementById('loading-container').innerHTML = `
-                <div class="loading">
-                    Загружаем магазины...
-                </div>
-            `;
-        document.getElementById('stores-container').innerHTML = '';
-        document.getElementById('pagination-container').innerHTML = '';
-        document.getElementById('error-container').innerHTML = '';
-    }
-
-    function hideLoading() {
-        document.getElementById('loading-container').innerHTML = '';
-    }
-
-    function showError(message) {
-        document.getElementById('error-container').innerHTML = `
-                <div class="error-message">
-                    <strong>❌ Ошибка:</strong> ${message}
-                </div>
-            `;
-    }
-
-    function formatAddress(address) {
-        if (!address) return 'Адрес не указан';
-
-        const parts = [
-            address.street,
-            address.city,
-            address.state,
-            address.zipCode,
-            address.country
-        ].filter(part => part && part.trim());
-
-        return parts.join(', ') || 'Адрес не указан';
-    }
-
-    function createStoreCard(store) {
-        const address = formatAddress(store.address);
-        const rating = store.rating ? parseFloat(store.rating).toFixed(1) : 'N/A';
-        const deliveryTime = store.estimatedDeliveryTime || 'N/A';
-        const deliveryFee = store.deliveryFee ? `$${parseFloat(store.deliveryFee).toFixed(2)}` : 'Free';
-        const deliveryRadius = store.deliveryRadius || 'N/A';
-
-        return `
-                <div class="store-card">
-                    <img src="${store.picUrl || 'https://via.placeholder.com/400x200/f0f0f0/999999?text=Store+Image'}"
-                         alt="${store.name}"
-                         class="store-image"
-                         onerror="this.src='https://via.placeholder.com/400x200/f0f0f0/999999?text=No+Image'">
-
-                    <div class="store-content">
-                        <div class="store-header">
-                            <h3 class="store-name">${store.name}</h3>
-                            <div class="rating-badge">
-                                ⭐ ${rating}
-                            </div>
-                        </div>
-
-                        <p class="store-description">${store.description || 'Описание не доступно'}</p>
-
-                        <div class="store-details">
-                            <div class="detail-item">
-                                <span class="detail-icon">🕒</span>
-                                <span>${deliveryTime} мин</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-icon">🚚</span>
-                                <span>${deliveryFee}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-icon">📞</span>
-                                <span>${store.phone || 'N/A'}</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-icon">📍</span>
-                                <span>${deliveryRadius} км</span>
-                            </div>
-                        </div>
-
-                        <div class="store-address">
-                            <div class="address-text">
-                                <strong>📍 Адрес:</strong><br>
-                                ${address}
-                            </div>
-                        </div>
-
-                        <div class="store-footer">
-                            <div class="delivery-info">
-                                <span class="delivery-badge">ID: ${store.id}</span>
-                                <span class="delivery-badge">Owner: ${store.ownerId}</span>
-                            </div>
-                            <span class="${store.isActive ? 'status-active' : 'status-inactive'}">
-                                ${store.isActive ? '✅ Активен' : '❌ Неактивен'}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            `;
-    }
-
-    function displayStores(stores) {
-        const container = document.getElementById('stores-container');
-
-        if (!stores || stores.length === 0) {
-            container.innerHTML = `
-                    <div class="no-stores">
-                        <div class="no-stores-icon">🏪</div>
-                        <h3>Магазины не найдены</h3>
-                        <p>Попробуйте изменить параметры поиска</p>
-                    </div>
-                `;
-            return;
-        }
-
-        const storesHTML = stores.map(store => createStoreCard(store)).join('');
-        container.innerHTML = `<div class="stores-grid">${storesHTML}</div>`;
-    }
-
-    function displayPagination() {
-        const container = document.getElementById('pagination-container');
-        const endpoint = document.getElementById('endpoint').value;
-
-        // Не показываем пагинацию для UI эндпоинта
-        if (endpoint === 'ui') {
-            container.innerHTML = '';
-            return;
-        }
-
-        container.innerHTML = `
-                <div class="pagination">
-                    <button onclick="loadPage(${currentPage - 1})" ${!hasPrevious ? 'disabled' : ''}>
-                        ← Предыдущая
-                    </button>
-                    <span class="pagination-info">
-                        Страница ${currentPage + 1} • Всего: ${totalCount} магазинов
-                    </span>
-                    <button onclick="loadPage(${currentPage + 1})" ${!hasNext ? 'disabled' : ''}>
-                        Следующая →
-                    </button>
-                </div>
-            `;
-    }
-
-    async function loadStores() {
-        const endpoint = document.getElementById('endpoint').value;
-        let url = `${BASE_URL}/${endpoint}`;
-
-        // Добавляем параметры пагинации для соответствующих эндпоинтов
-        if (['my', 'brief', 'full'].includes(endpoint)) {
-            const size = endpoint === 'brief' ? 12 : 12; // Настраиваем размер под UI
-            url += `?page=${currentPage}&size=${size}`;
-        }
-
-        showLoading();
-
-        try {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: getAuthHeaders()
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-
-            if (!data.success) {
-                throw new Error(data.message || 'Неизвестная ошибка');
-            }
-
-            // Обновляем пагинацию данные
-            totalCount = data.totalCount || 0;
-            hasNext = data.hasNext || false;
-            hasPrevious = data.hasPrevious || false;
-
-            // Отображаем магазины
-            const stores = endpoint === 'ui' ? data.stores : data.data || data.stores;
-            displayStores(stores);
-            displayPagination();
-
-        } catch (error) {
-            showError(error.message);
-        } finally {
-            hideLoading();
-        }
-    }
-
-    function loadPage(page) {
-        currentPage = page;
-        loadStores();
-    }
-
-    // Сброс страницы при смене эндпоинта
-    document.getElementById('endpoint').addEventListener('change', function() {
-        currentPage = 0;
+    // Обработка клика по области загрузки
+    uploadArea.addEventListener('click', () => {
+        imageInput.click();
     });
 
-    // Автоматическая загрузка при загрузке страницы
-    document.addEventListener('DOMContentLoaded', function() {
-        loadStores();
+    // Обработка перетаскивания файлов
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleImageUpload(files[0]);
+        }
+    });
+
+    // Обработка выбора файла
+    imageInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleImageUpload(e.target.files[0]);
+        }
+    });
+
+    // Функция обработки загрузки изображения
+    function handleImageUpload(file) {
+        // Проверка типа файла
+        if (!file.type.startsWith('image/')) {
+            alert('Пожалуйста, выберите изображение');
+            return;
+        }
+
+        // Проверка размера файла (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Размер файла не должен превышать 5MB');
+            return;
+        }
+
+        // Показ предпросмотра
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            previewImg.src = e.target.result;
+            uploadArea.style.display = 'none';
+            imagePreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+
+        // Обновляем input
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        imageInput.files = dataTransfer.files;
+    }
+
+    // Удаление изображения
+    removeImage.addEventListener('click', () => {
+        imageInput.value = '';
+        uploadArea.style.display = 'block';
+        imagePreview.style.display = 'none';
+        previewImg.src = '';
+    });
+
+    // Обработка отправки формы
+    document.getElementById('createStoreForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Проверка обязательного изображения
+        if (!imageInput.files || imageInput.files.length === 0) {
+            alert('Пожалуйста, загрузите фото магазина');
+            return;
+        }
+
+        // Показ лоадера
+        submitBtn.disabled = true;
+        loadingSpinner.style.display = 'inline-block';
+        submitText.textContent = 'Создание магазина...';
+
+        try {
+            const formData = new FormData(e.target);
+
+            // Отладочная информация
+            console.log('Отправляем данные:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+
+            const response = await fetch('/api/frontend/stores', {
+                method: 'POST',
+                body: formData
+            });
+
+            const responseText = await response.text();
+            console.log('Ответ сервера:', responseText);
+
+            if (response.ok) {
+                const result = JSON.parse(responseText);
+                alert('✅ Магазин успешно создан!');
+
+                // Сброс формы
+                e.target.reset();
+                removeImage.click();
+
+            } else {
+                throw new Error(`HTTP ${response.status}: ${responseText}`);
+            }
+        } catch (error) {
+            console.error('Ошибка создания магазина:', error);
+            alert('❌ Ошибка при создании магазина: ' + error.message);
+        } finally {
+            // Скрытие лоадера
+            submitBtn.disabled = false;
+            loadingSpinner.style.display = 'none';
+            submitText.textContent = '🚀 Создать магазин';
+        }
+    });
+
+    // Валидация полей в реальном времени
+    document.getElementById('name').addEventListener('input', function() {
+        const nameError = document.getElementById('nameError');
+        if (this.value.length > 100) {
+            nameError.textContent = 'Название не должно превышать 100 символов';
+        } else {
+            nameError.textContent = '';
+        }
     });
 </script>
 </body>

@@ -14,11 +14,12 @@ import java.util.List;
         name = "product-service",
         path = "/api/categories",
         fallback = CategoryServiceClientFallback.class,
+        configuration = FeignConfig.class,
         contextId = "categoryServiceClient"
 )
 public interface CategoryServiceClient {
 
-    // СОЗДАНИЕ И ОБНОВЛЕНИЕ (без userId - передается через заголовок)
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ResponseEntity<ApiResponse<CategoryResponseDto>> createCategory(
             @ModelAttribute CreateCategoryDto createCategoryDto

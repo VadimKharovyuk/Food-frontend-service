@@ -1,14 +1,16 @@
 package com.example.foodfrontendservice.service;
 
 import com.example.foodfrontendservice.Client.StoreServiceClient;
-import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreBriefResponseWrapper;
-import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreResponseWrapper;
-import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreStatsDto;
-import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreUIResponseWrapper;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.*;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreRequest;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.StoreCreationResponse;
+import feign.FeignException;
+import feign.RetryableException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -16,6 +18,92 @@ import org.springframework.stereotype.Service;
 public class StoreService {
 
     private final StoreServiceClient storeServiceClient;
+
+
+    /**
+     * ✅ ОБНОВЛЕНО: Основной метод с @ModelAttribute подходом
+     */
+    public StoreResponseDto createStore(CreateStoreRequest createRequest) {
+        log.info("🚀 UI Service: Creating store: {} for user with image: {}",
+                createRequest.getName(), createRequest.getImageUrl());
+
+        try {
+            // ✅ Валидация входных данных
+            validateCreateRequest(createRequest);
+
+            // ✅ ИСПРАВЛЕНО: Вызываем Feign клиент с @ModelAttribute
+            StoreResponseDto response = storeServiceClient.createStore(createRequest);
+
+            log.info("✅ Store created successfully with ID: {}", response.getId());
+            return response;
+
+        } catch (FeignException.InternalServerError e) {
+            log.error("❌ Product Service Error (500): {}", e.contentUTF8());
+            throw new RuntimeException("Внутренняя ошибка Product Service: " + e.contentUTF8());
+
+        } catch (FeignException.BadRequest e) {
+            log.warn("❌ Validation error (400): {}", e.contentUTF8());
+            throw new IllegalArgumentException("Ошибка валидации: " + e.contentUTF8());
+
+        } catch (FeignException.Unauthorized e) {
+            log.warn("❌ Unauthorized (401): {}", e.getMessage());
+            throw new SecurityException("Недостаточно прав для создания магазина");
+
+        } catch (FeignException.Forbidden e) {
+            log.warn("❌ Forbidden (403): {}", e.getMessage());
+            throw new SecurityException("Доступ запрещен. Требуется роль BUSINESS");
+
+        } catch (RetryableException e) {
+            log.warn("❌ Service unavailable: {}", e.getMessage());
+            throw new RuntimeException("Product Service временно недоступен");
+
+        } catch (FeignException e) {
+            log.error("❌ Feign error: HTTP {}, body: {}", e.status(), e.contentUTF8());
+            throw new RuntimeException(String.format("Ошибка связи с Product Service (HTTP %d)", e.status()));
+
+        } catch (Exception e) {
+            log.error("❌ Unexpected error: {}", e.getMessage(), e);
+            throw new RuntimeException("Внутренняя ошибка UI Service: " + e.getMessage());
+        }
+    }
+
+    /**
+     * ✅ Валидация основных полей перед отправкой
+     */
+    private void validateCreateRequest(CreateStoreRequest request) {
+        if (request.getName() == null || request.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Название магазина обязательно");
+        }
+
+        if (request.getStreet() == null || request.getStreet().trim().isEmpty()) {
+            throw new IllegalArgumentException("Адрес (улица) обязателен");
+        }
+
+        if (request.getCity() == null || request.getCity().trim().isEmpty()) {
+            throw new IllegalArgumentException("Город обязателен");
+        }
+
+        if (request.getCountry() == null || request.getCountry().trim().isEmpty()) {
+            throw new IllegalArgumentException("Страна обязательна");
+        }
+
+        if (request.getDeliveryRadius() != null && (request.getDeliveryRadius() < 1 || request.getDeliveryRadius() > 50)) {
+            throw new IllegalArgumentException("Радиус доставки должен быть от 1 до 50 км");
+        }
+
+        if (request.getEstimatedDeliveryTime() != null &&
+                (request.getEstimatedDeliveryTime() < 10 || request.getEstimatedDeliveryTime() > 180)) {
+            throw new IllegalArgumentException("Время доставки должно быть от 10 до 180 минут");
+        }
+
+        log.debug("✅ Validation passed for store: {}", request.getName());
+    }
+
+
+
+
+
+
 
     /**
      * Получить магазины для UI (главная страница)

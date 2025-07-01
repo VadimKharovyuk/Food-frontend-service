@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏪 Создать новый магазин</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .auth-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+
+        .auth-section h3 {
+            color: #495057;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .auth-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 50px 20px;
+            border: 3px dashed #ccc;
+            border-radius: 12px;
+            background: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .file-input-label:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .file-input-label.has-file {
+            border-color: #28a745;
+            background: rgba(40, 167, 69, 0.05);
+        }
+
+        .image-preview {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .image-preview img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 150px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .response-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .response-success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .response-error {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .response-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .response-content {
+            font-family: 'Courier New', monospace;
+            background: rgba(0,0,0,0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .loading {
+            position: relative;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            backdrop-filter: blur(2px);
+        }
+
+        .loading::before {
+            content: '⏳ Создаем магазин...';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px 30px;
+            border-radius: 50px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            font-weight: 600;
+            z-index: 1;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .validation-error {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-group.error input,
+        .form-group.error textarea,
+        .form-group.error select {
+            border-color: #dc3545;
+        }
+
+        .form-group.error .validation-error {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+
+            .auth-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🏪 Создать новый магазин</h1>
+        <p>Заполните информацию о вашем магазине для начала работы</p>
+    </div>
+
+    <!-- Секция авторизации -->
+    <div class="auth-section">
+        <h3>🔐 Настройки авторизации</h3>
+        <div class="auth-grid">
+            <div class="form-group">
+                <label for="authToken">Authorization Token:</label>
+                <input type="text" id="authToken"
+                       value="Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJidXNpbmVzc0BleGFtcGxlLmNvbSIsInVzZXJJZCI6OSwicm9sZSI6IlJPTEVfQlVTSU5FU1MiLCJpYXQiOjE3NTEyNjQyMzUsImV4cCI6MTc1MTM1MDYzNX0.0AuCD7BvZ2isOLuAve-FMyt3rLnDoEHlHYDj-Gq7UmQ"
+                       placeholder="Bearer token...">
+            </div>
+            <div class="form-group">
+                <label for="userId">User ID:</label>
+                <input type="number" id="userId" value="9" placeholder="User ID">
+            </div>
+        </div>
+    </div>
+
+    <!-- Форма создания магазина -->
+    <form id="createStoreForm" enctype="multipart/form-data">
+
+        <!-- Основная информация -->
+        <div class="form-section">
+            <h3 class="section-title">📝 Основная информация</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">Название магазина <span class="required">*</span></label>
+                    <input type="text" id="name" name="name" required
+                           placeholder="Название вашего магазина">
+                    <div class="validation-error">Название обязательно</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email"
+                           placeholder="contact@example.com">
+                    <div class="validation-error">Неверный формат email</div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="description">Описание</label>
+                    <textarea id="description" name="description"
+                              placeholder="Расскажите о вашем магазине..."></textarea>
+                    <div class="validation-error">Описание слишком длинное</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Адрес -->
+        <div class="form-section">
+            <h3 class="section-title">📍 Адрес магазина</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="street">Улица <span class="required">*</span></label>
+                    <input type="text" id="street" name="address.street" required
+                           placeholder="ул. Пушкина, д. 10">
+                    <div class="validation-error">Улица обязательна</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="city">Город <span class="required">*</span></label>
+                    <input type="text" id="city" name="address.city" required
+                           placeholder="Москва">
+                    <div class="validation-error">Город обязателен</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="region">Область/Штат/Регион</label>
+                    <input type="text" id="region" name="region"
+                           placeholder="Харьковская область">
+                </div>
+
+                <div class="form-group">
+                    <label for="postalCode">Почтовый индекс</label>
+                    <input type="text" id="postalCode" name="postalCode"
+                           placeholder="61000" pattern="[0-9]{5,10}">
+                    <div class="validation-error">Неверный формат индекса</div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="country">Страна <span class="required">*</span></label>
+                    <select id="country" name="address.country" required>
+                        <option value="">Выберите страну</option>
+                        <option value="Россия" selected>Россия</option>
+                        <option value="Беларусь">Беларусь</option>
+                        <option value="Казахстан">Казахстан</option>
+                        <option value="Украина">Украина</option>
+                        <option value="США">США</option>
+                        <option value="Германия">Германия</option>
+                    </select>
+                    <div class="validation-error">Страна обязательна</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Контакты -->
+        <div class="form-section">
+            <h3 class="section-title">📞 Контактная информация</h3>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="phone">Телефон</label>
+                    <input type="tel" id="phone" name="phone"
+                           placeholder="+7 (999) 123-45-67"
+                           pattern="^[+]?[0-9\s\-\(\)]{10,20}$">
+                    <div class="validation-error">Неверный формат телефона</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Параметры доставки -->
+        <div class="form-section">
+            <h3 class="section-title">🚚 Параметры доставки</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="deliveryRadius">Радиус доставки (км) <span class="required">*</span></label>
+                    <input type="number" id="deliveryRadius" name="deliveryRadius"
+                           min="1" max="50" value="5" required>
+                    <div class="validation-error">От 1 до 50 км</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="deliveryFee">Стоимость доставки ($) <span class="required">*</span></label>
+                    <input type="number" id="deliveryFee" name="deliveryFee"
+                           min="0" max="99999.99" step="0.01" value="2.99" required>
+                    <div class="validation-error">От 0 до 99999.99</div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="estimatedDeliveryTime">Время доставки (минуты) <span class="required">*</span></label>
+                    <input type="number" id="estimatedDeliveryTime" name="estimatedDeliveryTime"
+                           min="10" max="180" value="30" required>
+                    <div class="validation-error">От 10 до 180 минут</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Изображение -->
+        <div class="form-section">
+            <h3 class="section-title">📸 Изображение магазина</h3>
+            <div class="form-group">
+                <label>Загрузить фото магазина</label>
+                <div class="file-input-wrapper">
+                    <input type="file" id="imageFile" name="imageFile"
+                           accept="image/*" class="file-input">
+                    <label for="imageFile" class="file-input-label" id="fileLabel">
+                        <span>📸</span>
+                        <span>Нажмите для выбора изображения</span>
+                    </label>
+                </div>
+                <div class="image-preview" id="imagePreview">
+                    <img id="previewImg" src="" alt="Preview">
+                </div>
+            </div>
+        </div>
+
+        <!-- Кнопки -->
+        <div class="button-group">
+            <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                🔄 Очистить форму
+            </button>
+            <button type="submit" class="btn btn-primary" id="submitBtn">
+                🚀 Создать магазин
+            </button>
+        </div>
+    </form>
+
+    <!-- Секция ответа -->
+    <div class="response-section" id="responseSection">
+        <div class="response-title" id="responseTitle"></div>
+        <div class="response-content" id="responseContent"></div>
+    </div>
+</div>
+
+<script>
+    const BASE_URL = 'http://localhost:8082/api/frontend/stores';
+
+    // Обработка загрузки изображения
+    document.getElementById('imageFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        const label = document.getElementById('fileLabel');
+        const preview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+
+        if (file) {
+            label.classList.add('has-file');
+            label.innerHTML = `<span>✅</span><span>${file.name}</span>`;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            label.classList.remove('has-file');
+            label.innerHTML = `<span>📸</span><span>Нажмите для выбора изображения</span>`;
+            preview.style.display = 'none';
+        }
+    });
+
+    // Валидация формы
+    function validateForm() {
+        const requiredFields = document.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            const formGroup = field.closest('.form-group');
+
+            if (!field.value.trim()) {
+                formGroup.classList.add('error');
+                isValid = false;
+            } else {
+                formGroup.classList.remove('error');
+            }
+        });
+
+        // Дополнительная валидация email
+        const email = document.getElementById('email');
+        if (email.value && !email.value.includes('@')) {
+            email.closest('.form-group').classList.add('error');
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    // Отправка формы
+    document.getElementById('createStoreForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        if (!validateForm()) {
+            showResponse('error', 'Ошибка валидации', 'Пожалуйста, исправьте ошибки в форме');
+            return;
+        }
+
+        const container = document.querySelector('.container');
+        container.classList.add('loading');
+
+        try {
+            const formData = new FormData();
+
+            // Добавляем основные поля (упрощенная структура)
+            formData.append('name', document.getElementById('name').value);
+            formData.append('description', document.getElementById('description').value || '');
+            formData.append('phone', document.getElementById('phone').value || '');
+            formData.append('email', document.getElementById('email').value || '');
+            formData.append('deliveryRadius', document.getElementById('deliveryRadius').value);
+            formData.append('deliveryFee', document.getElementById('deliveryFee').value);
+            formData.append('estimatedDeliveryTime', document.getElementById('estimatedDeliveryTime').value);
+            formData.append('isActive', 'true');
+
+            // Добавляем поля адреса напрямую (правильные названия полей)
+            formData.append('street', document.getElementById('street').value);
+            formData.append('city', document.getElementById('city').value);
+            formData.append('region', document.getElementById('region').value || ''); // ИЗМЕНЕНО
+            formData.append('postalCode', document.getElementById('postalCode').value || ''); // ИЗМЕНЕНО
+            formData.append('country', document.getElementById('country').value);
+
+            // Добавляем файл если выбран
+            const imageFile = document.getElementById('imageFile').files[0];
+            if (imageFile) {
+                formData.append('imageFile', imageFile);
+            }
+
+            console.log('📤 Sending form data with', formData.entries().length, 'parts');
+
+            const response = await fetch(BASE_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': document.getElementById('authToken').value,
+                    'X-User-Id': document.getElementById('userId').value
+                    // НЕ добавляем Content-Type для multipart!
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                showResponse('success', 'Магазин успешно создан! 🎉', JSON.stringify(data, null, 2));
+                resetForm();
+            } else {
+                showResponse('error', 'Ошибка создания магазина',
+                    `Статус: ${response.status}\nСообщение: ${data.message || 'Неизвестная ошибка'}\n\n${JSON.stringify(data, null, 2)}`);
+            }
+
+        } catch (error) {
+            showResponse('error', 'Ошибка сети', error.message);
+        } finally {
+            container.classList.remove('loading');
+        }
+    });
+
+    function showResponse(type, title, content) {
+        const section = document.getElementById('responseSection');
+        const titleEl = document.getElementById('responseTitle');
+        const contentEl = document.getElementById('responseContent');
+
+        section.className = `response-section response-${type}`;
+        titleEl.innerHTML = type === 'success' ? `✅ ${title}` : `❌ ${title}`;
+        contentEl.textContent = content;
+        section.style.display = 'block';
+
+        // Прокрутка к результату
+        section.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function resetForm() {
+        document.getElementById('createStoreForm').reset();
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('fileLabel').classList.remove('has-file');
+        document.getElementById('fileLabel').innerHTML = `<span>📸</span><span>Нажмите для выбора изображения</span>`;
+        document.getElementById('responseSection').style.display = 'none';
+
+        // Убираем ошибки валидации
+        document.querySelectorAll('.form-group.error').forEach(group => {
+            group.classList.remove('error');
+        });
+    }
+
+    // Валидация в реальном времени
+    document.querySelectorAll('input, textarea, select').forEach(field => {
+        field.addEventListener('blur', function() {
+            const formGroup = this.closest('.form-group');
+
+            if (this.hasAttribute('required') && !this.value.trim()) {
+                formGroup.classList.add('error');
+            } else {
+                formGroup.classList.remove('error');
+            }
+        });
+    });
+</script>
+</body>
+</html>

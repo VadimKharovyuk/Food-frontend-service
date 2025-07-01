@@ -52,12 +52,24 @@
 //}
 
 package com.example.foodfrontendservice.config;
-
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
+import feign.codec.Encoder;
+import feign.form.spring.SpringFormEncoder;
+import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.cloud.openfeign.support.SpringEncoder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import lombok.extern.slf4j.Slf4j;
+import feign.RequestInterceptor;
+import feign.RequestTemplate;
+import feign.form.spring.SpringFormEncoder;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
+import org.springframework.cloud.openfeign.support.SpringEncoder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -135,5 +147,10 @@ public class FeignAuthInterceptor implements RequestInterceptor {
     private String getHeaderOrDefault(HttpServletRequest request, String headerName, String defaultValue) {
         String value = request.getHeader(headerName);
         return (value != null && !value.trim().isEmpty()) ? value : defaultValue;
+    }
+
+    @Bean
+    public Encoder multipartFormEncoder(ObjectFactory<HttpMessageConverters> messageConverters) {
+        return new SpringFormEncoder(new SpringEncoder(messageConverters));
     }
 }

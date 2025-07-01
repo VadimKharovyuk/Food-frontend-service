@@ -86,39 +86,6 @@ public class ApiResponse<T> {
                 .build();
     }
 
-    /**
-     * Создать успешный ответ без данных (например, для операций удаления)
-     * @param <T> тип данных
-     * @return успешный ответ без данных
-     */
-    public static <T> ApiResponse<T> successNoData() {
-        return ApiResponse.<T>builder()
-                .data(null)
-                .success(true)
-                .message(null)
-                .timestamp(LocalDateTime.now())
-                .build();
-    }
-
-    /**
-     * Создать успешный ответ с кастомным сообщением
-     * @param data данные для ответа
-     * @param message сообщение об успехе
-     * @param <T> тип данных
-     * @return успешный ответ с сообщением
-     */
-    public static <T> ApiResponse<T> successWithMessage(T data, String message) {
-        return ApiResponse.<T>builder()
-                .data(data)
-                .success(true)
-                .message(message)
-                .timestamp(LocalDateTime.now())
-                .build();
-    }
-
-    // ================================
-    // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
-    // ================================
 
     /**
      * Проверить, является ли ответ успешным
@@ -128,13 +95,6 @@ public class ApiResponse<T> {
         return success != null && success;
     }
 
-    /**
-     * Проверить, содержит ли ответ данные
-     * @return true если ответ содержит данные
-     */
-    public boolean hasData() {
-        return data != null;
-    }
 
     /**
      * Проверить, является ли ответ ошибкой
@@ -144,15 +104,5 @@ public class ApiResponse<T> {
         return success == null || !success;
     }
 
-    /**
-     * Получить данные или выбросить исключение если их нет
-     * @return данные ответа
-     * @throws RuntimeException если данных нет
-     */
-    public T getDataOrThrow() {
-        if (data == null) {
-            throw new RuntimeException(message != null ? message : "No data available");
-        }
-        return data;
-    }
+
 }

@@ -13,6 +13,6 @@ public class CategoryDto {
     private Long id;
     private String name;
     private Boolean isActive;
-    private String imageUrl;  // ← Добавили поле для изображения
-    private Integer sortOrder; // ← И sortOrder для полноты
+    private String imageUrl;
+    private Integer sortOrder;
 }

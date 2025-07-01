@@ -1,14 +1,25 @@
 package com.example.foodfrontendservice.controller;
 
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreRequest;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.StoreCreationResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.*;
 import com.example.foodfrontendservice.service.StoreService;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/frontend/stores")
@@ -183,4 +194,67 @@ public class StoreController {
                             .build());
         }
     }
+
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<StoreResponseDto> createStore(
+            @ModelAttribute CreateStoreRequest createStoreRequest,
+            HttpServletRequest request) {
+
+        log.info("📥 POST /api/v1/stores - Creating store: {} from IP: {}",
+                createStoreRequest.getName(),
+                getClientIpAddress(request));
+
+
+        try {
+            // ✅ Вызываем сервис для создания магазина
+            StoreResponseDto createdStore = storeService.createStore(createStoreRequest);
+
+            log.info("✅ Store created successfully with ID: {} and name: {}",
+                    createdStore.getId(), createdStore.getName());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdStore);
+
+        } catch (IllegalArgumentException e) {
+            log.warn("❌ Validation error: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .header("Error-Message", e.getMessage())
+                    .build();
+
+        } catch (SecurityException e) {
+            log.warn("❌ Security error: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .header("Error-Message", e.getMessage())
+                    .build();
+
+        } catch (RuntimeException e) {
+            log.error("❌ Runtime error while creating store: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .header("Error-Message", "Внутренняя ошибка сервера")
+                    .build();
+
+        } catch (Exception e) {
+            log.error("❌ Unexpected error while creating store: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .header("Error-Message", "Произошла непредвиденная ошибка")
+                    .build();
+        }
+    }
+    /**
+     * ✅ Получение IP адреса клиента для логирования
+     */
+    private String getClientIpAddress(HttpServletRequest request) {
+        String xForwardedFor = request.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            return xForwardedFor.split(",")[0].trim();
+        }
+
+        String xRealIp = request.getHeader("X-Real-IP");
+        if (xRealIp != null && !xRealIp.isEmpty()) {
+            return xRealIp;
+        }
+
+        return request.getRemoteAddr();
+    }
+
 }
