@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление ресторанами - Admin Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --light-bg: #f8fafc;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-color), #1e40af);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--card-shadow);
+            border: none;
+            transition: transform 0.2s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .restaurant-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--card-shadow);
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .restaurant-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15);
+        }
+
+        .restaurant-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid #e2e8f0;
+        }
+
+        .restaurant-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-size: 1.5rem;
+            border: 2px solid #e2e8f0;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-active {
+            background-color: #dcfce7;
+            color: var(--success-color);
+        }
+
+        .status-inactive {
+            background-color: #fee2e2;
+            color: var(--danger-color);
+        }
+
+        .rating-stars {
+            color: #fbbf24;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin: 0 0.2rem;
+        }
+
+        .btn-view {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .btn-edit {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .btn-delete {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .pagination {
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        .pagination .page-link {
+            border-radius: 8px;
+            margin: 0 0.2rem;
+            color: var(--primary-color);
+            border: 1px solid #e2e8f0;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--secondary-color);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background-color: #f8fafc;
+            border: none;
+            padding: 1rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .table td {
+            border: none;
+            padding: 1rem;
+            vertical-align: middle;
+        }
+
+        .error-alert {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border: none;
+            border-radius: 12px;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+<div class="admin-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="mb-0">
+                    <i class="fas fa-store me-2"></i>
+                    Управление ресторанами
+                </h1>
+                <p class="mb-0 opacity-75">Управление всеми ресторанами в системе</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Статистика -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <div class="text-primary mb-2">
+                    <i class="fas fa-store fa-2x"></i>
+                </div>
+                <h3 class="fw-bold text-primary" th:text="${totalCount ?: 0}">0</h3>
+                <p class="text-muted mb-0">Всего ресторанов</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <div class="text-success mb-2">
+                    <i class="fas fa-check-circle fa-2x"></i>
+                </div>
+                <h3 class="fw-bold text-success">0</h3>
+                <p class="text-muted mb-0">Активных</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <div class="text-warning mb-2">
+                    <i class="fas fa-clock fa-2x"></i>
+                </div>
+                <h3 class="fw-bold text-warning">0</h3>
+                <p class="text-muted mb-0">На модерации</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <div class="text-danger mb-2">
+                    <i class="fas fa-ban fa-2x"></i>
+                </div>
+                <h3 class="fw-bold text-danger">0</h3>
+                <p class="text-muted mb-0">Заблокированных</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Поиск и фильтры -->
+    <div class="search-box">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                    <input type="text" class="form-control" placeholder="Поиск по названию, адресу или владельцу...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select">
+                    <option value="">Все статусы</option>
+                    <option value="active">Активные</option>
+                    <option value="inactive">Неактивные</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select">
+                    <option value="10">10 на странице</option>
+                    <option value="25">25 на странице</option>
+                    <option value="50">50 на странице</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Сообщение об ошибке -->
+    <div th:if="${error}" class="alert error-alert" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${error}">Ошибка загрузки данных</span>
+    </div>
+
+    <!-- Список ресторанов -->
+    <div th:if="${stores != null and !stores.empty}">
+        <div class="table-responsive bg-white">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Ресторан</th>
+                    <th>Владелец</th>
+                    <th>Статус</th>
+                    <th>Рейтинг</th>
+                    <th>Доставка</th>
+                    <th>Создан</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="store : ${stores}">
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div th:if="${store.imageUrl != null and !store.imageUrl.isEmpty()}" class="me-3">
+                                <img th:src="${store.imageUrl}"
+                                     alt="Изображение ресторана"
+                                     class="restaurant-image"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="restaurant-placeholder" style="display: none;">
+                                    <i class="fas fa-store"></i>
+                                </div>
+                            </div>
+                            <div th:if="${store.imageUrl == null or store.imageUrl.isEmpty()}" class="restaurant-placeholder me-3">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-1 fw-bold" th:text="${store.name}">Название ресторана</h6>
+                                <p class="mb-0 text-muted small" th:text="${store.description}">Описание</p>
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    <span th:if="${store.address}"
+                                          th:text="${store.address.street + ', ' + store.address.city}">Адрес</span>
+                                </small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                            <span class="fw-medium">ID: </span>
+                            <span th:text="${store.ownerId}">123</span>
+                        </div>
+                        <div th:if="${store.email}">
+                            <small class="text-muted" th:text="${store.email}">email@example.com</small>
+                        </div>
+                        <div th:if="${store.phone}">
+                            <small class="text-muted" th:text="${store.phone}">+7 (999) 123-45-67</small>
+                        </div>
+                    </td>
+                    <td>
+                                <span th:class="${store.isActive ? 'status-badge status-active' : 'status-badge status-inactive'}"
+                                      th:text="${store.isActive ? 'Активен' : 'Неактивен'}">
+                                    Активен
+                                </span>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                                    <span class="rating-stars me-2">
+                                        <i class="fas fa-star" th:if="${store.rating != null and store.rating >= 1}"></i>
+                                        <i class="fas fa-star" th:if="${store.rating != null and store.rating >= 2}"></i>
+                                        <i class="fas fa-star" th:if="${store.rating != null and store.rating >= 3}"></i>
+                                        <i class="fas fa-star" th:if="${store.rating != null and store.rating >= 4}"></i>
+                                        <i class="fas fa-star" th:if="${store.rating != null and store.rating >= 5}"></i>
+                                    </span>
+                            <span th:text="${store.rating != null ? store.rating : 'Н/Д'}">4.5</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div th:if="${store.deliveryRadius}">
+                            <small class="text-muted">Радиус: </small>
+                            <span th:text="${store.deliveryRadius + ' км'}">5 км</span>
+                        </div>
+                        <div th:if="${store.deliveryFee}">
+                            <small class="text-muted">Стоимость: </small>
+                            <span th:text="${store.deliveryFee + ' ₽'}">100 ₽</span>
+                        </div>
+                        <div th:if="${store.estimatedDeliveryTime}">
+                            <small class="text-muted">Время: </small>
+                            <span th:text="${store.estimatedDeliveryTime + ' мин'}">30 мин</span>
+                        </div>
+                    </td>
+                    <td>
+                                <span th:if="${store.createdAt}"
+                                      th:text="${#temporals.format(store.createdAt, 'dd.MM.yyyy')}">01.01.2024</span>
+                        <div th:if="${store.updatedAt}">
+                            <small class="text-muted">
+                                Обновлен: <span th:text="${#temporals.format(store.updatedAt, 'dd.MM.yyyy')}">02.01.2024</span>
+                            </small>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex">
+                            <button class="action-btn btn-view" title="Просмотр">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="action-btn btn-edit" title="Редактировать">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn btn-delete" title="Удалить">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Пагинация -->
+        <nav th:if="${totalPages > 1}">
+            <ul class="pagination">
+                <li class="page-item" th:class="${!hasPrevious ? 'disabled' : ''}">
+                    <a class="page-link"
+                       th:href="${hasPrevious ? '/dashboard/ADMIN/restaurants?page=' + previousPage + '&size=' + pageSize : '#'}"
+                       th:attr="aria-disabled=${!hasPrevious}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+
+                <li class="page-item"
+                    th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:class="${pageNum == currentPage ? 'active' : ''}">
+                    <a class="page-link"
+                       th:href="@{/dashboard/ADMIN/restaurants(page=${pageNum}, size=${pageSize})}"
+                       th:text="${pageNum + 1}">1</a>
+                </li>
+
+                <li class="page-item" th:class="${!hasNext ? 'disabled' : ''}">
+                    <a class="page-link"
+                       th:href="${hasNext ? '/dashboard/ADMIN/restaurants?page=' + nextPage + '&size=' + pageSize : '#'}"
+                       th:attr="aria-disabled=${!hasNext}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Информация о странице -->
+        <div class="text-center text-muted mt-3">
+            <small>
+                Показано <span th:text="${stores.size()}">10</span> из <span th:text="${totalCount}">50</span> ресторанов
+                (Страница <span th:text="${currentPage + 1}">1</span> из <span th:text="${totalPages}">5</span>)
+            </small>
+        </div>
+    </div>
+
+    <!-- Пустое состояние -->
+    <div th:if="${stores == null or stores.empty}" class="empty-state">
+        <i class="fas fa-store-slash"></i>
+        <h4>Рестораны не найдены</h4>
+        <p class="text-muted">В данный момент в системе нет ресторанов для отображения.</p>
+        <button class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>
+            Добавить первый ресторан
+        </button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Функционал поиска и фильтрации
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.querySelector('input[placeholder*="Поиск"]');
+        const statusSelect = document.querySelector('select');
+        const sizeSelect = document.querySelectorAll('select')[1];
+
+        // Обработчик поиска
+        if (searchInput) {
+            let searchTimeout;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    // Здесь можно добавить AJAX поиск
+                    console.log('Поиск:', this.value);
+                }, 500);
+            });
+        }
+
+        // Обработчик изменения размера страницы
+        if (sizeSelect) {
+            sizeSelect.addEventListener('change', function() {
+                const currentUrl = new URL(window.location);
+                currentUrl.searchParams.set('size', this.value);
+                currentUrl.searchParams.set('page', '0'); // Сброс на первую страницу
+                window.location.href = currentUrl.toString();
+            });
+        }
+
+        // Анимация появления карточек
+        const cards = document.querySelectorAll('.restaurant-card, .stats-card');
+        cards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+
+    // Функции для действий с ресторанами
+    function viewRestaurant(id) {
+        window.location.href = `/dashboard/ADMIN/restaurants/${id}`;
+    }
+
+    function editRestaurant(id) {
+        window.location.href = `/dashboard/ADMIN/restaurants/${id}/edit`;
+    }
+
+    function deleteRestaurant(id) {
+        if (confirm('Вы уверены, что хотите удалить этот ресторан?')) {
+            // Здесь должен быть AJAX запрос на удаление
+            console.log('Удаление ресторана с ID:', id);
+        }
+    }
+</script>
+</body>
+</html>

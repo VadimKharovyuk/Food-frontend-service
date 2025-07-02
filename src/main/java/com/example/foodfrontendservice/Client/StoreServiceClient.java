@@ -17,9 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-/**
- * ✅ ИСПРАВЛЕНО: Используем FeignConfig вместо FeignAuthInterceptor
- */
+
 
 @FeignClient(
         name = "product-service",
@@ -57,6 +55,7 @@ public interface StoreServiceClient {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     );
+
 
     // 🏪 Получить полные данные магазинов с пагинацией
     @GetMapping

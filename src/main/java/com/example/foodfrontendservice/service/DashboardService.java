@@ -18,9 +18,6 @@ public class DashboardService {
 
     private final UserIntegrationService userIntegrationService;
 
-    /**
-     * 🔧 Универсальный метод загрузки роль-специфичного дашборда
-     */
     public String loadRoleSpecificDashboard(HttpServletRequest request, Model model,
                                             UserRole expectedRole, String viewName) {
         try {
