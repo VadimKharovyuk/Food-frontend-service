@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" th:fragment="layout">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'QuickFood - ' + ${roleDisplayName ?: 'Dashboard'}">QuickFood Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: #1e293b;
+            border-right: 1px solid #334155;
+            padding: 24px;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 24px;
+        }
+
+        .user-info {
+            background: #334155;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid #475569;
+        }
+
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .user-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .user-role {
+            color: #10b981;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: block;
+            padding: 12px 16px;
+            color: #e2e8f0;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: #334155;
+            color: #10b981;
+        }
+
+        .nav-link.active {
+            background: #10b981;
+            color: white;
+        }
+
+        .dashboard-header {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid #334155;
+        }
+
+        .dashboard-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-subtitle {
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .logout-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.3s ease;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .logout-btn:hover {
+            background: #b91c1c;
+        }
+
+        .role-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Стили для контента */
+        .content-section {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #334155;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="user-info">
+            <div class="user-avatar">
+                <span th:text="${user?.firstName != null ? user.firstName.substring(0,1).toUpperCase() : '👤'}">U</span>
+            </div>
+            <div class="user-name" th:text="${user?.firstName + ' ' + user?.lastName}">Имя Пользователя</div>
+            <div class="user-role" th:text="${roleDisplayName ?: 'Пользователь'}">Роль</div>
+            <span class="role-badge" th:text="${userRole ?: 'USER'}">ROLE</span>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">📊 Главная</a>
+                </li>
+
+                <!-- Role-specific menu items -->
+                <li class="nav-item" th:if="${userRole?.name() == 'BASE_USER'}">
+                    <a href="#" class="nav-link">🛒 Мои заказы</a>
+                </li>
+                <li class="nav-item" th:if="${userRole?.name() == 'BASE_USER'}">
+                    <a href="#" class="nav-link">❤️ Избранное</a>
+                </li>
+
+                <li class="nav-item" th:if="${userRole?.name() == 'BUSINESS_USER'}">
+                    <a href="#" class="nav-link">🏪 Мой ресторан</a>
+                </li>
+                <li class="nav-item" th:if="${userRole?.name() == 'BUSINESS_USER'}">
+                    <a href="#" class="nav-link">📋 Заказы</a>
+                </li>
+
+                <li class="nav-item" th:if="${userRole?.name() == 'COURIER'}">
+                    <a href="#" class="nav-link">🚚 Активные доставки</a>
+                </li>
+                <li class="nav-item" th:if="${userRole?.name() == 'COURIER'}">
+                    <a href="#" class="nav-link">📈 Статистика</a>
+                </li>
+
+                <li class="nav-item" th:if="${userRole?.name() == 'ADMIN'}">
+                    <a href="#" class="nav-link">👥 Пользователи</a>
+                </li>
+                <li class="nav-item" th:if="${userRole?.name() == 'ADMIN'}">
+                    <a href="#" class="nav-link">🏪 Рестораны</a>
+                </li>
+                <li class="nav-item" th:if="${userRole?.name() == 'ADMIN'}">
+                    <a href="#" class="nav-link">📊 Аналитика</a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="#" class="nav-link">⚙️ Настройки</a>
+                </li>
+            </ul>
+        </nav>
+
+        <button class="logout-btn" onclick="logout()">🚪 Выйти</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title" th:text="'Добро пожаловать, ' + ${user?.firstName ?: 'Пользователь'} + '!'">Добро пожаловать!</h1>
+            <p class="dashboard-subtitle" th:text="'Панель управления: ' + ${roleDisplayName ?: 'Dashboard'}">Панель управления</p>
+        </div>
+
+        <!-- Role-specific content will be inserted here -->
+        <div th:insert="~{::content}">
+            <div class="content-section">
+                <h2 class="section-title">📋 Содержимое по умолчанию</h2>
+                <p>Здесь будет содержимое для конкретной роли пользователя.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    // Получаем токен из модели
+    const authToken = /*[[${authToken ?: ''}]]*/ '';
+
+    // Функция выхода
+    function logout() {
+        if (confirm('Вы уверены, что хотите выйти?')) {
+            // Очищаем localStorage
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('tokenType');
+
+            // Перенаправляем на страницу входа
+            window.location.href = '/login';
+        }
+    }
+
+    // Настройка AJAX запросов с токеном
+    if (authToken) {
+        // Обновляем токен в localStorage если нужно
+        const storedToken = localStorage.getItem('authToken');
+        if (!storedToken || storedToken !== authToken) {
+            localStorage.setItem('authToken', authToken);
+        }
+    }
+
+    console.log('🏠 Dashboard loaded for role:', /*[[${userRole ?: 'UNKNOWN'}]]*/ 'UNKNOWN');
+</script>
+</body>
+</html>

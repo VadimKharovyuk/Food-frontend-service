@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{dashboard/base :: layout}">
+<body>
+<div th:fragment="content">
+  <!-- Статистика администратора -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-value">1,247</div>
+      <div class="stat-label">Пользователей</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🏪</div>
+      <div class="stat-value">86</div>
+      <div class="stat-label">Ресторанов</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📦</div>
+      <div class="stat-value">5,432</div>
+      <div class="stat-label">Заказов</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div class="stat-value">₽234,560</div>
+      <div class="stat-label">Оборот</div>
+    </div>
+  </div>
+
+  <!-- Управление пользователями -->
+  <div class="content-section">
+    <h2 class="section-title">
+      <span>👥</span>
+      Управление пользователями
+    </h2>
+
+    <div class="admin-grid">
+      <div class="admin-card">
+        <h3>📊 Статистика пользователей</h3>
+        <div class="stat-row">
+          <span>Покупатели:</span>
+          <strong>987</strong>
+        </div>
+        <div class="stat-row">
+          <span>Владельцы бизнеса:</span>
+          <strong>86</strong>
+        </div>
+        <div class="stat-row">
+          <span>Курьеры:</span>
+          <strong>174</strong>
+        </div>
+        <div class="stat-row">
+          <span>Администраторы:</span>
+          <strong>3</strong>
+        </div>
+      </div>
+
+      <div class="admin-card">
+        <h3>🔄 Недавние регистрации</h3>
+        <div class="recent-item">
+          <span class="user-name">Иван Петров</span>
+          <span class="user-role">Покупатель</span>
+          <span class="user-time">2 часа назад</span>
+        </div>
+        <div class="recent-item">
+          <span class="user-name">Кафе "Уют"</span>
+          <span class="user-role">Ресторан</span>
+          <span class="user-time">5 часов назад</span>
+        </div>
+        <div class="recent-item">
+          <span class="user-name">Михаил Курьеров</span>
+          <span class="user-role">Курьер</span>
+          <span class="user-time">1 день назад</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Управление ресторанами -->
+  <div class="content-section">
+    <h2 class="section-title">
+      <span>🏪</span>
+      Управление ресторанами
+    </h2>
+
+    <div class="restaurant-grid">
+      <div class="restaurant-card pending">
+        <h4>🔍 Пиццерия "Мама Миа"</h4>
+        <p>Статус: <span class="status-pending">На модерации</span></p>
+        <p>Подано: 15.01.2025</p>
+        <div class="card-actions">
+          <button class="btn-approve">✅ Одобрить</button>
+          <button class="btn-reject">❌ Отклонить</button>
+        </div>
+      </div>
+
+      <div class="restaurant-card active">
+        <h4>✅ Суши "Токио"</h4>
+        <p>Статус: <span class="status-active">Активен</span></p>
+        <p>Заказов сегодня: 23</p>
+        <div class="card-actions">
+          <button class="btn-view">👁️ Просмотр</button>
+          <button class="btn-settings">⚙️ Настройки</button>
+        </div>
+      </div>
+
+      <div class="restaurant-card blocked">
+        <h4>🚫 Фаст Фуд Экспресс</h4>
+        <p>Статус: <span class="status-blocked">Заблокирован</span></p>
+        <p>Причина: Нарушение правил</p>
+        <div class="card-actions">
+          <button class="btn-unblock">🔓 Разблокировать</button>
+          <button class="btn-details">📋 Детали</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Системная аналитика -->
+  <div class="content-section">
+    <h2 class="section-title">
+      <span>📊</span>
+      Системная аналитика
+    </h2>
+
+    <div class="analytics-grid">
+      <div class="analytics-card">
+        <h3>📈 Рост платформы</h3>
+        <div class="metric">
+          <span class="metric-label">Пользователи за месяц:</span>
+          <span class="metric-value positive">+12.5%</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Заказы за неделю:</span>
+          <span class="metric-value positive">+8.3%</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Оборот:</span>
+          <span class="metric-value positive">+15.2%</span>
+        </div>
+      </div>
+
+      <div class="analytics-card">
+        <h3>⚡ Производительность</h3>
+        <div class="metric">
+          <span class="metric-label">Среднее время доставки:</span>
+          <span class="metric-value">28 мин</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Успешность заказов:</span>
+          <span class="metric-value positive">97.2%</span>
+        </div>
+        <div class="metric">
+          <span class="metric-label">Рейтинг сервиса:</span>
+          <span class="metric-value">4.8/5.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .admin-grid, .restaurant-grid, .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .admin-card, .restaurant-card, .analytics-card {
+      background: #334155;
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid #475569;
+    }
+
+    .admin-card h3, .restaurant-card h4, .analytics-card h3 {
+      margin-bottom: 16px;
+      color: #10b981;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #475569;
+    }
+
+    .recent-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #475569;
+      font-size: 14px;
+    }
+
+    .user-role {
+      color: #94a3b8;
+      font-size: 12px;
+    }
+
+    .user-time {
+      color: #6b7280;
+      font-size: 12px;
+    }
+
+    .status-pending {
+      color: #f59e0b;
+      font-weight: 600;
+    }
+
+    .status-active {
+      color: #10b981;
+      font-weight: 600;
+    }
+
+    .status-blocked {
+      color: #dc2626;
+      font-weight: 600;
+    }
+
+    .card-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .card-actions button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn-approve {
+      background: #10b981;
+      color: white;
+    }
+
+    .btn-reject {
+      background: #dc2626;
+      color: white;
+    }
+
+    .btn-view, .btn-settings, .btn-details {
+      background: #374151;
+      color: #e5e7eb;
+    }
+
+    .btn-unblock {
+      background: #059669;
+      color: white;
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 8px 0;
+    }
+
+    .metric-label {
+      color: #94a3b8;
+    }
+
+    .metric-value {
+      font-weight: 600;
+    }
+
+    .metric-value.positive {
+      color: #10b981;
+    }
+
+    .restaurant-card.pending {
+      border-left: 4px solid #f59e0b;
+    }
+
+    .restaurant-card.active {
+      border-left: 4px solid #10b981;
+    }
+
+    .restaurant-card.blocked {
+      border-left: 4px solid #dc2626;
+    }
+  </style>
+</div>
+</body>
+</html>

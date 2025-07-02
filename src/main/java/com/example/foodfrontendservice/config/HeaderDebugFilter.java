@@ -19,7 +19,7 @@ import java.util.List;
         name = "app.debug.headers.enabled",
         havingValue = "true",
         matchIfMissing = false
-) // Включается только когда нужно
+)
 public class HeaderDebugFilter implements Filter {
 
     // Список URL паттернов для мониторинга

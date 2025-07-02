@@ -1,4 +1,4 @@
-package com.example.foodfrontendservice.controller;
+package com.example.foodfrontendservice.controller.rest;
 
 import com.example.foodfrontendservice.dto.AuthResponseDto;
 import com.example.foodfrontendservice.dto.LoginRequestDto;

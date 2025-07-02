@@ -17,7 +17,7 @@ public class UserResponseDto {
     private String email;
     private String firstName;
     private String lastName;
-    private String imgUrl;
+
     private UserRole userRole;
     private String roleDisplayName;
     private LocalDateTime createdAt;

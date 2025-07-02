@@ -1,9 +1,7 @@
-package com.example.foodfrontendservice.controller;
-import com.example.foodfrontendservice.config.CurrentUser;
+package com.example.foodfrontendservice.controller.rest;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.*;
 import com.example.foodfrontendservice.service.CategoryService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

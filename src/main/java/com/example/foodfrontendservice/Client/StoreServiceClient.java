@@ -1,7 +1,8 @@
 package com.example.foodfrontendservice.Client;
 
 import com.example.foodfrontendservice.Client.Fallback.StoreServiceClientFallback;
-import com.example.foodfrontendservice.config.FeignConfig;
+
+import com.example.foodfrontendservice.config.feignConfig;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreBriefResponseWrapper;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreResponseDto;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreResponseWrapper;
@@ -25,7 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
         path = "/api/stores",
         fallback = StoreServiceClientFallback.class,
         contextId = "storeServiceClient",
-        configuration = FeignConfig.class
+        configuration = feignConfig.class
 )
 public interface StoreServiceClient {
 

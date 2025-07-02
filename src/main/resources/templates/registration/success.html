@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickFood - Регистрация завершена</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-container {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            margin: 20px;
+            animation: successAnimation 0.8s ease-out;
+        }
+
+        @keyframes successAnimation {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 40px;
+            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 8px 32px rgba(16, 185, 129, 0.4);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 12px 40px rgba(16, 185, 129, 0.6);
+            }
+        }
+
+        .success-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #10b981;
+        }
+
+        .success-message {
+            font-size: 16px;
+            color: #94a3b8;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .user-info {
+            background: #334155;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 32px;
+            border: 1px solid #475569;
+        }
+
+        .user-email {
+            font-size: 18px;
+            font-weight: 600;
+            color: #10b981;
+            margin-bottom: 8px;
+        }
+
+        .next-steps {
+            text-align: left;
+            margin-bottom: 32px;
+        }
+
+        .next-steps h3 {
+            color: #10b981;
+            margin-bottom: 16px;
+            font-size: 18px;
+        }
+
+        .steps-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #475569;
+        }
+
+        .step-item:last-child {
+            border-bottom: none;
+        }
+
+        .step-number {
+            width: 32px;
+            height: 32px;
+            background: #10b981;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-right: 16px;
+            font-size: 14px;
+        }
+
+        .step-text {
+            color: #e2e8f0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-secondary {
+            background: #374151;
+            color: #e5e7eb;
+            border: 1px solid #4b5563;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .countdown {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+
+        .countdown-number {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        @media (max-width: 480px) {
+            .success-container {
+                padding: 32px 24px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="success-container">
+    <div class="success-icon">
+        ✅
+    </div>
+
+    <h1 class="success-title">Регистрация завершена!</h1>
+
+    <p class="success-message">
+        Ваш аккаунт успешно создан. Добро пожаловать в QuickFood!
+    </p>
+
+    <div class="user-info" th:if="${email}">
+        <div class="user-email" th:text="${email}">email@example.com</div>
+        <div>Ваш аккаунт готов к использованию</div>
+    </div>
+
+    <div class="next-steps">
+        <h3>🚀 Что дальше?</h3>
+        <ul class="steps-list">
+            <li class="step-item">
+                <div class="step-number">1</div>
+                <div class="step-text">Войдите в свой аккаунт</div>
+            </li>
+            <li class="step-item">
+                <div class="step-number">2</div>
+                <div class="step-text">Заполните профиль</div>
+            </li>
+            <li class="step-item">
+                <div class="step-number">3</div>
+                <div class="step-text">Начните пользоваться сервисом</div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="action-buttons">
+        <a href="/login" class="btn btn-primary" id="loginBtn">
+            🔐 Войти в аккаунт
+        </a>
+        <a href="/" class="btn btn-secondary">
+            🏠 На главную
+        </a>
+    </div>
+
+    <div class="countdown">
+        Автоматический переход на страницу входа через <span class="countdown-number" id="countdownNumber">10</span> секунд
+    </div>
+</div>
+
+<script>
+    // Автоматическое перенаправление
+    let countdown = 10;
+    const countdownElement = document.getElementById('countdownNumber');
+
+    const timer = setInterval(() => {
+        countdown--;
+        countdownElement.textContent = countdown;
+
+        if (countdown <= 0) {
+            clearInterval(timer);
+            window.location.href = '/login?registered=true';
+        }
+    }, 1000);
+
+    // Отменяем автоматическое перенаправление при клике на кнопку
+    document.getElementById('loginBtn').addEventListener('click', () => {
+        clearInterval(timer);
+    });
+
+    // Отменяем автоматическое перенаправление при любом взаимодействии
+    document.addEventListener('click', () => {
+        clearInterval(timer);
+        document.querySelector('.countdown').style.display = 'none';
+    });
+
+    // Анимация появления элементов
+    setTimeout(() => {
+        document.querySelectorAll('.step-item').forEach((step, index) => {
+            setTimeout(() => {
+                step.style.opacity = '0';
+                step.style.transform = 'translateX(-20px)';
+                step.style.transition = 'all 0.4s ease';
+
+                setTimeout(() => {
+                    step.style.opacity = '1';
+                    step.style.transform = 'translateX(0)';
+                }, 100);
+            }, index * 150);
+        });
+    }, 500);
+
+    console.log('🎉 Регистрация завершена успешно!');
+</script>
+</body>
+</html>

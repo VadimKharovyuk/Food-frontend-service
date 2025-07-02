@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Debug</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .section {
+            background: #2a2a2a;
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #00ff00;
+            color: #1a1a1a;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #00cc00;
+        }
+        pre {
+            background: #0a0a0a;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 15px;
+            overflow-x: auto;
+            margin: 10px 0;
+        }
+        .success { color: #00ff00; }
+        .error { color: #ff0000; }
+        .warning { color: #ffff00; }
+        input {
+            background: #2a2a2a;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            padding: 8px;
+            border-radius: 4px;
+            width: 100%;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔍 Token Debug Tool</h1>
+
+    <div class="section">
+        <h2>📊 Current Status</h2>
+        <div id="status">Loading...</div>
+        <button onclick="checkCurrentStatus()">🔄 Refresh Status</button>
+    </div>
+
+    <div class="section">
+        <h2>🧪 Test Token Redirect</h2>
+        <button onclick="testTokenRedirect()">🚀 Test Redirect with Token</button>
+        <button onclick="testTokenRedirectPost()">📮 Test POST Redirect</button>
+        <div id="redirectResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>🔑 Manual Token Test</h2>
+        <input type="text" id="manualToken" placeholder="Paste your token here">
+        <button onclick="testManualToken()">🧪 Test Manual Token</button>
+        <div id="manualResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>📋 Session Info</h2>
+        <button onclick="getSessionInfo()">📊 Get Session Info</button>
+        <button onclick="clearSession()">🧹 Clear Session</button>
+        <div id="sessionInfo"></div>
+    </div>
+
+    <div class="section">
+        <h2>🔍 Debug Auth Headers</h2>
+        <button onclick="debugAuth()">🔍 Debug Current Request</button>
+        <div id="debugInfo"></div>
+    </div>
+</div>
+
+<script>
+    async function checkCurrentStatus() {
+        const statusDiv = document.getElementById('status');
+
+        const token = localStorage.getItem('authToken');
+        const user = localStorage.getItem('user');
+
+        let status = '<strong>LocalStorage:</strong><br>';
+        status += `Token: ${token ? '✅ Present (' + token.substring(0, 20) + '...)' : '❌ Missing'}<br>`;
+        status += `User: ${user ? '✅ Present' : '❌ Missing'}<br><br>`;
+
+        // Проверяем сессию
+        try {
+            const response = await fetch('/debug/session');
+            const sessionData = await response.json();
+            status += '<strong>Session:</strong><br>';
+            status += `<pre>${JSON.stringify(sessionData, null, 2)}</pre>`;
+        } catch (error) {
+            status += `<span class="error">Session check failed: ${error.message}</span><br>`;
+        }
+
+        statusDiv.innerHTML = status;
+    }
+
+    async function testTokenRedirect() {
+        const token = localStorage.getItem('authToken');
+        const resultDiv = document.getElementById('redirectResult');
+
+        if (!token) {
+            resultDiv.innerHTML = '<span class="error">❌ No token in localStorage</span>';
+            return;
+        }
+
+        try {
+            // Попробуем GET запрос с токеном в URL
+            const response = await fetch(`/dashboard?token=${encodeURIComponent(token)}`, {
+                method: 'GET',
+                redirect: 'manual' // Не следуем автоматическим редиректам
+            });
+
+            resultDiv.innerHTML = `
+                    <strong>GET /dashboard?token=...</strong><br>
+                    Status: ${response.status}<br>
+                    Redirected: ${response.redirected}<br>
+                    Location: ${response.headers.get('Location') || 'None'}<br>
+                    Type: ${response.type}
+                `;
+
+        } catch (error) {
+            resultDiv.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+        }
+    }
+
+    async function testTokenRedirectPost() {
+        const token = localStorage.getItem('authToken');
+        const resultDiv = document.getElementById('redirectResult');
+
+        if (!token) {
+            resultDiv.innerHTML = '<span class="error">❌ No token in localStorage</span>';
+            return;
+        }
+
+        try {
+            const response = await fetch('/dashboard', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'X-Auth-Token': token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ action: 'dashboard_redirect' }),
+                redirect: 'manual'
+            });
+
+            resultDiv.innerHTML = `
+                    <strong>POST /dashboard</strong><br>
+                    Status: ${response.status}<br>
+                    Redirected: ${response.redirected}<br>
+                    Location: ${response.headers.get('Location') || 'None'}<br>
+                    Headers sent: Authorization, X-Auth-Token
+                `;
+
+        } catch (error) {
+            resultDiv.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+        }
+    }
+
+    async function testManualToken() {
+        const token = document.getElementById('manualToken').value;
+        const resultDiv = document.getElementById('manualResult');
+
+        if (!token) {
+            resultDiv.innerHTML = '<span class="error">❌ Please enter a token</span>';
+            return;
+        }
+
+        try {
+            const response = await fetch('/debug/redirect-test', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'X-Auth-Token': token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ testToken: token })
+            });
+
+            const result = await response.json();
+            resultDiv.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+
+        } catch (error) {
+            resultDiv.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+        }
+    }
+
+    async function getSessionInfo() {
+        const sessionDiv = document.getElementById('sessionInfo');
+
+        try {
+            const response = await fetch('/debug/session');
+            const sessionData = await response.json();
+            sessionDiv.innerHTML = `<pre>${JSON.stringify(sessionData, null, 2)}</pre>`;
+        } catch (error) {
+            sessionDiv.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+        }
+    }
+
+    async function clearSession() {
+        const sessionDiv = document.getElementById('sessionInfo');
+
+        try {
+            const response = await fetch('/debug/clear-session', { method: 'POST' });
+            const result = await response.json();
+            sessionDiv.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+        } catch (error) {
+            sessionDiv.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+        }
+    }
+
+    async function debugAuth() {
+        const debugDiv = document.getElementById('debugInfo');
+        const token = localStorage.getItem('authToken');
+
+        try {
+            const response = await fetch('/debug/auth', {
+                headers: token ? {
+                    'Authorization': `Bearer ${token}`,
+                    'X-Auth-Token': token
+                } : {}
+            });
+            const debugData = await response.json();
+            debugDiv.innerHTML = `<pre>${JSON.stringify(debugData, null, 2)}</pre>`;
+        } catch (error) {
+            debugDiv.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+        }
+    }
+
+    // Автоматически проверяем статус при загрузке
+    window.addEventListener('load', checkCurrentStatus);
+</script>
+</body>
+</html>

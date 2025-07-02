@@ -1,25 +1,19 @@
-package com.example.foodfrontendservice.controller;
+package com.example.foodfrontendservice.controller.rest;
 
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreRequest;
-import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.StoreCreationResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.*;
 import com.example.foodfrontendservice.service.StoreService;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/frontend/stores")

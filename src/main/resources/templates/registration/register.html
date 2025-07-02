@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuickFood - Регистрация</title>
+  <link rel="stylesheet" href="/css/register.css">
+</head>
+<body>
+<div class="floating-shapes">
+  <div class="shape"></div>
+  <div class="shape"></div>
+  <div class="shape"></div>
+</div>
+
+<div class="register-container">
+  <div class="logo">
+    <div class="logo-icon"></div>
+    <h1>Регистрация</h1>
+    <p>Создайте аккаунт в QuickFood</p>
+  </div>
+
+  <!-- Сообщения об ошибках/успехе -->
+  <div th:if="${error}" class="error-message" th:text="${error}"></div>
+  <div th:if="${success}" class="success-message" th:text="${success}"></div>
+
+  <form id="registrationForm" th:action="@{/register}" method="post" th:object="${registrationDto}">
+
+    <!-- Имя -->
+    <div class="form-group">
+      <label for="firstName">Имя <span class="required">*</span></label>
+      <input
+              type="text"
+              id="firstName"
+              th:field="*{firstName}"
+              placeholder="Введите ваше имя"
+              required
+      >
+      <div th:if="${#fields.hasErrors('firstName')}" class="field-error" th:errors="*{firstName}"></div>
+    </div>
+
+    <!-- Фамилия -->
+    <div class="form-group">
+      <label for="lastName">Фамилия <span class="required">*</span></label>
+      <input
+              type="text"
+              id="lastName"
+              th:field="*{lastName}"
+              placeholder="Введите вашу фамилию"
+              required
+      >
+      <div th:if="${#fields.hasErrors('lastName')}" class="field-error" th:errors="*{lastName}"></div>
+    </div>
+
+    <!-- Email -->
+    <div class="form-group">
+      <label for="email">Email <span class="required">*</span></label>
+      <div class="input-wrapper">
+        <input
+                type="email"
+                id="email"
+                th:field="*{email}"
+                placeholder="example@mail.com"
+                required
+        >
+        <span id="emailStatus" class="email-status"></span>
+      </div>
+      <div th:if="${#fields.hasErrors('email')}" class="field-error" th:errors="*{email}"></div>
+    </div>
+
+    <!-- Пароль -->
+    <div class="form-group">
+      <label for="password">Пароль <span class="required">*</span></label>
+      <div class="input-wrapper">
+        <input
+                type="password"
+                id="password"
+                th:field="*{password}"
+                placeholder="Минимум 6 символов"
+                required
+                minlength="6"
+        >
+        <button type="button" class="password-toggle" onclick="togglePassword()">
+          👁️
+        </button>
+      </div>
+      <div th:if="${#fields.hasErrors('password')}" class="field-error" th:errors="*{password}"></div>
+    </div>
+
+    <!-- Роль пользователя -->
+    <div class="form-group">
+      <label>Я хочу <span class="required">*</span></label>
+      <div class="role-grid">
+        <div class="role-option" th:each="role : ${availableRoles}">
+          <input
+                  type="radio"
+                  th:id="'role_' + ${role.name()}"
+                  th:field="*{userRole}"
+                  th:value="${role}"
+                  required
+          >
+          <label th:for="'role_' + ${role.name()}" class="role-label">
+                            <span class="role-icon" th:switch="${role.name()}">
+                                <span th:case="'BASE_USER'">🛒</span>
+                                <span th:case="'BUSINESS_USER'">🏪</span>
+                                <span th:case="'COURIER'">🚚</span>
+                                <span th:case="*">👤</span>
+                            </span>
+            <div class="role-name" th:text="${role.displayName}">Роль</div>
+          </label>
+        </div>
+      </div>
+      <div th:if="${#fields.hasErrors('userRole')}" class="field-error" th:errors="*{userRole}"></div>
+    </div>
+
+    <button type="submit" class="register-btn" id="registerBtn">
+      <span class="loading-spinner" id="loadingSpinner"></span>
+      <span id="btnText">Создать аккаунт</span>
+    </button>
+  </form>
+
+  <div class="links">
+    <a href="/login">Уже есть аккаунт? Войти</a>
+  </div>
+</div>
+
+<script>
+  let emailCheckTimeout;
+
+  function togglePassword() {
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.querySelector('.password-toggle');
+
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      toggleBtn.textContent = '🙈';
+    } else {
+      passwordInput.type = 'password';
+      toggleBtn.textContent = '👁️';
+    }
+  }
+
+  function setLoading(loading) {
+    const registerBtn = document.getElementById('registerBtn');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const btnText = document.getElementById('btnText');
+
+    if (loading) {
+      registerBtn.disabled = true;
+      loadingSpinner.style.display = 'inline-block';
+      btnText.textContent = 'Создание аккаунта...';
+    } else {
+      registerBtn.disabled = false;
+      loadingSpinner.style.display = 'none';
+      btnText.textContent = 'Создать аккаунт';
+    }
+  }
+
+  function setEmailStatus(status, message) {
+    const emailStatus = document.getElementById('emailStatus');
+    emailStatus.className = `email-status email-${status}`;
+
+    switch(status) {
+      case 'checking':
+        emailStatus.textContent = '⏳';
+        emailStatus.title = 'Проверка...';
+        break;
+      case 'available':
+        emailStatus.textContent = '✅';
+        emailStatus.title = 'Email доступен';
+        break;
+      case 'taken':
+        emailStatus.textContent = '❌';
+        emailStatus.title = 'Email уже занят';
+        break;
+      default:
+        emailStatus.textContent = '';
+        emailStatus.title = '';
+    }
+  }
+
+  // Проверка доступности email
+  function checkEmailAvailability(email) {
+    if (!email || email.length < 3) {
+      setEmailStatus('', '');
+      return;
+    }
+
+    setEmailStatus('checking', 'Проверка...');
+
+    fetch(`/register/check-email?email=${encodeURIComponent(email)}`)
+            .then(response => response.json())
+            .then(isAvailable => {
+              if (isAvailable) {
+                setEmailStatus('available', 'Email доступен');
+              } else {
+                setEmailStatus('taken', 'Email уже занят');
+              }
+            })
+            .catch(error => {
+              console.error('Ошибка проверки email:', error);
+              setEmailStatus('', '');
+            });
+  }
+
+  // Обработка изменения email
+  document.getElementById('email').addEventListener('input', function(e) {
+    const email = e.target.value;
+
+    clearTimeout(emailCheckTimeout);
+    emailCheckTimeout = setTimeout(() => {
+      checkEmailAvailability(email);
+    }, 500);
+  });
+
+  // Обработка отправки формы
+  document.getElementById('registrationForm').addEventListener('submit', function(e) {
+    const emailStatus = document.getElementById('emailStatus');
+
+    // Проверяем, что email доступен
+    if (emailStatus.classList.contains('email-taken')) {
+      e.preventDefault();
+      alert('Пожалуйста, выберите другой email адрес');
+      return false;
+    }
+
+    setLoading(true);
+  });
+
+  // Анимация при фокусе на поля
+  document.querySelectorAll('input, select').forEach(input => {
+    input.addEventListener('focus', function() {
+      const formGroup = this.closest('.form-group');
+      if (formGroup) {
+        formGroup.style.transform = 'scale(1.02)';
+        formGroup.style.transition = 'transform 0.2s ease';
+      }
+    });
+
+    input.addEventListener('blur', function() {
+      const formGroup = this.closest('.form-group');
+      if (formGroup) {
+        formGroup.style.transform = 'scale(1)';
+      }
+    });
+  });
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('from') === 'login') {
+    console.log('🔄 Переход с страницы входа');
+  }
+</script>
+</body>
+</html>

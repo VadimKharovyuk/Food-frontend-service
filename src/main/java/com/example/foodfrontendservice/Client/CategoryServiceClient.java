@@ -1,7 +1,8 @@
 package com.example.foodfrontendservice.Client;
 
 import com.example.foodfrontendservice.Client.Fallback.CategoryServiceClientFallback;
-import com.example.foodfrontendservice.config.FeignConfig;
+
+import com.example.foodfrontendservice.config.feignConfig;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -14,7 +15,7 @@ import java.util.List;
         name = "product-service",
         path = "/api/categories",
         fallback = CategoryServiceClientFallback.class,
-        configuration = FeignConfig.class,
+        configuration = feignConfig.class,
         contextId = "categoryServiceClient"
 )
 public interface CategoryServiceClient {

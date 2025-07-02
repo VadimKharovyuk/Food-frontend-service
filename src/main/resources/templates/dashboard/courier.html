@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{dashboard/base :: layout}">
+<body>
+<div th:fragment="content">
+    <!-- Статистика курьера -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">🚚</div>
+            <div class="stat-value">12</div>
+            <div class="stat-label">Доставок сегодня</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value">₽1,840</div>
+            <div class="stat-label">Заработок за день</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-value">4.9</div>
+            <div class="stat-label">Рейтинг</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📍</div>
+            <div class="stat-value">2.3 км</div>
+            <div class="stat-label">Средний маршрут</div>
+        </div>
+    </div>
+
+    <!-- Статус курьера -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <span>📍</span>
+            Статус работы
+        </h2>
+
+        <div class="courier-status">
+            <div class="status-card online">
+                <div class="status-indicator"></div>
+                <div class="status-info">
+                    <h3>🟢 Онлайн</h3>
+                    <p>Готов к приему заказов</p>
+                    <div class="status-time">В сети: 3ч 25мин</div>
+                </div>
+                <div class="status-actions">
+                    <button class="btn-offline">📴 Уйти в офлайн</button>
+                    <button class="btn-break">☕ Перерыв</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Текущие доставки -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <span>🚚</span>
+            Активные доставки
+            <span class="delivery-counter">2</span>
+        </h2>
+
+        <div class="deliveries-list">
+            <div class="delivery-card priority">
+                <div class="delivery-header">
+                    <span class="delivery-number">#1247</span>
+                    <span class="delivery-priority">🔥 Приоритет</span>
+                    <span class="delivery-time">⏰ 15 мин назад</span>
+                </div>
+                <div class="delivery-route">
+                    <div class="route-point pickup">
+                        <div class="point-icon">🏪</div>
+                        <div class="point-info">
+                            <div class="point-name">Пиццерия "Мама Миа"</div>
+                            <div class="point-address">ул. Ленина, 45</div>
+                            <div class="point-status completed">✅ Забрано</div>
+                        </div>
+                    </div>
+                    <div class="route-arrow">⬇️</div>
+                    <div class="route-point delivery">
+                        <div class="point-icon">🏠</div>
+                        <div class="point-info">
+                            <div class="point-name">Иван Петров</div>
+                            <div class="point-address">ул. Мира, 12, кв. 45</div>
+                            <div class="point-status pending">🔔 Звонить за 5 мин</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="delivery-details">
+                    <div class="delivery-info">
+                        <span>💰 ₽890</span>
+                        <span>📞 +7 (999) 123-45-67</span>
+                        <span>💳 Картой</span>
+                    </div>
+                    <div class="delivery-actions">
+                        <button class="btn-navigate">🗺️ Маршрут</button>
+                        <button class="btn-call">📞 Звонок</button>
+                        <button class="btn-delivered">✅ Доставлено</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="delivery-card">
+                <div class="delivery-header">
+                    <span class="delivery-number">#1249</span>
+                    <span class="delivery-priority">📦 Обычный</span>
+                    <span class="delivery-time">⏰ 8 мин назад</span>
+                </div>
+                <div class="delivery-route">
+                    <div class="route-point pickup">
+                        <div class="point-icon">🏪</div>
+                        <div class="point-info">
+                            <div class="point-name">Tokyo Sushi</div>
+                            <div class="point-address">пр. Победы, 23</div>
+                            <div class="point-status pending">⏳ Ожидает</div>
+                        </div>
+                    </div>
+                    <div class="route-arrow">⬇️</div>
+                    <div class="route-point delivery">
+                        <div class="point-icon">🏢</div>
+                        <div class="point-info">
+                            <div class="point-name">Анна Сидорова</div>
+                            <div class="point-address">Бизнес-центр "Альфа", 5 этаж</div>
+                            <div class="point-status waiting">⏰ Ожидает</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="delivery-details">
+                    <div class="delivery-info">
+                        <span>💰 ₽1,200</span>
+                        <span>📞 +7 (999) 987-65-43</span>
+                        <span>💵 Наличными</span>
+                    </div>
+                    <div class="delivery-actions">
+                        <button class="btn-pickup">📦 Забрать</button>
+                        <button class="btn-navigate">🗺️ Маршрут</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Доступные заказы -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <span>📋</span>
+            Доступные заказы
+        </h2>
+
+        <div class="available-orders">
+            <div class="order-card available">
+                <div class="order-header">
+                    <span class="order-number">#1250</span>
+                    <span class="order-distance">📍 1.2 км от вас</span>
+                    <span class="order-payment">💰 ₽750 + ₽120 чаевые</span>
+                </div>
+                <div class="order-route-preview">
+                    <span class="route-from">🏪 Burger King → 🏠 ул. Садовая, 8</span>
+                    <span class="route-time">⏱️ ~15 мин</span>
+                </div>
+                <div class="order-actions">
+                    <button class="btn-accept-order">✅ Принять заказ</button>
+                    <button class="btn-view-details">👁️ Детали</button>
+                </div>
+            </div>
+
+            <div class="order-card available">
+                <div class="order-header">
+                    <span class="order-number">#1251</span>
+                    <span class="order-distance">📍 2.8 км от вас</span>
+                    <span class="order-payment">💰 ₽1,100 + ₽150 чаевые</span>
+                </div>
+                <div class="order-route-preview">
+                    <span class="route-from">🏪 Кафе "Уют" → 🏢 ТЦ "Европа"</span>
+                    <span class="route-time">⏱️ ~22 мин</span>
+                </div>
+                <div class="order-actions">
+                    <button class="btn-accept-order">✅ Принять заказ</button>
+                    <button class="btn-view-details">👁️ Детали</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Статистика и заработок -->
+    <div class="content-section">
+        <h2 class="section-title">
+            <span>📊</span>
+            Статистика заработка
+        </h2>
+
+        <div class="earnings-grid">
+            <div class="earnings-card">
+                <h3>💰 Заработок</h3>
+                <div class="earnings-period">
+                    <button class="period-btn active">День</button>
+                    <button class="period-btn">Неделя</button>
+                    <button class="period-btn">Месяц</button>
+                </div>
+                <div class="earnings-amount">₽1,840</div>
+                <div class="earnings-breakdown">
+                    <div class="breakdown-item">
+                        <span>Доставки: ₽1,200</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Чаевые: ₽640</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="earnings-card">
+                <h3>🎯 Эффективность</h3>
+                <div class="efficiency-stats">
+                    <div class="efficiency-item">
+                        <span class="metric-label">Доставок в час:</span>
+                        <span class="metric-value">3.2</span>
+                    </div>
+                    <div class="efficiency-item">
+                        <span class="metric-label">Среднее время:</span>
+                        <span class="metric-value">18 мин</span>
+                    </div>
+                    <div class="efficiency-item">
+                        <span class="metric-label">Успешность:</span>
+                        <span class="metric-value success">98.5%</span>
+                    </div>
+                    <div class="efficiency-item">
+                        <span class="metric-label">Рейтинг клиентов:</span>
+                        <span class="metric-value">⭐ 4.9/5.0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="earnings-card">
+                <h3>🏆 Достижения</h3>
+                <div class="achievements">
+                    <div class="achievement earned">
+                        <span class="achievement-icon">🚀</span>
+                        <div class="achievement-info">
+                            <div class="achievement-name">Скоростной</div>
+                            <div class="achievement-desc">10 доставок за день</div>
+                        </div>
+                    </div>
+                    <div class="achievement earned">
+                        <span class="achievement-icon">⭐</span>
+                        <div class="achievement-info">
+                            <div class="achievement-name">Звезда сервиса</div>
+                            <div class="achievement-desc">Рейтинг выше 4.8</div>
+                        </div>
+                    </div>
+                    <div class="achievement locked">
+                        <span class="achievement-icon">💎</span>
+                        <div class="achievement-info">
+                            <div class="achievement-name">Платиновый</div>
+                            <div class="achievement-desc">100 доставок в месяц</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .delivery-counter {
+            background: #dc2626;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .courier-status {
+            margin-top: 20px;
+        }
+
+        .status-card {
+            background: #334155;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #475569;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .status-card.online {
+            border-color: #10b981;
+            background: linear-gradient(to right, rgba(16, 185, 129, 0.1), #334155);
+        }
+
+        .status-indicator {
+            width: 20px;
+            height: 20px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .status-info {
+            flex: 1;
+        }
+
+        .status-info h3 {
+            margin-bottom: 4px;
+            color: #10b981;
+        }
+
+        .status-time {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .status-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-offline, .btn-break {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .btn-offline {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-break {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .deliveries-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .delivery-card {
+            background: #334155;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #475569;
+        }
+
+        .delivery-card.priority {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.2);
+        }
+
+        .delivery-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .delivery-number {
+            font-weight: bold;
+            color: #10b981;
+            font-size: 16px;
+        }
+
+        .delivery-priority {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #dc2626;
+            color: white;
+        }
+
+        .delivery-time {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+
+        .delivery-route {
+            margin: 16px 0;
+        }
+
+        .route-point {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .point-icon {
+            font-size: 20px;
+            width: 32px;
+            height: 32px;
+            background: #475569;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .point-info {
+            flex: 1;
+        }
+
+        .point-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .point-address {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .point-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .point-status.completed {
+            background: #10b981;
+            color: white;
+        }
+
+        .point-status.pending {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .point-status.waiting {
+            background: #6b7280;
+            color: white;
+        }
+
+        .route-arrow {
+            text-align: center;
+            margin: 8px 0;
+            color: #94a3b8;
+        }
+
+        .delivery-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #475569;
+        }
+
+        .delivery-info {
+            display: flex;
+            gap: 16px;
+            font-size: 14px;
+        }
+
+        .delivery-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .delivery-actions button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-navigate {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-call {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-delivered {
+            background: #059669;
+            color: white;
+        }
+
+        .btn-pickup {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .available-orders {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .order-card.available {
+            background: #334155;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            padding: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .order-card.available:hover {
+            border-color: #10b981;
+            box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .order-distance, .order-payment {
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .order-route-preview {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .route-time {
+            color: #10b981;
+            font-weight: 500;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-accept-order {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .btn-view-details {
+            background: #374151;
+            color: #e5e7eb;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .earnings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .earnings-card {
+            background: #334155;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #475569;
+        }
+
+        .earnings-card h3 {
+            margin-bottom: 16px;
+            color: #10b981;
+        }
+
+        .earnings-period {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .period-btn {
+            padding: 6px 12px;
+            border: 1px solid #475569;
+            background: transparent;
+            color: #94a3b8;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .period-btn.active {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .earnings-amount {
+            font-size: 28px;
+            font-weight: bold;
+            color: #10b981;
+            margin-bottom: 12px;
+        }
+
+        .breakdown-item {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .efficiency-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .efficiency-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .metric-label {
+            color: #94a3b8;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .metric-value.success {
+            color: #10b981;
+        }
+
+        .achievements {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .achievement {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .achievement.earned {
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .achievement.locked {
+            opacity: 0.5;
+        }
+
+        .achievement-icon {
+            font-size: 24px;
+        }
+
+        .achievement-name {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .achievement-desc {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+    </style>
+</div>
+</body>
+</html>

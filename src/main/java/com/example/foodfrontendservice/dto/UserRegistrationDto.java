@@ -1,6 +1,6 @@
 package com.example.foodfrontendservice.dto;
 
-import com.example.foodfrontendservice.enums.UserRole; // 🎯 Правильный импорт
+import com.example.foodfrontendservice.enums.UserRole;
 import lombok.Data;
 
 @Data

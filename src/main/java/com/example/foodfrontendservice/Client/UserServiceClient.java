@@ -1,6 +1,7 @@
 package com.example.foodfrontendservice.Client;
 import com.example.foodfrontendservice.Client.Fallback.UserServiceClientFallback;
-import com.example.foodfrontendservice.config.FeignConfig;
+
+import com.example.foodfrontendservice.config.feignConfig;
 import com.example.foodfrontendservice.dto.AuthResponseDto;
 import com.example.foodfrontendservice.dto.LoginRequestDto;
 import com.example.foodfrontendservice.dto.UserRegistrationDto;
@@ -14,7 +15,7 @@ import java.util.List;
 @FeignClient(
         name = "user-service",
         fallback = UserServiceClientFallback.class,
-        configuration = FeignConfig.class
+        configuration = feignConfig.class
 )
 public interface UserServiceClient {
 
