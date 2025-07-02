@@ -2,7 +2,9 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="auth-token" th:content="${authToken}">
+  <meta name="auth-header" th:content="${authHeader}">
+  <meta name="is-authenticated" th:content="${isAuthenticated}">
   <title>Доставка еды - Рестораны рядом</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -701,69 +703,127 @@
 <script>
   // Toggle Favorite Function
   function toggleFavorite(storeId) {
-    const authToken = getAuthHeaderFromCookie();
+    console.log(`🔄 Toggling favorite for store ${storeId}`);
 
-    if (!authToken) {
-      showNotification('Необходимо войти в систему', 'error');
+    if (!isUserAuthenticated()) {
+      showNotification('Необходимо войти в систему для добавления в избранное', 'error');
       return;
     }
+
+    const authHeader = getAuthHeader();
+    if (!authHeader) {
+      showNotification('Ошибка авторизации. Войдите заново.', 'error');
+      return;
+    }
+
+    console.log('🔐 Using auth header for favorite toggle');
 
     fetch(`/api/stores/${storeId}/toggle-favorite`, {
       method: 'POST',
       headers: {
-        'Authorization': authToken,
+        'Authorization': authHeader,
         'Content-Type': 'application/json'
       }
     })
-            .then(response => response.json())
+            .then(response => {
+              console.log(`📡 Response status: ${response.status}`);
+              return response.json();
+            })
             .then(data => {
+              console.log('📦 Response data:', data);
+
               if (data.success) {
-                const btn = document.querySelector(`[onclick="toggleFavorite(${storeId})"]`);
-                if (btn) {
+                // Find the button and update it
+                const buttons = document.querySelectorAll(`[onclick*="toggleFavorite(${storeId})"]`);
+                buttons.forEach(btn => {
                   const icon = btn.querySelector('i');
 
                   if (data.isFavorite) {
                     btn.classList.add('active');
-                    icon.className = 'fas fa-heart';
+                    if (icon) icon.className = 'fas fa-heart';
                   } else {
                     btn.classList.remove('active');
-                    icon.className = 'far fa-heart';
+                    if (icon) icon.className = 'far fa-heart';
                   }
-                }
+                });
 
-                showNotification(data.message, 'success');
+                showNotification(data.message || 'Избранное обновлено', 'success');
               } else {
-                showNotification(data.message, 'error');
+                showNotification(data.message || 'Ошибка обновления избранного', 'error');
               }
             })
             .catch(error => {
-              console.error('Error:', error);
+              console.error('💥 Error toggling favorite:', error);
               showNotification('Ошибка при обновлении избранного', 'error');
             });
   }
 
-  // Helper function to get auth header from various sources
-  function getAuthHeaderFromCookie() {
-    // Try to get from localStorage first
-    const token = localStorage.getItem('authToken');
-    if (token) return `Bearer ${token}`;
-
-    // Try to get from cookie
-    const cookieToken = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('authToken='));
-
-    if (cookieToken) {
-      return `Bearer ${cookieToken.split('=')[1]}`;
+  // Enhanced auth token management
+  function getAuthToken() {
+    // 1. Try to get from meta tag (preferred method)
+    const metaToken = document.querySelector('meta[name="auth-token"]');
+    if (metaToken && metaToken.getAttribute('content')) {
+      const token = metaToken.getAttribute('content').trim();
+      if (token && token !== '') {
+        console.log('✅ Token found in meta tag');
+        return token;
+      }
     }
 
-    // Try to get from meta tag (if you store it there)
-    const metaToken = document.querySelector('meta[name="auth-token"]');
-    if (metaToken) {
-      return `Bearer ${metaToken.getAttribute('content')}`;
+    // 2. Try to get from localStorage
+    const localToken = localStorage.getItem('authToken');
+    if (localToken) {
+      console.log('✅ Token found in localStorage');
+      return localToken;
+    }
+
+    // 3. Try to get from sessionStorage
+    const sessionToken = sessionStorage.getItem('authToken');
+    if (sessionToken) {
+      console.log('✅ Token found in sessionStorage');
+      return sessionToken;
+    }
+
+    // 4. Try to get from cookie
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      const [name, value] = cookie.trim().split('=');
+      if (name === 'authToken' && value) {
+        console.log('✅ Token found in cookie');
+        return value;
+      }
+    }
+
+    console.warn('⚠️ No auth token found');
+    return null;
+  }
+
+  function getAuthHeader() {
+    // 1. Try to get full header from meta tag
+    const metaHeader = document.querySelector('meta[name="auth-header"]');
+    if (metaHeader && metaHeader.getAttribute('content')) {
+      const header = metaHeader.getAttribute('content').trim();
+      if (header && header !== '' && header.startsWith('Bearer ')) {
+        return header;
+      }
+    }
+
+    // 2. Construct from token
+    const token = getAuthToken();
+    if (token) {
+      return `Bearer ${token}`;
     }
 
     return null;
+  }
+
+  function isUserAuthenticated() {
+    const metaAuth = document.querySelector('meta[name="is-authenticated"]');
+    if (metaAuth) {
+      return metaAuth.getAttribute('content') === 'true';
+    }
+
+    return getAuthToken() !== null;
   }
 
   // Show notification
@@ -781,8 +841,13 @@
     }, 3000);
   }
 
-  // Initialize everything on page load
+  // Debug information on page load
   document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔍 Auth Debug Info:');
+    console.log('- Is Authenticated:', isUserAuthenticated());
+    console.log('- Auth Token:', getAuthToken() ? 'Present' : 'Missing');
+    console.log('- Auth Header:', getAuthHeader() ? 'Present' : 'Missing');
+
     // Store card animations and hover effects
     const storeCards = document.querySelectorAll('.store-card');
     storeCards.forEach((card, index) => {
@@ -825,7 +890,6 @@
       searchInput.addEventListener('input', function() {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
-          // Add search suggestions or instant search here if needed
           console.log('Search query:', this.value);
         }, 300);
       });

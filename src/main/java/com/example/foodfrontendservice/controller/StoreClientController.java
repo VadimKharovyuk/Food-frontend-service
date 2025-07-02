@@ -18,9 +18,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Контроллер для отображения магазинов на фронтенде
- */
 @Controller
 @RequiredArgsConstructor
 @Slf4j
@@ -29,6 +26,8 @@ public class StoreClientController {
 
     private final StoreService storeService;
     private final FavoriteStoreClientService favoriteStoreClientService;
+
+
 
     /**
      * Главная страница со списком магазинов
@@ -71,17 +70,22 @@ public class StoreClientController {
             model.addAttribute("nextPage", page + 1);
             model.addAttribute("previousPage", page - 1);
 
-            // Если пользователь авторизован - получаем его избранное
+            // Обработка авторизации и токена
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String jwt = authHeader.substring(7);
                 Set<Long> favoriteStoreIds = getUserFavoriteStoreIds(jwt);
+
                 model.addAttribute("favoriteStoreIds", favoriteStoreIds);
                 model.addAttribute("isAuthenticated", true);
+                model.addAttribute("authToken", jwt);
+                model.addAttribute("authHeader", authHeader); // ← Полный заголовок
 
                 log.debug("✅ Пользователь авторизован. Избранных магазинов: {}", favoriteStoreIds.size());
             } else {
                 model.addAttribute("favoriteStoreIds", Set.of());
                 model.addAttribute("isAuthenticated", false);
+                model.addAttribute("authToken", "");
+                model.addAttribute("authHeader", "");
                 log.debug("👤 Пользователь не авторизован");
             }
 
@@ -94,6 +98,9 @@ public class StoreClientController {
             log.error("💥 Ошибка загрузки страницы магазинов: {}", e.getMessage(), e);
             model.addAttribute("error", "Ошибка загрузки магазинов");
             model.addAttribute("stores", List.of());
+            model.addAttribute("isAuthenticated", false);
+            model.addAttribute("authToken", "");
+            model.addAttribute("authHeader", "");
             return "stores/store-list";
         }
     }
@@ -127,7 +134,7 @@ public class StoreClientController {
                 model.addAttribute("isAuthenticated", false);
             }
 
-            return "stores/store-detail";
+            return "stores/store-detail"; // Шаблон Thymeleaf
 
         } catch (Exception e) {
             log.error("💥 Ошибка загрузки страницы магазина {}: {}", storeId, e.getMessage(), e);
@@ -135,6 +142,10 @@ public class StoreClientController {
             return "stores/store-detail";
         }
     }
+
+    // ================================
+    // AJAX ENDPOINTS
+    // ================================
 
     /**
      * AJAX: Получить магазины (для динамической загрузки)
@@ -261,6 +272,10 @@ public class StoreClientController {
         Set<Long> favoriteIds = getUserFavoriteStoreIds(jwt);
         return favoriteIds.contains(storeId);
     }
+
+    // ================================
+    // ДОПОЛНИТЕЛЬНЫЕ ENDPOINTS
+    // ================================
 
     /**
      * Страница избранных магазинов
