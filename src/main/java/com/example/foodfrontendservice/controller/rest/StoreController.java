@@ -23,6 +23,37 @@ public class StoreController {
 
     private final StoreService storeService;
 
+    /**
+     * 🏪 Получить список магазинов с пагинацией (краткие данные)
+     */
+    @GetMapping("/brief")
+    public ResponseEntity<StoreBriefResponseWrapper> getStoresBrief(
+            @RequestParam(defaultValue = "0")
+            @Min(value = 0, message = "Page must be non-negative") int page,
+            @RequestParam(defaultValue = "10")
+            @Min(value = 1, message = "Size must be positive")
+            @Max(value = 50, message = "Size must not exceed 50") int size) {
+
+        log.info("📋 GET /api/frontend/stores/brief - page={}, size={}", page, size);
+
+        try {
+            StoreBriefResponseWrapper response = storeService.getStoresBrief(page, size);
+
+            if (response.getSuccess()) {
+                log.info("✅ Retrieved {} brief stores, hasNext: {}",
+                        response.getTotalCount(), response.getHasNext());
+                return ResponseEntity.ok(response);
+            } else {
+                log.warn("❌ Failed to get brief stores: {}", response.getMessage());
+                return ResponseEntity.status(500).body(response);
+            }
+        } catch (Exception e) {
+            log.error("💥 Unexpected error while getting brief stores", e);
+            return ResponseEntity.status(500)
+                    .body(StoreBriefResponseWrapper.error("Внутренняя ошибка сервера"));
+        }
+    }
+
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<StoreResponseDto>> createStore(
             @RequestPart("store") CreateStoreRequest createStoreRequest,
@@ -156,36 +187,7 @@ public class StoreController {
         }
     }
 
-    /**
-     * 🏪 Получить список магазинов с пагинацией (краткие данные)
-     */
-    @GetMapping("/brief")
-    public ResponseEntity<StoreBriefResponseWrapper> getStoresBrief(
-            @RequestParam(defaultValue = "0")
-            @Min(value = 0, message = "Page must be non-negative") int page,
-            @RequestParam(defaultValue = "10")
-            @Min(value = 1, message = "Size must be positive")
-            @Max(value = 50, message = "Size must not exceed 50") int size) {
 
-        log.info("📋 GET /api/frontend/stores/brief - page={}, size={}", page, size);
-
-        try {
-            StoreBriefResponseWrapper response = storeService.getStoresBrief(page, size);
-
-            if (response.getSuccess()) {
-                log.info("✅ Retrieved {} brief stores, hasNext: {}",
-                        response.getTotalCount(), response.getHasNext());
-                return ResponseEntity.ok(response);
-            } else {
-                log.warn("❌ Failed to get brief stores: {}", response.getMessage());
-                return ResponseEntity.status(500).body(response);
-            }
-        } catch (Exception e) {
-            log.error("💥 Unexpected error while getting brief stores", e);
-            return ResponseEntity.status(500)
-                    .body(StoreBriefResponseWrapper.error("Внутренняя ошибка сервера"));
-        }
-    }
 
     /**
      * 🏪 Получить полный список магазинов

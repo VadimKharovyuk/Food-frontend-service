@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-// Для StoreUIDto (уже есть PagedApiResponse, но добавлю специализированную)
 @Data
 @Builder
 @NoArgsConstructor
@@ -21,7 +20,7 @@ public class StoreUIResponseWrapper {
     private String message;
     private LocalDateTime timestamp;
 
-    // Статические методы...
+
     public static StoreUIResponseWrapper success(List<StoreUIDto> stores) {
         return StoreUIResponseWrapper.builder()
                 .stores(stores)
