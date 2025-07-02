@@ -1,7 +1,11 @@
 package com.example.foodfrontendservice.controller;
 import com.example.foodfrontendservice.Client.StoreServiceClient;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreResponseWrapper;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.CategoryResponseDto;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ListApiResponse;
 import com.example.foodfrontendservice.enums.UserRole;
+import com.example.foodfrontendservice.service.CategoryService;
 import com.example.foodfrontendservice.service.DashboardService;
 import com.example.foodfrontendservice.service.StoreService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,59 @@ public class AdminDashboardController {
 
     private final DashboardService dashboardService;
     private final StoreService storeService;
+    private final CategoryService   categoryService;
+
+    @GetMapping("/categories")
+    public String categories(HttpServletRequest request, Model model) {
+
+        log.info("🏷️ Загрузка страницы управления категориями");
+
+        if (!dashboardService.hasRole(request, UserRole.ADMIN)) {
+            log.warn("🚫 Попытка доступа к управлению категориями без прав администратора");
+            return "redirect:/dashboard?error=access_denied";
+        }
+
+        try {
+            String dashboardView = dashboardService.loadRoleSpecificDashboard(
+                    request, model, UserRole.ADMIN, "dashboard/admin-categories"
+            );
+
+
+            if (dashboardView.startsWith("redirect:")) {
+                return dashboardView;
+            }
+            ListApiResponse<CategoryResponseDto> listApiResponse = categoryService.getAllCategories();
+
+            if (listApiResponse != null && listApiResponse.isSuccess()) {
+                model.addAttribute("categories", listApiResponse.getDataOrEmpty());
+                model.addAttribute("totalCount", listApiResponse.getTotalCount());
+                model.addAttribute("hasData", listApiResponse.hasData());
+
+                log.info("✅ Загружено {} категорий", listApiResponse.getDataSize());
+            } else {
+                log.warn("⚠️ Не удалось получить данные о категориях: {}",
+                        listApiResponse != null ? listApiResponse.getMessage() : "null response");
+
+                model.addAttribute("error", "Не удалось загрузить данные о категориях");
+                model.addAttribute("categories", Collections.emptyList());
+                model.addAttribute("totalCount", 0);
+                model.addAttribute("hasData", false);
+            }
+
+            return "admin/admin-categories";
+
+        } catch (Exception e) {
+            log.error("💥 Ошибка загрузки страницы управления категориями: {}", e.getMessage(), e);
+            model.addAttribute("error", "Ошибка загрузки данных");
+            model.addAttribute("categories", Collections.emptyList());
+            model.addAttribute("totalCount", 0);
+            model.addAttribute("hasData", false);
+            return "admin/admin-categories";
+        }
+    }
+
+
+
 
 
     @GetMapping("/restaurants")
@@ -33,14 +90,12 @@ public class AdminDashboardController {
 
         log.info("🏪 Загрузка страницы управления ресторанами (page: {}, size: {})", page, size);
 
-        // Проверяем права администратора
         if (!dashboardService.hasRole(request, UserRole.ADMIN)) {
             log.warn("🚫 Попытка доступа к управлению ресторанами без прав администратора");
             return "redirect:/dashboard?error=access_denied";
         }
 
         try {
-            // Получаем базовые данные для дашборда
             String dashboardView = dashboardService.loadRoleSpecificDashboard(
                     request, model, UserRole.ADMIN, "dashboard/admin-restaurants"
             );
@@ -49,8 +104,6 @@ public class AdminDashboardController {
             if (dashboardView.startsWith("redirect:")) {
                 return dashboardView;
             }
-
-
             StoreResponseWrapper storeResponse = storeService.getActiveStores(page, size);
 
             if (storeResponse != null && Boolean.TRUE.equals(storeResponse.getSuccess())) {
@@ -101,6 +154,8 @@ public class AdminDashboardController {
             return "admin/admin-restaurants";
         }
     }
+
+
 
 
     /**

@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Управление категориями - Admin Dashboard</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #2563eb;
+      --secondary-color: #64748b;
+      --success-color: #059669;
+      --warning-color: #d97706;
+      --danger-color: #dc2626;
+      --light-bg: #f8fafc;
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --purple-color: #7c3aed;
+      --orange-color: #ea580c;
+    }
+
+    body {
+      background-color: var(--light-bg);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .admin-header {
+      background: linear-gradient(135deg, var(--purple-color), #6d28d9);
+      color: white;
+      padding: 2rem 0;
+      margin-bottom: 2rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .stats-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--card-shadow);
+      border: none;
+      transition: transform 0.2s ease;
+    }
+
+    .stats-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .category-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: var(--card-shadow);
+      border: none;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .category-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15);
+    }
+
+    .category-image {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 2px solid #e2e8f0;
+    }
+
+    .category-placeholder {
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      font-size: 1.2rem;
+      border: 2px solid #e2e8f0;
+    }
+
+    .status-badge {
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .status-active {
+      background-color: #dcfce7;
+      color: var(--success-color);
+    }
+
+    .status-inactive {
+      background-color: #fee2e2;
+      color: var(--danger-color);
+    }
+
+    .action-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      margin: 0 0.2rem;
+    }
+
+    .btn-view {
+      background-color: #e0f2fe;
+      color: #0369a1;
+    }
+
+    .btn-edit {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+
+    .btn-delete {
+      background-color: #fee2e2;
+      color: #dc2626;
+    }
+
+    .btn-move-up {
+      background-color: #f0f9ff;
+      color: #0284c7;
+    }
+
+    .btn-move-down {
+      background-color: #f0f9ff;
+      color: #0284c7;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--secondary-color);
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .search-box {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .error-alert {
+      background: linear-gradient(135deg, #fee2e2, #fecaca);
+      border: none;
+      border-radius: 12px;
+      color: #991b1b;
+    }
+
+    .sort-order-badge {
+      background-color: #f1f5f9;
+      color: var(--secondary-color);
+      padding: 0.3rem 0.6rem;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .category-grid-item {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s ease;
+    }
+
+    .category-grid-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15);
+    }
+
+    .view-toggle {
+      background: white;
+      border-radius: 8px;
+      padding: 0.3rem;
+      box-shadow: var(--card-shadow);
+    }
+
+    .view-toggle button {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .view-toggle button.active {
+      background-color: var(--purple-color);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+<div class="admin-header">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <h1 class="mb-0">
+          <i class="fas fa-tags me-2"></i>
+          Управление категориями
+        </h1>
+        <p class="mb-0 opacity-75">Управление категориями товаров и меню</p>
+      </div>
+      <div class="col-md-6 text-end">
+        <button class="btn btn-light btn-lg me-2" onclick="openCreateModal()">
+          <i class="fas fa-plus me-2"></i>
+          Добавить категорию
+        </button>
+        <div class="view-toggle d-inline-block">
+          <button id="listView" class="active" onclick="switchView('list')">
+            <i class="fas fa-list"></i>
+          </button>
+          <button id="gridView" onclick="switchView('grid')">
+            <i class="fas fa-th-large"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Статистика -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="stats-card text-center">
+        <div class="text-purple mb-2" style="color: var(--purple-color);">
+          <i class="fas fa-tags fa-2x"></i>
+        </div>
+        <h3 class="fw-bold" style="color: var(--purple-color);" th:text="${totalCount ?: 0}">0</h3>
+        <p class="text-muted mb-0">Всего категорий</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card text-center">
+        <div class="text-success mb-2">
+          <i class="fas fa-check-circle fa-2x"></i>
+        </div>
+        <h3 class="fw-bold text-success" id="activeCount">0</h3>
+        <p class="text-muted mb-0">Активных</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card text-center">
+        <div class="text-warning mb-2">
+          <i class="fas fa-eye-slash fa-2x"></i>
+        </div>
+        <h3 class="fw-bold text-warning" id="inactiveCount">0</h3>
+        <p class="text-muted mb-0">Неактивных</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card text-center">
+        <div class="text-info mb-2">
+          <i class="fas fa-sort-numeric-down fa-2x"></i>
+        </div>
+        <h3 class="fw-bold text-info" id="maxSortOrder">0</h3>
+        <p class="text-muted mb-0">Макс. порядок</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Поиск и фильтры -->
+  <div class="search-box">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+          <input type="text" class="form-control" placeholder="Поиск по названию или описанию..." id="searchInput">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" id="statusFilter">
+          <option value="">Все статусы</option>
+          <option value="active">Активные</option>
+          <option value="inactive">Неактивные</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" id="sortOrder">
+          <option value="name">По названию</option>
+          <option value="sortOrder">По порядку</option>
+          <option value="created">По дате создания</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Сообщение об ошибке -->
+  <div th:if="${error}" class="alert error-alert" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <span th:text="${error}">Ошибка загрузки данных</span>
+  </div>
+
+  <!-- Список категорий (табличный вид) -->
+  <div id="listViewContainer" th:if="${hasData}">
+    <div class="table-responsive bg-white" style="border-radius: 12px; box-shadow: var(--card-shadow);">
+      <table class="table mb-0">
+        <thead>
+        <tr>
+          <th style="background-color: #f8fafc; border: none; padding: 1rem; font-weight: 600; color: var(--secondary-color);">Категория</th>
+          <th style="background-color: #f8fafc; border: none; padding: 1rem; font-weight: 600; color: var(--secondary-color);">Статус</th>
+          <th style="background-color: #f8fafc; border: none; padding: 1rem; font-weight: 600; color: var(--secondary-color);">Порядок</th>
+          <th style="background-color: #f8fafc; border: none; padding: 1rem; font-weight: 600; color: var(--secondary-color);">Создана</th>
+          <th style="background-color: #f8fafc; border: none; padding: 1rem; font-weight: 600; color: var(--secondary-color);">Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="category : ${categories}" class="category-row">
+          <td style="border: none; padding: 1rem; vertical-align: middle;">
+            <div class="d-flex align-items-center">
+              <div th:if="${category.imageUrl != null and !category.imageUrl.isEmpty()}" class="me-3">
+                <img th:src="${category.imageUrl}"
+                     alt="Изображение категории"
+                     class="category-image"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="category-placeholder" style="display: none;">
+                  <i class="fas fa-tag"></i>
+                </div>
+              </div>
+              <div th:if="${category.imageUrl == null or category.imageUrl.isEmpty()}" class="category-placeholder me-3">
+                <i class="fas fa-tag"></i>
+              </div>
+              <div>
+                <h6 class="mb-1 fw-bold category-name" th:text="${category.name}">Название категории</h6>
+                <p class="mb-0 text-muted small category-description" th:text="${category.description}">Описание категории</p>
+              </div>
+            </div>
+          </td>
+          <td style="border: none; padding: 1rem; vertical-align: middle;">
+                                <span th:class="${category.isActive ? 'status-badge status-active' : 'status-badge status-inactive'}"
+                                      th:text="${category.isActive ? 'Активна' : 'Неактивна'}"
+                                      th:data-status="${category.isActive ? 'active' : 'inactive'}">
+                                    Активна
+                                </span>
+          </td>
+          <td style="border: none; padding: 1rem; vertical-align: middle;">
+            <span class="sort-order-badge" th:text="${category.sortOrder ?: 'Не задан'}" th:data-sort-order="${category.sortOrder}">1</span>
+          </td>
+          <td style="border: none; padding: 1rem; vertical-align: middle;">
+                                <span th:if="${category.createdAt}"
+                                      th:text="${#temporals.format(category.createdAt, 'dd.MM.yyyy')}">01.01.2024</span>
+            <div th:if="${category.updatedAt}">
+              <small class="text-muted">
+                Обновлена: <span th:text="${#temporals.format(category.updatedAt, 'dd.MM.yyyy')}">02.01.2024</span>
+              </small>
+            </div>
+          </td>
+          <td style="border: none; padding: 1rem; vertical-align: middle;">
+            <div class="d-flex">
+              <button class="action-btn btn-view" title="Просмотр" th:onclick="'viewCategory(' + ${category.id} + ')'">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="action-btn btn-edit" title="Редактировать" th:onclick="'editCategory(' + ${category.id} + ')'">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn btn-move-up" title="Переместить вверх" th:onclick="'moveCategoryUp(' + ${category.id} + ')'">
+                <i class="fas fa-arrow-up"></i>
+              </button>
+              <button class="action-btn btn-move-down" title="Переместить вниз" th:onclick="'moveCategoryDown(' + ${category.id} + ')'">
+                <i class="fas fa-arrow-down"></i>
+              </button>
+              <button class="action-btn btn-delete" title="Удалить" th:onclick="'deleteCategory(' + ${category.id} + ')'">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Сетка категорий (карточный вид) -->
+  <div id="gridViewContainer" class="category-grid" style="display: none;" th:if="${hasData}">
+    <div th:each="category : ${categories}" class="category-grid-item category-card">
+      <div class="d-flex align-items-start mb-3">
+        <div th:if="${category.imageUrl != null and !category.imageUrl.isEmpty()}" class="me-3">
+          <img th:src="${category.imageUrl}"
+               alt="Изображение категории"
+               class="category-image"
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="category-placeholder" style="display: none;">
+            <i class="fas fa-tag"></i>
+          </div>
+        </div>
+        <div th:if="${category.imageUrl == null or category.imageUrl.isEmpty()}" class="category-placeholder me-3">
+          <i class="fas fa-tag"></i>
+        </div>
+        <div class="flex-grow-1">
+          <h5 class="mb-1 fw-bold" th:text="${category.name}">Название категории</h5>
+          <p class="text-muted small mb-2" th:text="${category.description}">Описание категории</p>
+          <div class="d-flex align-items-center justify-content-between">
+                            <span th:class="${category.isActive ? 'status-badge status-active' : 'status-badge status-inactive'}"
+                                  th:text="${category.isActive ? 'Активна' : 'Неактивна'}">
+                                Активна
+                            </span>
+            <span class="sort-order-badge" th:text="'Порядок: ' + ${category.sortOrder ?: 'Н/Д'}">Порядок: 1</span>
+          </div>
+        </div>
+      </div>
+      <div class="text-center">
+        <button class="action-btn btn-view me-1" title="Просмотр" th:onclick="'viewCategory(' + ${category.id} + ')'">
+          <i class="fas fa-eye"></i>
+        </button>
+        <button class="action-btn btn-edit me-1" title="Редактировать" th:onclick="'editCategory(' + ${category.id} + ')'">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="action-btn btn-delete" title="Удалить" th:onclick="'deleteCategory(' + ${category.id} + ')'">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+      <div class="text-center mt-2">
+        <small class="text-muted">
+          Создана: <span th:if="${category.createdAt}" th:text="${#temporals.format(category.createdAt, 'dd.MM.yyyy')}">01.01.2024</span>
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Пустое состояние -->
+  <div th:if="${!hasData}" class="empty-state">
+    <i class="fas fa-tags"></i>
+    <h4>Категории не найдены</h4>
+    <p class="text-muted">В данный момент в системе нет категорий для отображения.</p>
+    <button class="btn btn-primary" onclick="openCreateModal()">
+      <i class="fas fa-plus me-2"></i>
+      Создать первую категорию
+    </button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Переключение видов
+  function switchView(view) {
+    const listView = document.getElementById('listViewContainer');
+    const gridView = document.getElementById('gridViewContainer');
+    const listBtn = document.getElementById('listView');
+    const gridBtn = document.getElementById('gridView');
+
+    if (view === 'list') {
+      listView.style.display = 'block';
+      gridView.style.display = 'none';
+      listBtn.classList.add('active');
+      gridBtn.classList.remove('active');
+    } else {
+      listView.style.display = 'none';
+      gridView.style.display = 'grid';
+      listBtn.classList.remove('active');
+      gridBtn.classList.add('active');
+    }
+  }
+
+  // Функционал поиска и фильтрации
+  document.addEventListener('DOMContentLoaded', function() {
+    calculateStats();
+
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const sortOrder = document.getElementById('sortOrder');
+
+    // Поиск
+    if (searchInput) {
+      let searchTimeout;
+      searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          filterCategories();
+        }, 300);
+      });
+    }
+
+    // Фильтр по статусу
+    if (statusFilter) {
+      statusFilter.addEventListener('change', filterCategories);
+    }
+
+    // Сортировка
+    if (sortOrder) {
+      sortOrder.addEventListener('change', sortCategories);
+    }
+
+    // Анимация появления элементов
+    const cards = document.querySelectorAll('.stats-card, .category-row, .category-grid-item');
+    cards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      setTimeout(() => {
+        card.style.transition = 'all 0.5s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, index * 50);
+    });
+  });
+
+  // Подсчет статистики
+  function calculateStats() {
+    const categories = document.querySelectorAll('.category-row');
+    let activeCount = 0;
+    let inactiveCount = 0;
+    let maxSortOrder = 0;
+
+    categories.forEach(row => {
+      const status = row.querySelector('[data-status]')?.getAttribute('data-status');
+      const sortOrder = parseInt(row.querySelector('[data-sort-order]')?.getAttribute('data-sort-order')) || 0;
+
+      if (status === 'active') activeCount++;
+      else if (status === 'inactive') inactiveCount++;
+
+      if (sortOrder > maxSortOrder) maxSortOrder = sortOrder;
+    });
+
+    document.getElementById('activeCount').textContent = activeCount;
+    document.getElementById('inactiveCount').textContent = inactiveCount;
+    document.getElementById('maxSortOrder').textContent = maxSortOrder;
+  }
+
+  // Фильтрация категорий
+  function filterCategories() {
+    const searchValue = document.getElementById('searchInput').value.toLowerCase();
+    const statusValue = document.getElementById('statusFilter').value;
+    const rows = document.querySelectorAll('.category-row');
+
+    rows.forEach(row => {
+      const name = row.querySelector('.category-name')?.textContent.toLowerCase() || '';
+      const description = row.querySelector('.category-description')?.textContent.toLowerCase() || '';
+      const status = row.querySelector('[data-status]')?.getAttribute('data-status') || '';
+
+      const matchesSearch = name.includes(searchValue) || description.includes(searchValue);
+      const matchesStatus = !statusValue || status === statusValue;
+
+      row.style.display = matchesSearch && matchesStatus ? 'table-row' : 'none';
+    });
+  }
+
+  // Сортировка категорий
+  function sortCategories() {
+    const sortValue = document.getElementById('sortOrder').value;
+    const tbody = document.querySelector('tbody');
+    const rows = Array.from(document.querySelectorAll('.category-row'));
+
+    rows.sort((a, b) => {
+      if (sortValue === 'name') {
+        const nameA = a.querySelector('.category-name').textContent.toLowerCase();
+        const nameB = b.querySelector('.category-name').textContent.toLowerCase();
+        return nameA.localeCompare(nameB);
+      } else if (sortValue === 'sortOrder') {
+        const orderA = parseInt(a.querySelector('[data-sort-order]').getAttribute('data-sort-order')) || 0;
+        const orderB = parseInt(b.querySelector('[data-sort-order]').getAttribute('data-sort-order')) || 0;
+        return orderA - orderB;
+      }
+      // По умолчанию по дате создания (без сортировки, так как это сложно без данных)
+      return 0;
+    });
+
+    // Перестраиваем таблицу
+    rows.forEach(row => tbody.appendChild(row));
+  }
+
+  // Функции действий с категориями
+  function viewCategory(id) {
+    window.location.href = `/dashboard/ADMIN/categories/${id}`;
+  }
+
+  function editCategory(id) {
+    window.location.href = `/dashboard/ADMIN/categories/${id}/edit`;
+  }
+
+  function deleteCategory(id) {
+    if (confirm('Вы уверены, что хотите удалить эту категорию?')) {
+      // AJAX запрос на удаление
+      console.log('Удаление категории с ID:', id);
+    }
+  }
+
+  function moveCategoryUp(id) {
+    // AJAX запрос на перемещение вверх
+    console.log('Перемещение категории вверх, ID:', id);
+  }
+
+  function moveCategoryDown(id) {
+    // AJAX запрос на перемещение вниз
+    console.log('Перемещение категории вниз, ID:', id);
+  }
+
+  function openCreateModal() {
+    // Открытие модального окна создания категории
+    window.location.href = '/dashboard/ADMIN/categories/create';
+  }
+</script>
+</body>
+</html>

@@ -242,6 +242,11 @@
                     <a href="/dashboard/ADMIN/restaurants" class="nav-link">🏪 Рестораны</a>
                 </li>
                 <li class="nav-item" th:if="${userRole?.name() == 'ADMIN'}">
+                    <a href="/dashboard/ADMIN/categories" class="nav-link">
+                        <i class="fas fa-tags"></i> Категории
+                    </a>
+                </li>
+                <li class="nav-item" th:if="${userRole?.name() == 'ADMIN'}">
                     <a href="#" class="nav-link">📊 Аналитика</a>
                 </li>
 
