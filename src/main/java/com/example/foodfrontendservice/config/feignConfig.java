@@ -42,12 +42,10 @@ public class feignConfig {
      */
     @Bean
     public feign.Logger.Level feignLoggerLevel() {
-        return feign.Logger.Level.HEADERS; // Логирует заголовки для отладки
+        return feign.Logger.Level.HEADERS;
     }
 
-    /**
-     * ✅ ОБЪЕДИНЕННЫЙ и ИСПРАВЛЕННЫЙ FeignAuthInterceptor
-     */
+
     @Slf4j
     public static class FeignAuthInterceptor implements RequestInterceptor {
 
@@ -65,31 +63,31 @@ public class feignConfig {
                 if (attributes != null) {
                     HttpServletRequest request = attributes.getRequest();
 
-                    // 🔑 Получаем токен из разных источников с приоритетом
+
                     String token = extractTokenFromRequest(request);
 
                     if (token != null) {
-                        // Добавляем Authorization header
+
                         template.header(AUTHORIZATION_HEADER, "Bearer " + token);
                         log.debug("🔐 Добавлен Authorization header в Feign запрос (длина токена: {})", token.length());
                     } else {
                         log.debug("⚠️ Токен не найден для Feign запроса");
                     }
 
-                    // 👤 Получаем и передаем данные пользователя из сессии
+
                     addUserHeadersFromSession(request, template);
 
-                    // Также пытаемся получить из заголовков запроса (fallback)
+
                     transferHeaderIfExists(request, template, USER_ROLE_HEADER);
                     transferHeaderIfExists(request, template, USER_EMAIL_HEADER);
                     transferHeaderIfExists(request, template, USER_ID_HEADER);
 
-                    // ✅ НЕ переопределяем Content-Type для multipart запросов
+
                     if (!isMultipartRequest(template)) {
                         template.header("Accept", "application/json");
                     }
 
-                    // Детальное логирование
+
                     logFeignRequest(template, token, request);
                 } else {
                     log.warn("⚠️ Нет доступного RequestContext для передачи заголовков в Feign Client");
