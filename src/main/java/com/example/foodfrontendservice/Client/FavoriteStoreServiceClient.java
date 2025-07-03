@@ -1,6 +1,6 @@
 package com.example.foodfrontendservice.Client;
 import com.example.foodfrontendservice.Client.Fallback.FavoriteStoreServiceFallback;
-import com.example.foodfrontendservice.config.feignConfig;
+import com.example.foodfrontendservice.config.FeignConfig;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.Favorite.FavoriteStoreApiResponse;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.Favorite.FavoriteStoreResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -14,7 +14,7 @@ import java.util.List;
         path = "/api/favorites",
         fallback = FavoriteStoreServiceFallback.class,
         contextId = "favoriteStoreServiceClient",
-        configuration = feignConfig.class
+        configuration = FeignConfig.class
 )
 public interface FavoriteStoreServiceClient {
 

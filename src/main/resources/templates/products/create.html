@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать продукт</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .form-body {
+            padding: 2rem;
+        }
+
+        .form-control, .form-select {
+            border-radius: 12px;
+            border: 2px solid #e8ecf4;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            background: #6c757d;
+            border: none;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            background: #5a6268;
+        }
+
+        .file-upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .file-upload-area:hover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+            transform: scale(1.02);
+        }
+
+        .file-upload-area.dragover {
+            border-color: #28a745;
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.1) 0%, rgba(40, 167, 69, 0.1) 100%);
+        }
+
+        .file-upload-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover .file-upload-icon {
+            transform: scale(1.1);
+            color: #764ba2;
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin-top: 1rem;
+        }
+
+        .alert {
+            border-radius: 12px;
+            border: none;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.1) 0%, rgba(220, 53, 69, 0.05) 100%);
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-group-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px 0 0 12px;
+        }
+
+        .price-input .form-control {
+            border-radius: 0 12px 12px 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-row {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .form-row:nth-child(2) { animation-delay: 0.1s; }
+        .form-row:nth-child(3) { animation-delay: 0.2s; }
+        .form-row:nth-child(4) { animation-delay: 0.3s; }
+        .form-row:nth-child(5) { animation-delay: 0.4s; }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .form-check-input {
+            width: 1.2em;
+            height: 1.2em;
+            border-radius: 6px;
+            border: 2px solid #667eea;
+        }
+
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
+                <div class="form-card">
+                    <!-- Header -->
+                    <div class="form-header">
+                        <h2 class="mb-0">
+                            <i class="fas fa-plus-circle me-3"></i>
+                            Создать новый продукт
+                        </h2>
+                        <p class="mb-0 mt-2 opacity-75">Добавьте продукт в ваш магазин</p>
+                    </div>
+
+                    <!-- Form Body -->
+                    <div class="form-body">
+                        <!-- Error Alert -->
+                        <div th:if="${error}" class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span th:text="${error}"></span>
+                        </div>
+
+                        <!-- Validation Errors -->
+                        <div th:if="${#fields.hasErrors('product')}" class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Ошибки валидации:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li th:each="error : ${#fields.errors('product')}" th:text="${error}"></li>
+                            </ul>
+                        </div>
+                        <!-- В templates/products/create.html - УПРОСТИТЕ ФОРМУ -->
+                        <form th:action="@{/products/create}" method="post"
+                              enctype="multipart/form-data" th:object="${product}">
+
+                            <!-- ТОЛЬКО ОСНОВНЫЕ ПОЛЯ -->
+                            <input type="hidden" th:field="*{storeId}" value="1">
+                            <input type="hidden" th:field="*{categoryId}" value="1">
+                            <input type="hidden" th:field="*{isPopular}" value="false">
+                            <input type="hidden" th:field="*{isAvailable}" value="true">
+                            <input type="hidden" name="userId" value="1">
+
+                            <!-- Название -->
+                            <input type="text" th:field="*{name}" placeholder="Название продукта" required>
+
+                            <!-- Описание -->
+                            <textarea th:field="*{description}" placeholder="Описание"></textarea>
+
+                            <!-- Цена -->
+                            <input type="number" th:field="*{price}" step="0.01" placeholder="Цена" required>
+
+                            <!-- Файл -->
+                            <input type="file" name="imageFile" accept="image/*" required>
+
+                            <!-- Кнопки -->
+                            <button type="submit">Создать</button>
+                            <a href="/products">Отмена</a>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Предпросмотр изображения
+    function previewImage(input) {
+        const preview = document.getElementById('imagePreview');
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        const uploadContent = document.querySelector('.upload-content');
+        const fileName = document.getElementById('fileName');
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                fileName.textContent = input.files[0].name;
+                previewContainer.classList.remove('d-none');
+                uploadContent.classList.add('d-none');
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // Счетчик символов для описания
+    document.getElementById('description').addEventListener('input', function() {
+        const count = this.value.length;
+        document.getElementById('descriptionCount').textContent = count;
+
+        if (count > 950) {
+            document.getElementById('descriptionCount').style.color = '#dc3545';
+        } else {
+            document.getElementById('descriptionCount').style.color = '#6c757d';
+        }
+    });
+
+    // Drag & Drop для изображений
+    const fileUploadArea = document.querySelector('.file-upload-area');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        fileUploadArea.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        fileUploadArea.addEventListener(eventName, highlight, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        fileUploadArea.addEventListener(eventName, unhighlight, false);
+    });
+
+    function highlight(e) {
+        fileUploadArea.classList.add('dragover');
+    }
+
+    function unhighlight(e) {
+        fileUploadArea.classList.remove('dragover');
+    }
+
+    fileUploadArea.addEventListener('drop', handleDrop, false);
+
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+
+        if (files.length > 0) {
+            document.getElementById('imageFile').files = files;
+            previewImage(document.getElementById('imageFile'));
+        }
+    }
+
+    // Валидация цены со скидкой
+    document.getElementById('discountPrice').addEventListener('input', function() {
+        const price = parseFloat(document.getElementById('price').value);
+        const discountPrice = parseFloat(this.value);
+
+        if (discountPrice && price && discountPrice >= price) {
+            this.setCustomValidity('Цена со скидкой должна быть меньше обычной цены');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+
+    // Валидация обычной цены
+    document.getElementById('price').addEventListener('input', function() {
+        const discountInput = document.getElementById('discountPrice');
+        if (discountInput.value) {
+            discountInput.dispatchEvent(new Event('input'));
+        }
+    });
+</script>
+</body>
+</html>

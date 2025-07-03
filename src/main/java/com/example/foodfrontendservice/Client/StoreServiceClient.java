@@ -2,14 +2,13 @@ package com.example.foodfrontendservice.Client;
 
 import com.example.foodfrontendservice.Client.Fallback.StoreServiceClientFallback;
 
-import com.example.foodfrontendservice.config.feignConfig;
+import com.example.foodfrontendservice.config.FeignConfig;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreBriefResponseWrapper;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreResponseDto;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreResponseWrapper;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.StoreUIResponseWrapper;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreDto;
-import com.example.foodfrontendservice.dto.PRODUCTSERVICE.store.CreateStoreRequest;
 import feign.Headers;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -24,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
         path = "/api/stores",
         fallback = StoreServiceClientFallback.class,
         contextId = "storeServiceClient",
-        configuration = feignConfig.class
+        configuration = FeignConfig.class
 )
 public interface StoreServiceClient {
 
