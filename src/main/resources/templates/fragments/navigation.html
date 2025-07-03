@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navigation Fragment</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+<body>
+<!-- Navigation Fragment -->
+<nav class="navbar" th:fragment="navigation">
+    <div class="nav-container">
+        <!-- Логотип -->
+        <div class="nav-logo">
+            <a th:href="@{/}" class="logo-link">
+                <span class="logo-icon">🍕</span>
+                <span class="logo-text">Quick<strong>Food</strong></span>
+            </a>
+        </div>
+
+        <!-- Основное меню -->
+        <div class="nav-menu" id="navMenu">
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a th:href="@{/}" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        Главная
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/stores}" class="nav-link">
+                        <i class="fas fa-utensils"></i>
+                        Рестораны
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a th:href="@{/delivery}" class="nav-link">
+                        <i class="fas fa-motorcycle"></i>
+                        Доставка
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Правая часть навигации -->
+        <div class="nav-actions">
+            <!-- Поиск -->
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Поиск ресторанов или блюд..." th:value="${searchQuery}">
+                <button class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+
+            <!-- Избранное -->
+            <div class="favorite-dropdown">
+                <button class="favorite-btn" id="favoriteBtn">
+                    <i class="fas fa-heart"></i>
+                </button>
+                <div class="favorite-menu">
+                    <a th:href="@{/favorites/stores}">
+                        <i class="fas fa-store"></i>
+                        Избранные магазины
+                    </a>
+                    <a th:href="@{/favorites/products}">
+                        <i class="fas fa-heart"></i>
+                        Избранные товары
+                    </a>
+                </div>
+            </div>
+
+            <!-- Корзина -->
+            <button class="cart-btn" id="cartBtn" th:onclick="'location.href=\'' + @{/cart} + '\''">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" th:text="${cartItemCount ?: '0'}">0</span>
+            </button>
+
+
+            <!-- Мобильное меню -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn">
+                <span class="hamburger"></span>
+                <span class="hamburger"></span>
+                <span class="hamburger"></span>
+            </button>
+        </div>
+    </div>
+</nav>
+</body>
+</html>
