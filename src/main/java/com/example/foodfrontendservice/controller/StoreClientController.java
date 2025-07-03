@@ -27,13 +27,6 @@ public class StoreClientController {
     private final StoreService storeService;
     private final FavoriteStoreClientService favoriteStoreClientService;
 
-
-
-    /**
-     * Главная страница со списком магазинов
-     * GET /
-     * GET /stores
-     */
     @GetMapping()
     public String showStoresPage(
             @RequestParam(defaultValue = "0") int page,
@@ -78,7 +71,7 @@ public class StoreClientController {
                 model.addAttribute("favoriteStoreIds", favoriteStoreIds);
                 model.addAttribute("isAuthenticated", true);
                 model.addAttribute("authToken", jwt);
-                model.addAttribute("authHeader", authHeader); // ← Полный заголовок
+                model.addAttribute("authHeader", authHeader);
 
                 log.debug("✅ Пользователь авторизован. Избранных магазинов: {}", favoriteStoreIds.size());
             } else {

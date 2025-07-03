@@ -12,18 +12,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 🏠 Базовый контроллер для всех дашбордов
- */
+
 @Slf4j
 @RequiredArgsConstructor
 public abstract class BaseDashboardController {
 
     protected final DashboardService dashboardService;
 
-    /**
-     * 👤 Общий AJAX endpoint для получения информации о текущем пользователе
-     */
+
     @GetMapping("/current-user")
     @ResponseBody
     public Map<String, Object> getCurrentUser(HttpServletRequest request) {

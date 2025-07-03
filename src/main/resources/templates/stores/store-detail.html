@@ -1,10 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickFood - Главная</title>
 </head>
 <body>
+
+<!-- Навигация с активной страницей -->
+<div th:replace="~{fragments/navigation :: navigation}" th:with="activePage='home'"></div>
+<div th:replace="~{fragments/navigation :: navigation}"></div>
+
+<!-- Контент главной страницы -->
+<main class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto text-center">
+            <h1 class="display-4 fw-bold mb-4">Добро пожаловать в QuickFood!</h1>
+            <p class="lead">Быстрая доставка любимой еды прямо к вашей двери</p>
+            <a th:href="@{/stores}" class="btn btn-success btn-lg">Выбрать ресторан</a>
+        </div>
+    </div>
+</main>
 
 </body>
 </html>
