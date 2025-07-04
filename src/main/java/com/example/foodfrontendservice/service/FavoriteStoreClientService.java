@@ -47,4 +47,16 @@ public class FavoriteStoreClientService {
             return FavoriteStoreApiResponse.error("Ошибка связи с сервисом");
         }
     }
+//    public FavoriteStoreApiResponse<Void> removeFromFavorites(String jwt, Long favoriteId) {
+//        try {
+//            String authHeader = "Bearer " + jwt;
+//            ResponseEntity<FavoriteStoreApiResponse<Void>> response =
+//                    favoriteStoreServiceClient.removeFromFavorites(authHeader, favoriteId);
+//
+//            return response.getBody();
+//        } catch (Exception e) {
+//            log.error("Ошибка удаления из избранного через Feign: {}", e.getMessage());
+//            return FavoriteStoreApiResponse.error("Ошибка связи с сервисом");
+//        }
+//    }
 }

@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <meta name="auth-token" th:content="${authToken}">
-  <meta name="auth-header" th:content="${authHeader}">
-  <meta name="is-authenticated" th:content="${isAuthenticated}">
-  <title>Доставка еды - Рестораны рядом</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="auth-token" th:content="${authToken}">
+    <meta name="auth-header" th:content="${authHeader}">
+    <meta name="is-authenticated" th:content="${isAuthenticated}">
+    <title>Доставка еды - Рестораны рядом</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-  <link rel="stylesheet" href="/css/bolt-navigation.css">
-  <link rel="stylesheet" href="/css/stores/store-list.css">
+    <link rel="stylesheet" href="/css/bolt-navigation.css">
+    <link rel="stylesheet" href="/css/stores/store-list.css">
 </head>
 <body>
 <!-- Header -->
@@ -18,400 +18,522 @@
 
 
 <div class="container">
-  <!-- Search Hero -->
-  <div class="search-hero">
-    <div class="text-center mb-3">
-      <h2 class="text-dark mb-2">🍕 Найдите свой любимый ресторан</h2>
-      <p class="text-muted">Быстрая доставка из лучших ресторанов города</p>
+    <!-- Search Hero -->
+    <div class="search-hero">
+        <div class="text-center mb-3">
+            <h2 class="text-dark mb-2">🍕 Найдите свой любимый ресторан</h2>
+            <p class="text-muted">Быстрая доставка из лучших ресторанов города</p>
+        </div>
+        <form class="search-form" method="GET" action="/">
+            <input type="text"
+                   class="form-control search-input"
+                   name="search"
+                   th:value="${search}"
+                   placeholder="Поиск ресторанов, кухни, блюд...">
+            <button type="submit" class="btn btn-search">
+                <i class="fas fa-search me-1"></i>
+                Найти
+            </button>
+        </form>
     </div>
-    <form class="search-form" method="GET" action="/">
-      <input type="text"
-             class="form-control search-input"
-             name="search"
-             th:value="${search}"
-             placeholder="Поиск ресторанов, кухни, блюд...">
-      <button type="submit" class="btn btn-search">
-        <i class="fas fa-search me-1"></i>
-        Найти
-      </button>
-    </form>
-  </div>
 
-  <!-- Filters Bar -->
-  <div class="filters-bar">
-    <div class="filter-chips">
-      <span class="fw-bold text-dark me-2">Фильтры:</span>
-      <a href="/?sortBy=rating" class="filter-chip" th:classappend="${sortBy == 'rating'} ? 'active' : ''">
-        <i class="fas fa-star me-1"></i>
-        По рейтингу
-      </a>
-      <a href="/?sortBy=delivery_time" class="filter-chip" th:classappend="${sortBy == 'delivery_time'} ? 'active' : ''">
-        <i class="fas fa-clock me-1"></i>
-        Быстрая доставка
-      </a>
-      <a href="/?sortBy=delivery_fee" class="filter-chip" th:classappend="${sortBy == 'delivery_fee'} ? 'active' : ''">
-        <i class="fas fa-dollar-sign me-1"></i>
-        Низкая стоимость
-      </a>
-      <a href="/?sortBy=popular" class="filter-chip" th:classappend="${sortBy == 'popular'} ? 'active' : ''">
-        <i class="fas fa-fire me-1"></i>
-        Популярные
-      </a>
+    <!-- Filters Bar -->
+    <div class="filters-bar">
+        <div class="filter-chips">
+            <span class="fw-bold text-dark me-2">Фильтры:</span>
+            <a href="/?sortBy=rating" class="filter-chip" th:classappend="${sortBy == 'rating'} ? 'active' : ''">
+                <i class="fas fa-star me-1"></i>
+                По рейтингу
+            </a>
+            <a href="/?sortBy=delivery_time" class="filter-chip"
+               th:classappend="${sortBy == 'delivery_time'} ? 'active' : ''">
+                <i class="fas fa-clock me-1"></i>
+                Быстрая доставка
+            </a>
+            <a href="/?sortBy=delivery_fee" class="filter-chip"
+               th:classappend="${sortBy == 'delivery_fee'} ? 'active' : ''">
+                <i class="fas fa-dollar-sign me-1"></i>
+                Низкая стоимость
+            </a>
+            <a href="/?sortBy=popular" class="filter-chip" th:classappend="${sortBy == 'popular'} ? 'active' : ''">
+                <i class="fas fa-fire me-1"></i>
+                Популярные
+            </a>
+        </div>
     </div>
-  </div>
 
-  <!-- Stats Bar -->
-  <div class="stats-bar" th:if="${stores != null and !stores.empty}">
-    <div class="stats-info">
-      Найдено <span class="results-count" th:text="${totalCount}">0</span> ресторанов
+    <!-- Stats Bar -->
+    <div class="stats-bar" th:if="${stores != null and !stores.empty}">
+        <div class="stats-info">
+            Найдено <span class="results-count" th:text="${totalCount}">0</span> ресторанов
+        </div>
+        <div class="stats-info">
+            Страница <span th:text="${currentPage + 1}">1</span> из <span th:text="${totalPages}">1</span>
+        </div>
     </div>
-    <div class="stats-info">
-      Страница <span th:text="${currentPage + 1}">1</span> из <span th:text="${totalPages}">1</span>
+
+    <!-- Stores Grid -->
+    <div class="stores-grid" th:if="${stores != null and !stores.empty}">
+        <div th:each="store : ${stores}" class="store-card">
+            <!-- Store Status -->
+            <div th:class="${store.isActive} ? 'store-status' : 'store-status closed'"
+                 th:text="${store.isActive} ? 'Открыт' : 'Закрыт'">
+                Открыт
+            </div>
+
+            <!-- Favorite Heart Button - Positioned absolutely in top-right corner -->
+            <button th:if="${isAuthenticated}"
+                    class="favorite-heart-btn store-favorite-btn"
+                    th:classappend="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'is-favorite' : ''"
+                    th:data-store-id="${store.id}"
+                    th:data-favorite-id="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id) ? store.favoriteId : ''}"
+                    th:title="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'Удалить из избранного' : 'Добавить в избранное'">
+                <i th:class="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'fas fa-heart' : 'far fa-heart'"></i>
+            </button>
+
+            <!-- Store Image -->
+            <div th:if="${store.picUrl != null and !store.picUrl.isEmpty()}">
+                <img th:src="${store.picUrl}"
+                     th:alt="${store.name}"
+                     class="store-image"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="store-image-placeholder" style="display: none;">
+                    <div class="placeholder-icon">
+                        <i class="fas fa-utensils"></i>
+                        <div class="placeholder-text" th:text="${store.name}">Фото ресторана</div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${store.picUrl == null or store.picUrl.isEmpty()}" class="store-image-placeholder">
+                <div class="placeholder-icon">
+                    <i class="fas fa-utensils"></i>
+                    <div class="placeholder-text" th:text="${store.name}">Фото ресторана</div>
+                </div>
+            </div>
+
+            <!-- Store Content -->
+            <div class="store-content">
+                <!-- Store Header -->
+                <div class="store-header">
+                    <h5 class="store-name" th:text="${store.name}">Название ресторана</h5>
+
+                    <!-- Alternative favorite button inside header (if you prefer it here instead) -->
+                    <!--
+                    <button th:if="${isAuthenticated}"
+                            class="favorite-heart-btn header-favorite-btn"
+                            th:classappend="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'is-favorite' : ''"
+                            th:data-store-id="${store.id}"
+                            th:data-favorite-id="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id) ? store.favoriteId : ''}"
+                            th:title="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'Удалить из избранного' : 'Добавить в избранное'">
+                        <i th:class="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'fas fa-heart' : 'far fa-heart'"></i>
+                    </button>
+                    -->
+                </div>
+
+                <!-- Rating -->
+                <div class="store-rating" th:if="${store.rating != null}">
+                    <div class="rating-stars">
+                        <i class="fas fa-star" th:if="${store.rating >= 1}"></i>
+                        <i class="fas fa-star" th:if="${store.rating >= 2}"></i>
+                        <i class="fas fa-star" th:if="${store.rating >= 3}"></i>
+                        <i class="fas fa-star" th:if="${store.rating >= 4}"></i>
+                        <i class="fas fa-star" th:if="${store.rating >= 5}"></i>
+                    </div>
+                    <span class="rating-value" th:text="${store.rating}">4.5</span>
+                    <span class="text-muted">(120+ отзывов)</span>
+                </div>
+
+                <!-- Store Info -->
+                <div class="store-info">
+                    <div class="delivery-time">
+                        <i class="fas fa-clock"></i>
+                        <span th:text="${store.estimatedDeliveryTime} + ' мин'">30 мин</span>
+                    </div>
+                    <div class="delivery-fee" th:if="${store.deliveryFee != null and store.deliveryFee > 0}">
+                        <span th:text="${store.deliveryFee} + ' ₽'">100 ₽</span>
+                    </div>
+                    <div class="delivery-fee" th:if="${store.deliveryFee != null and store.deliveryFee == 0}">
+                        Бесплатно
+                    </div>
+                </div>
+
+                <!-- Address -->
+                <div class="store-address" th:if="${store.addressStreet}">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span th:text="${store.addressStreet + ', ' + store.addressCity}">Адрес ресторана</span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="store-actions">
+                    <!-- Order Button -->
+                    <button class="order-btn btn-primary"
+                            th:disabled="${!store.isActive}"
+                            th:onclick="|window.location.href='/stores/${store.id}'|">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span th:if="${store.isActive}">Заказать</span>
+                        <span th:unless="${store.isActive}">Закрыт</span>
+                    </button>
+
+                    <!-- Alternative: Add to Favorites Button (if you prefer button style) -->
+                    <!--
+                    <button th:if="${isAuthenticated and store.isActive}"
+                            class="btn btn-outline add-to-favorites-btn"
+                            th:classappend="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'btn-danger remove-from-favorites-btn' : ''"
+                            th:data-store-id="${store.id}"
+                            th:data-favorite-id="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id) ? store.favoriteId : ''}">
+                        <i th:class="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'fas fa-heart' : 'far fa-heart'"></i>
+                        <span th:if="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)}">В избранном</span>
+                        <span th:unless="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)}">В избранное</span>
+                    </button>
+                    -->
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Stores Grid -->
-  <div class="stores-grid" th:if="${stores != null and !stores.empty}">
-    <div th:each="store : ${stores}" class="store-card">
-      <!-- Store Status -->
-      <div th:class="${store.isActive} ? 'store-status' : 'store-status closed'"
-           th:text="${store.isActive} ? 'Открыт' : 'Закрыт'">
-        Открыт
-      </div>
+<!--    &lt;!&ndash; Stores Grid &ndash;&gt;-->
+<!--    <div class="stores-grid" th:if="${stores != null and !stores.empty}">-->
+<!--        <div th:each="store : ${stores}" class="store-card">-->
+<!--            &lt;!&ndash; Store Status &ndash;&gt;-->
+<!--            <div th:class="${store.isActive} ? 'store-status' : 'store-status closed'"-->
+<!--                 th:text="${store.isActive} ? 'Открыт' : 'Закрыт'">-->
+<!--                Открыт-->
+<!--            </div>-->
 
-      <!-- Store Image -->
-      <div th:if="${store.picUrl != null and !store.picUrl.isEmpty()}">
-        <img th:src="${store.picUrl}"
-             th:alt="${store.name}"
-             class="store-image"
-             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-        <div class="store-image-placeholder" style="display: none;">
-          <div class="placeholder-icon">
-            <i class="fas fa-utensils"></i>
-            <div class="placeholder-text" th:text="${store.name}">Фото ресторана</div>
-          </div>
-        </div>
-      </div>
-      <div th:if="${store.picUrl == null or store.picUrl.isEmpty()}" class="store-image-placeholder">
-        <div class="placeholder-icon">
-          <i class="fas fa-utensils"></i>
-          <div class="placeholder-text" th:text="${store.name}">Фото ресторана</div>
-        </div>
-      </div>
+<!--            &lt;!&ndash; Store Image &ndash;&gt;-->
+<!--            <div th:if="${store.picUrl != null and !store.picUrl.isEmpty()}">-->
+<!--                <img th:src="${store.picUrl}"-->
+<!--                     th:alt="${store.name}"-->
+<!--                     class="store-image"-->
+<!--                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">-->
+<!--                <div class="store-image-placeholder" style="display: none;">-->
+<!--                    <div class="placeholder-icon">-->
+<!--                        <i class="fas fa-utensils"></i>-->
+<!--                        <div class="placeholder-text" th:text="${store.name}">Фото ресторана</div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div th:if="${store.picUrl == null or store.picUrl.isEmpty()}" class="store-image-placeholder">-->
+<!--                <div class="placeholder-icon">-->
+<!--                    <i class="fas fa-utensils"></i>-->
+<!--                    <div class="placeholder-text" th:text="${store.name}">Фото ресторана</div>-->
+<!--                </div>-->
+<!--            </div>-->
 
-      <!-- Store Content -->
-      <div class="store-content">
-        <!-- Store Header -->
-        <div class="store-header">
-          <h5 class="store-name" th:text="${store.name}">Название ресторана</h5>
-          <button th:if="${isAuthenticated}"
-                  class="favorite-btn"
-                  th:classappend="${favoriteStoreIds.contains(store.id)} ? 'active' : ''"
-                  th:onclick="|toggleFavorite(${store.id})|">
-            <i th:class="${favoriteStoreIds.contains(store.id)} ? 'fas fa-heart' : 'far fa-heart'"></i>
-          </button>
-        </div>
+<!--            &lt;!&ndash; Store Content &ndash;&gt;-->
+<!--            <div class="store-content">-->
+<!--                &lt;!&ndash; Store Header &ndash;&gt;-->
+<!--                <div class="store-header">-->
+<!--                    <h5 class="store-name" th:text="${store.name}">Название ресторана</h5>-->
+<!--                    <button th:if="${isAuthenticated}"-->
+<!--                            class="favorite-btn"-->
+<!--                            th:classappend="${favoriteStoreIds.contains(store.id)} ? 'active' : ''"-->
+<!--                            th:onclick="|toggleFavorite(${store.id})|">-->
+<!--                        <i th:class="${favoriteStoreIds.contains(store.id)} ? 'fas fa-heart' : 'far fa-heart'"></i>-->
+<!--                    </button>-->
+<!--                </div>-->
 
-        <!-- Rating -->
-        <div class="store-rating" th:if="${store.rating != null}">
-          <div class="rating-stars">
-            <i class="fas fa-star" th:if="${store.rating >= 1}"></i>
-            <i class="fas fa-star" th:if="${store.rating >= 2}"></i>
-            <i class="fas fa-star" th:if="${store.rating >= 3}"></i>
-            <i class="fas fa-star" th:if="${store.rating >= 4}"></i>
-            <i class="fas fa-star" th:if="${store.rating >= 5}"></i>
-          </div>
-          <span class="rating-value" th:text="${store.rating}">4.5</span>
-          <span class="text-muted">(120+ отзывов)</span>
-        </div>
+<!--                &lt;!&ndash; Rating &ndash;&gt;-->
+<!--                <div class="store-rating" th:if="${store.rating != null}">-->
+<!--                    <div class="rating-stars">-->
+<!--                        <i class="fas fa-star" th:if="${store.rating >= 1}"></i>-->
+<!--                        <i class="fas fa-star" th:if="${store.rating >= 2}"></i>-->
+<!--                        <i class="fas fa-star" th:if="${store.rating >= 3}"></i>-->
+<!--                        <i class="fas fa-star" th:if="${store.rating >= 4}"></i>-->
+<!--                        <i class="fas fa-star" th:if="${store.rating >= 5}"></i>-->
+<!--                    </div>-->
+<!--                    <span class="rating-value" th:text="${store.rating}">4.5</span>-->
+<!--                    <span class="text-muted">(120+ отзывов)</span>-->
+<!--                </div>-->
 
-        <!-- Store Info -->
-        <div class="store-info">
-          <div class="delivery-time">
-            <i class="fas fa-clock"></i>
-            <span th:text="${store.estimatedDeliveryTime} + ' мин'">30 мин</span>
-          </div>
-          <div class="delivery-fee" th:if="${store.deliveryFee != null and store.deliveryFee > 0}">
-            <span th:text="${store.deliveryFee} + ' ₽'">100 ₽</span>
-          </div>
-          <div class="delivery-fee" th:if="${store.deliveryFee != null and store.deliveryFee == 0}">
-            Бесплатно
-          </div>
-        </div>
+<!--                &lt;!&ndash; Store Info &ndash;&gt;-->
+<!--                <div class="store-info">-->
+<!--                    <div class="delivery-time">-->
+<!--                        <i class="fas fa-clock"></i>-->
+<!--                        <span th:text="${store.estimatedDeliveryTime} + ' мин'">30 мин</span>-->
+<!--                    </div>-->
+<!--                    <div class="delivery-fee" th:if="${store.deliveryFee != null and store.deliveryFee > 0}">-->
+<!--                        <span th:text="${store.deliveryFee} + ' ₽'">100 ₽</span>-->
+<!--                    </div>-->
+<!--                    <div class="delivery-fee" th:if="${store.deliveryFee != null and store.deliveryFee == 0}">-->
+<!--                        Бесплатно-->
+<!--                    </div>-->
+<!--                </div>-->
 
-        <!-- Address -->
-        <div class="store-address" th:if="${store.addressStreet}">
-          <i class="fas fa-map-marker-alt"></i>
-          <span th:text="${store.addressStreet + ', ' + store.addressCity}">Адрес ресторана</span>
-        </div>
+<!--                &lt;!&ndash; Address &ndash;&gt;-->
+<!--                <div class="store-address" th:if="${store.addressStreet}">-->
+<!--                    <i class="fas fa-map-marker-alt"></i>-->
+<!--                    <span th:text="${store.addressStreet + ', ' + store.addressCity}">Адрес ресторана</span>-->
+<!--                </div>-->
 
-        <!-- Order Button -->
-        <button class="order-btn"
-                th:disabled="${!store.isActive}"
-                th:onclick="|window.location.href='/stores/${store.id}'|">
-          <i class="fas fa-shopping-cart me-1"></i>
-          <span th:if="${store.isActive}">Заказать</span>
-          <span th:unless="${store.isActive}">Закрыт</span>
-        </button>
-      </div>
+<!--                &lt;!&ndash; Order Button &ndash;&gt;-->
+<!--                <button class="order-btn"-->
+<!--                        th:disabled="${!store.isActive}"-->
+<!--                        th:onclick="|window.location.href='/stores/${store.id}'|">-->
+<!--                    <i class="fas fa-shopping-cart me-1"></i>-->
+<!--                    <span th:if="${store.isActive}">Заказать</span>-->
+<!--                    <span th:unless="${store.isActive}">Закрыт</span>-->
+<!--                </button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+
+    <!-- Empty State -->
+    <div th:if="${stores == null or stores.empty}" class="empty-state">
+        <i class="fas fa-search"></i>
+        <h3>Рестораны не найдены</h3>
+        <p>Попробуйте изменить параметры поиска или выберите другой город</p>
+        <a href="/" class="btn btn-primary">
+            <i class="fas fa-home me-1"></i>
+            На главную
+        </a>
     </div>
-  </div>
 
-  <!-- Empty State -->
-  <div th:if="${stores == null or stores.empty}" class="empty-state">
-    <i class="fas fa-search"></i>
-    <h3>Рестораны не найдены</h3>
-    <p>Попробуйте изменить параметры поиска или выберите другой город</p>
-    <a href="/" class="btn btn-primary">
-      <i class="fas fa-home me-1"></i>
-      На главную
-    </a>
-  </div>
+    <!-- Pagination -->
+    <div class="pagination-container" th:if="${totalPages > 1}">
+        <nav>
+            <ul class="pagination">
+                <!-- Previous -->
+                <li class="page-item" th:classappend="${!hasPrevious} ? 'disabled' : ''">
+                    <a class="page-link"
+                       th:href="${hasPrevious} ? ('/?page=' + ${previousPage} + '&size=' + ${pageSize} + (${search} != null ? ('&search=' + ${search}) : '') + (${city} != null ? ('&city=' + ${city}) : '') + (${sortBy} != null ? ('&sortBy=' + ${sortBy}) : '')) : '#'"
+                       th:attr="aria-disabled=${!hasPrevious}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
 
-  <!-- Pagination -->
-  <div class="pagination-container" th:if="${totalPages > 1}">
-    <nav>
-      <ul class="pagination">
-        <!-- Previous -->
-        <li class="page-item" th:classappend="${!hasPrevious} ? 'disabled' : ''">
-          <a class="page-link"
-             th:href="${hasPrevious} ? ('/?page=' + ${previousPage} + '&size=' + ${pageSize} + (${search} != null ? ('&search=' + ${search}) : '') + (${city} != null ? ('&city=' + ${city}) : '') + (${sortBy} != null ? ('&sortBy=' + ${sortBy}) : '')) : '#'"
-             th:attr="aria-disabled=${!hasPrevious}">
-            <i class="fas fa-chevron-left"></i>
-          </a>
-        </li>
+                <!-- Page Numbers -->
+                <li class="page-item"
+                    th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                    th:classappend="${pageNum == currentPage} ? 'active' : ''">
+                    <a class="page-link"
+                       th:href="'/?page=' + ${pageNum} + '&size=' + ${pageSize} + (${search} != null ? ('&search=' + ${search}) : '') + (${city} != null ? ('&city=' + ${city}) : '') + (${sortBy} != null ? ('&sortBy=' + ${sortBy}) : '')"
+                       th:text="${pageNum + 1}">1</a>
+                </li>
 
-        <!-- Page Numbers -->
-        <li class="page-item"
-            th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
-            th:classappend="${pageNum == currentPage} ? 'active' : ''">
-          <a class="page-link"
-             th:href="'/?page=' + ${pageNum} + '&size=' + ${pageSize} + (${search} != null ? ('&search=' + ${search}) : '') + (${city} != null ? ('&city=' + ${city}) : '') + (${sortBy} != null ? ('&sortBy=' + ${sortBy}) : '')"
-             th:text="${pageNum + 1}">1</a>
-        </li>
-
-        <!-- Next -->
-        <li class="page-item" th:classappend="${!hasNext} ? 'disabled' : ''">
-          <a class="page-link"
-             th:href="${hasNext} ? ('/?page=' + ${nextPage} + '&size=' + ${pageSize} + (${search} != null ? ('&search=' + ${search}) : '') + (${city} != null ? ('&city=' + ${city}) : '') + (${sortBy} != null ? ('&sortBy=' + ${sortBy}) : '')) : '#'"
-             th:attr="aria-disabled=${!hasNext}">
-            <i class="fas fa-chevron-right"></i>
-          </a>
-        </li>
-      </ul>
-    </nav>
-  </div>
+                <!-- Next -->
+                <li class="page-item" th:classappend="${!hasNext} ? 'disabled' : ''">
+                    <a class="page-link"
+                       th:href="${hasNext} ? ('/?page=' + ${nextPage} + '&size=' + ${pageSize} + (${search} != null ? ('&search=' + ${search}) : '') + (${city} != null ? ('&city=' + ${city}) : '') + (${sortBy} != null ? ('&sortBy=' + ${sortBy}) : '')) : '#'"
+                       th:attr="aria-disabled=${!hasNext}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </div>
 <script src="/js/bolt-navigation.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
-  // Toggle Favorite Function
-  function toggleFavorite(storeId) {
-    console.log(`🔄 Toggling favorite for store ${storeId}`);
+    // Toggle Favorite Function
+    function toggleFavorite(storeId) {
+        console.log(`🔄 Toggling favorite for store ${storeId}`);
 
-    if (!isUserAuthenticated()) {
-      showNotification('Необходимо войти в систему для добавления в избранное', 'error');
-      return;
-    }
+        if (!isUserAuthenticated()) {
+            showNotification('Необходимо войти в систему для добавления в избранное', 'error');
+            return;
+        }
 
-    const authHeader = getAuthHeader();
-    if (!authHeader) {
-      showNotification('Ошибка авторизации. Войдите заново.', 'error');
-      return;
-    }
+        const authHeader = getAuthHeader();
+        if (!authHeader) {
+            showNotification('Ошибка авторизации. Войдите заново.', 'error');
+            return;
+        }
 
-    console.log('🔐 Using auth header for favorite toggle');
+        console.log('🔐 Using auth header for favorite toggle');
 
-    fetch(`/api/stores/${storeId}/toggle-favorite`, {
-      method: 'POST',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json'
-      }
-    })
+        fetch(`/api/stores/${storeId}/toggle-favorite`, {
+            method: 'POST',
+            headers: {
+                'Authorization': authHeader,
+                'Content-Type': 'application/json'
+            }
+        })
             .then(response => {
-              console.log(`📡 Response status: ${response.status}`);
-              return response.json();
+                console.log(`📡 Response status: ${response.status}`);
+                return response.json();
             })
             .then(data => {
-              console.log('📦 Response data:', data);
+                console.log('📦 Response data:', data);
 
-              if (data.success) {
-                // Find the button and update it
-                const buttons = document.querySelectorAll(`[onclick*="toggleFavorite(${storeId})"]`);
-                buttons.forEach(btn => {
-                  const icon = btn.querySelector('i');
+                if (data.success) {
+                    // Find the button and update it
+                    const buttons = document.querySelectorAll(`[onclick*="toggleFavorite(${storeId})"]`);
+                    buttons.forEach(btn => {
+                        const icon = btn.querySelector('i');
 
-                  if (data.isFavorite) {
-                    btn.classList.add('active');
-                    if (icon) icon.className = 'fas fa-heart';
-                  } else {
-                    btn.classList.remove('active');
-                    if (icon) icon.className = 'far fa-heart';
-                  }
-                });
+                        if (data.isFavorite) {
+                            btn.classList.add('active');
+                            if (icon) icon.className = 'fas fa-heart';
+                        } else {
+                            btn.classList.remove('active');
+                            if (icon) icon.className = 'far fa-heart';
+                        }
+                    });
 
-                showNotification(data.message || 'Избранное обновлено', 'success');
-              } else {
-                showNotification(data.message || 'Ошибка обновления избранного', 'error');
-              }
+                    showNotification(data.message || 'Избранное обновлено', 'success');
+                } else {
+                    showNotification(data.message || 'Ошибка обновления избранного', 'error');
+                }
             })
             .catch(error => {
-              console.error('💥 Error toggling favorite:', error);
-              showNotification('Ошибка при обновлении избранного', 'error');
+                console.error('💥 Error toggling favorite:', error);
+                showNotification('Ошибка при обновлении избранного', 'error');
             });
-  }
-
-  // Enhanced auth token management
-  function getAuthToken() {
-    // 1. Try to get from meta tag (preferred method)
-    const metaToken = document.querySelector('meta[name="auth-token"]');
-    if (metaToken && metaToken.getAttribute('content')) {
-      const token = metaToken.getAttribute('content').trim();
-      if (token && token !== '') {
-        console.log('✅ Token found in meta tag');
-        return token;
-      }
     }
 
-    // 2. Try to get from localStorage
-    const localToken = localStorage.getItem('authToken');
-    if (localToken) {
-      console.log('✅ Token found in localStorage');
-      return localToken;
-    }
-
-    // 3. Try to get from sessionStorage
-    const sessionToken = sessionStorage.getItem('authToken');
-    if (sessionToken) {
-      console.log('✅ Token found in sessionStorage');
-      return sessionToken;
-    }
-
-    // 4. Try to get from cookie
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-      const [name, value] = cookie.trim().split('=');
-      if (name === 'authToken' && value) {
-        console.log('✅ Token found in cookie');
-        return value;
-      }
-    }
-
-    console.warn('⚠️ No auth token found');
-    return null;
-  }
-
-  function getAuthHeader() {
-    // 1. Try to get full header from meta tag
-    const metaHeader = document.querySelector('meta[name="auth-header"]');
-    if (metaHeader && metaHeader.getAttribute('content')) {
-      const header = metaHeader.getAttribute('content').trim();
-      if (header && header !== '' && header.startsWith('Bearer ')) {
-        return header;
-      }
-    }
-
-    // 2. Construct from token
-    const token = getAuthToken();
-    if (token) {
-      return `Bearer ${token}`;
-    }
-
-    return null;
-  }
-
-  function isUserAuthenticated() {
-    const metaAuth = document.querySelector('meta[name="is-authenticated"]');
-    if (metaAuth) {
-      return metaAuth.getAttribute('content') === 'true';
-    }
-
-    return getAuthToken() !== null;
-  }
-
-  // Show notification
-  function showNotification(message, type) {
-    // Simple notification implementation
-    const notification = document.createElement('div');
-    notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
-    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
-    notification.textContent = message;
-
-    document.body.appendChild(notification);
-
-    setTimeout(() => {
-      notification.remove();
-    }, 3000);
-  }
-
-  // Debug information on page load
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('🔍 Auth Debug Info:');
-    console.log('- Is Authenticated:', isUserAuthenticated());
-    console.log('- Auth Token:', getAuthToken() ? 'Present' : 'Missing');
-    console.log('- Auth Header:', getAuthHeader() ? 'Present' : 'Missing');
-
-    // Store card animations and hover effects
-    const storeCards = document.querySelectorAll('.store-card');
-    storeCards.forEach((card, index) => {
-      // Stagger animation
-      card.style.animationDelay = `${index * 0.1}s`;
-
-      // Enhanced hover effects
-      card.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-8px) scale(1.02)';
-        this.style.boxShadow = 'var(--shadow-hover)';
-      });
-
-      card.addEventListener('mouseleave', function() {
-        this.style.transform = 'translateY(0) scale(1)';
-        this.style.boxShadow = 'var(--shadow)';
-      });
-    });
-
-    // Image error handling
-    const images = document.querySelectorAll('.store-image');
-    images.forEach((img) => {
-      img.addEventListener('error', function() {
-        console.log('Image failed to load:', this.src);
-        this.style.display = 'none';
-        const placeholder = this.nextElementSibling;
-        if (placeholder && placeholder.classList.contains('store-image-placeholder')) {
-          placeholder.style.display = 'flex';
+    // Enhanced auth token management
+    function getAuthToken() {
+        // 1. Try to get from meta tag (preferred method)
+        const metaToken = document.querySelector('meta[name="auth-token"]');
+        if (metaToken && metaToken.getAttribute('content')) {
+            const token = metaToken.getAttribute('content').trim();
+            if (token && token !== '') {
+                console.log('✅ Token found in meta tag');
+                return token;
+            }
         }
-      });
 
-      img.addEventListener('load', function() {
-        console.log('Image loaded successfully:', this.src);
-      });
+        // 2. Try to get from localStorage
+        const localToken = localStorage.getItem('authToken');
+        if (localToken) {
+            console.log('✅ Token found in localStorage');
+            return localToken;
+        }
+
+        // 3. Try to get from sessionStorage
+        const sessionToken = sessionStorage.getItem('authToken');
+        if (sessionToken) {
+            console.log('✅ Token found in sessionStorage');
+            return sessionToken;
+        }
+
+        // 4. Try to get from cookie
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'authToken' && value) {
+                console.log('✅ Token found in cookie');
+                return value;
+            }
+        }
+
+        console.warn('⚠️ No auth token found');
+        return null;
+    }
+
+    function getAuthHeader() {
+        // 1. Try to get full header from meta tag
+        const metaHeader = document.querySelector('meta[name="auth-header"]');
+        if (metaHeader && metaHeader.getAttribute('content')) {
+            const header = metaHeader.getAttribute('content').trim();
+            if (header && header !== '' && header.startsWith('Bearer ')) {
+                return header;
+            }
+        }
+
+        // 2. Construct from token
+        const token = getAuthToken();
+        if (token) {
+            return `Bearer ${token}`;
+        }
+
+        return null;
+    }
+
+    function isUserAuthenticated() {
+        const metaAuth = document.querySelector('meta[name="is-authenticated"]');
+        if (metaAuth) {
+            return metaAuth.getAttribute('content') === 'true';
+        }
+
+        return getAuthToken() !== null;
+    }
+
+    // Show notification
+    function showNotification(message, type) {
+        // Simple notification implementation
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // Debug information on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('🔍 Auth Debug Info:');
+        console.log('- Is Authenticated:', isUserAuthenticated());
+        console.log('- Auth Token:', getAuthToken() ? 'Present' : 'Missing');
+        console.log('- Auth Header:', getAuthHeader() ? 'Present' : 'Missing');
+
+        // Store card animations and hover effects
+        const storeCards = document.querySelectorAll('.store-card');
+        storeCards.forEach((card, index) => {
+            // Stagger animation
+            card.style.animationDelay = `${index * 0.1}s`;
+
+            // Enhanced hover effects
+            card.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-8px) scale(1.02)';
+                this.style.boxShadow = 'var(--shadow-hover)';
+            });
+
+            card.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0) scale(1)';
+                this.style.boxShadow = 'var(--shadow)';
+            });
+        });
+
+        // Image error handling
+        const images = document.querySelectorAll('.store-image');
+        images.forEach((img) => {
+            img.addEventListener('error', function () {
+                console.log('Image failed to load:', this.src);
+                this.style.display = 'none';
+                const placeholder = this.nextElementSibling;
+                if (placeholder && placeholder.classList.contains('store-image-placeholder')) {
+                    placeholder.style.display = 'flex';
+                }
+            });
+
+            img.addEventListener('load', function () {
+                console.log('Image loaded successfully:', this.src);
+            });
+        });
+
+        // Enhanced search functionality
+        const searchInput = document.querySelector('.search-input[name="search"]');
+        if (searchInput) {
+            let searchTimeout;
+            searchInput.addEventListener('input', function () {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    console.log('Search query:', this.value);
+                }, 300);
+            });
+        }
     });
 
-    // Enhanced search functionality
+    // Search auto-complete (optional enhancement)
     const searchInput = document.querySelector('.search-input[name="search"]');
     if (searchInput) {
-      let searchTimeout;
-      searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(() => {
-          console.log('Search query:', this.value);
-        }, 300);
-      });
+        let searchTimeout;
+        searchInput.addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                // Implement search suggestions if needed
+            }, 300);
+        });
     }
-  });
-
-  // Search auto-complete (optional enhancement)
-  const searchInput = document.querySelector('.search-input[name="search"]');
-  if (searchInput) {
-    let searchTimeout;
-    searchInput.addEventListener('input', function() {
-      clearTimeout(searchTimeout);
-      searchTimeout = setTimeout(() => {
-        // Implement search suggestions if needed
-      }, 300);
-    });
-  }
 </script>
 </body>
 </html>

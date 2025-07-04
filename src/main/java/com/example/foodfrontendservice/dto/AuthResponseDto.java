@@ -14,4 +14,5 @@ public class AuthResponseDto {
     @Builder.Default
     private String type = "Bearer";
     private UserResponseDto user;
+    private Boolean rememberMe;
 }
