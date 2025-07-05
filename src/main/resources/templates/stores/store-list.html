@@ -86,7 +86,6 @@
                     class="favorite-heart-btn store-favorite-btn"
                     th:classappend="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'is-favorite' : ''"
                     th:data-store-id="${store.id}"
-                    th:data-favorite-id="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id) ? store.favoriteId : ''}"
                     th:title="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'Удалить из избранного' : 'Добавить в избранное'">
                 <i th:class="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'fas fa-heart' : 'far fa-heart'"></i>
             </button>
@@ -117,17 +116,7 @@
                 <div class="store-header">
                     <h5 class="store-name" th:text="${store.name}">Название ресторана</h5>
 
-                    <!-- Alternative favorite button inside header (if you prefer it here instead) -->
-                    <!--
-                    <button th:if="${isAuthenticated}"
-                            class="favorite-heart-btn header-favorite-btn"
-                            th:classappend="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'is-favorite' : ''"
-                            th:data-store-id="${store.id}"
-                            th:data-favorite-id="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id) ? store.favoriteId : ''}"
-                            th:title="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'Удалить из избранного' : 'Добавить в избранное'">
-                        <i th:class="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'fas fa-heart' : 'far fa-heart'"></i>
-                    </button>
-                    -->
+
                 </div>
 
                 <!-- Rating -->
@@ -173,110 +162,11 @@
                         <span th:if="${store.isActive}">Заказать</span>
                         <span th:unless="${store.isActive}">Закрыт</span>
                     </button>
-
-                    <!-- Alternative: Add to Favorites Button (if you prefer button style) -->
-                    <!--
-                    <button th:if="${isAuthenticated and store.isActive}"
-                            class="btn btn-outline add-to-favorites-btn"
-                            th:classappend="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'btn-danger remove-from-favorites-btn' : ''"
-                            th:data-store-id="${store.id}"
-                            th:data-favorite-id="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id) ? store.favoriteId : ''}">
-                        <i th:class="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)} ? 'fas fa-heart' : 'far fa-heart'"></i>
-                        <span th:if="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)}">В избранном</span>
-                        <span th:unless="${favoriteStoreIds != null and favoriteStoreIds.contains(store.id)}">В избранное</span>
-                    </button>
-                    -->
                 </div>
             </div>
         </div>
     </div>
 
-<!--    &lt;!&ndash; Stores Grid &ndash;&gt;-->
-<!--    <div class="stores-grid" th:if="${stores != null and !stores.empty}">-->
-<!--        <div th:each="store : ${stores}" class="store-card">-->
-<!--            &lt;!&ndash; Store Status &ndash;&gt;-->
-<!--            <div th:class="${store.isActive} ? 'store-status' : 'store-status closed'"-->
-<!--                 th:text="${store.isActive} ? 'Открыт' : 'Закрыт'">-->
-<!--                Открыт-->
-<!--            </div>-->
-
-<!--            &lt;!&ndash; Store Image &ndash;&gt;-->
-<!--            <div th:if="${store.picUrl != null and !store.picUrl.isEmpty()}">-->
-<!--                <img th:src="${store.picUrl}"-->
-<!--                     th:alt="${store.name}"-->
-<!--                     class="store-image"-->
-<!--                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">-->
-<!--                <div class="store-image-placeholder" style="display: none;">-->
-<!--                    <div class="placeholder-icon">-->
-<!--                        <i class="fas fa-utensils"></i>-->
-<!--                        <div class="placeholder-text" th:text="${store.name}">Фото ресторана</div>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
-<!--            <div th:if="${store.picUrl == null or store.picUrl.isEmpty()}" class="store-image-placeholder">-->
-<!--                <div class="placeholder-icon">-->
-<!--                    <i class="fas fa-utensils"></i>-->
-<!--                    <div class="placeholder-text" th:text="${store.name}">Фото ресторана</div>-->
-<!--                </div>-->
-<!--            </div>-->
-
-<!--            &lt;!&ndash; Store Content &ndash;&gt;-->
-<!--            <div class="store-content">-->
-<!--                &lt;!&ndash; Store Header &ndash;&gt;-->
-<!--                <div class="store-header">-->
-<!--                    <h5 class="store-name" th:text="${store.name}">Название ресторана</h5>-->
-<!--                    <button th:if="${isAuthenticated}"-->
-<!--                            class="favorite-btn"-->
-<!--                            th:classappend="${favoriteStoreIds.contains(store.id)} ? 'active' : ''"-->
-<!--                            th:onclick="|toggleFavorite(${store.id})|">-->
-<!--                        <i th:class="${favoriteStoreIds.contains(store.id)} ? 'fas fa-heart' : 'far fa-heart'"></i>-->
-<!--                    </button>-->
-<!--                </div>-->
-
-<!--                &lt;!&ndash; Rating &ndash;&gt;-->
-<!--                <div class="store-rating" th:if="${store.rating != null}">-->
-<!--                    <div class="rating-stars">-->
-<!--                        <i class="fas fa-star" th:if="${store.rating >= 1}"></i>-->
-<!--                        <i class="fas fa-star" th:if="${store.rating >= 2}"></i>-->
-<!--                        <i class="fas fa-star" th:if="${store.rating >= 3}"></i>-->
-<!--                        <i class="fas fa-star" th:if="${store.rating >= 4}"></i>-->
-<!--                        <i class="fas fa-star" th:if="${store.rating >= 5}"></i>-->
-<!--                    </div>-->
-<!--                    <span class="rating-value" th:text="${store.rating}">4.5</span>-->
-<!--                    <span class="text-muted">(120+ отзывов)</span>-->
-<!--                </div>-->
-
-<!--                &lt;!&ndash; Store Info &ndash;&gt;-->
-<!--                <div class="store-info">-->
-<!--                    <div class="delivery-time">-->
-<!--                        <i class="fas fa-clock"></i>-->
-<!--                        <span th:text="${store.estimatedDeliveryTime} + ' мин'">30 мин</span>-->
-<!--                    </div>-->
-<!--                    <div class="delivery-fee" th:if="${store.deliveryFee != null and store.deliveryFee > 0}">-->
-<!--                        <span th:text="${store.deliveryFee} + ' ₽'">100 ₽</span>-->
-<!--                    </div>-->
-<!--                    <div class="delivery-fee" th:if="${store.deliveryFee != null and store.deliveryFee == 0}">-->
-<!--                        Бесплатно-->
-<!--                    </div>-->
-<!--                </div>-->
-
-<!--                &lt;!&ndash; Address &ndash;&gt;-->
-<!--                <div class="store-address" th:if="${store.addressStreet}">-->
-<!--                    <i class="fas fa-map-marker-alt"></i>-->
-<!--                    <span th:text="${store.addressStreet + ', ' + store.addressCity}">Адрес ресторана</span>-->
-<!--                </div>-->
-
-<!--                &lt;!&ndash; Order Button &ndash;&gt;-->
-<!--                <button class="order-btn"-->
-<!--                        th:disabled="${!store.isActive}"-->
-<!--                        th:onclick="|window.location.href='/stores/${store.id}'|">-->
-<!--                    <i class="fas fa-shopping-cart me-1"></i>-->
-<!--                    <span th:if="${store.isActive}">Заказать</span>-->
-<!--                    <span th:unless="${store.isActive}">Закрыт</span>-->
-<!--                </button>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--    </div>-->
 
 
     <!-- Empty State -->
@@ -327,52 +217,54 @@
 <script src="/js/bolt-navigation.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+// ✅ УЛУЧШЕННЫЙ JavaScript для работы с избранным
 <script>
-    // Toggle Favorite Function
+    // ✅ Получаем токен из Thymeleaf (аналогично странице избранного)
+    const jwtToken = '[[${jwtToken}]]';
+    const isAuthenticated = [[${isAuthenticated}]];
+
+    // ✅ ОСНОВНАЯ ФУНКЦИЯ: Toggle Favorite (используется в HTML)
     function toggleFavorite(storeId) {
         console.log(`🔄 Toggling favorite for store ${storeId}`);
 
-        if (!isUserAuthenticated()) {
+        if (!isAuthenticated || !jwtToken) {
             showNotification('Необходимо войти в систему для добавления в избранное', 'error');
             return;
         }
 
-        const authHeader = getAuthHeader();
-        if (!authHeader) {
-            showNotification('Ошибка авторизации. Войдите заново.', 'error');
-            return;
-        }
+        console.log('🔐 Using JWT token for favorite toggle');
 
-        console.log('🔐 Using auth header for favorite toggle');
+        // Показываем loading состояние
+        const buttons = document.querySelectorAll(`[data-store-id="${storeId}"]`);
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.className = 'fas fa-spinner fa-spin';
+            }
+        });
 
-        fetch(`/api/stores/${storeId}/toggle-favorite`, {
+        fetch(`/stores/api/${storeId}/toggle-favorite`, {
             method: 'POST',
             headers: {
-                'Authorization': authHeader,
-                'Content-Type': 'application/json'
+                'Authorization': `Bearer ${jwtToken}`,
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             }
         })
             .then(response => {
                 console.log(`📡 Response status: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 return response.json();
             })
             .then(data => {
                 console.log('📦 Response data:', data);
 
                 if (data.success) {
-                    // Find the button and update it
-                    const buttons = document.querySelectorAll(`[onclick*="toggleFavorite(${storeId})"]`);
-                    buttons.forEach(btn => {
-                        const icon = btn.querySelector('i');
-
-                        if (data.isFavorite) {
-                            btn.classList.add('active');
-                            if (icon) icon.className = 'fas fa-heart';
-                        } else {
-                            btn.classList.remove('active');
-                            if (icon) icon.className = 'far fa-heart';
-                        }
-                    });
+                    // Обновляем все кнопки для этого магазина
+                    updateFavoriteButtons(storeId, data.isFavorite);
 
                     showNotification(data.message || 'Избранное обновлено', 'success');
                 } else {
@@ -382,98 +274,154 @@
             .catch(error => {
                 console.error('💥 Error toggling favorite:', error);
                 showNotification('Ошибка при обновлении избранного', 'error');
+            })
+            .finally(() => {
+                // Восстанавливаем состояние кнопок
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                });
             });
     }
 
-    // Enhanced auth token management
-    function getAuthToken() {
-        // 1. Try to get from meta tag (preferred method)
-        const metaToken = document.querySelector('meta[name="auth-token"]');
-        if (metaToken && metaToken.getAttribute('content')) {
-            const token = metaToken.getAttribute('content').trim();
-            if (token && token !== '') {
-                console.log('✅ Token found in meta tag');
-                return token;
+    // ✅ ФУНКЦИЯ: Обновление состояния кнопок избранного
+    function updateFavoriteButtons(storeId, isFavorite) {
+        const buttons = document.querySelectorAll(`[data-store-id="${storeId}"]`);
+
+        buttons.forEach(btn => {
+            const icon = btn.querySelector('i');
+
+            if (isFavorite) {
+                btn.classList.add('is-favorite');
+                btn.setAttribute('title', 'Удалить из избранного');
+                if (icon) icon.className = 'fas fa-heart';
+            } else {
+                btn.classList.remove('is-favorite');
+                btn.setAttribute('title', 'Добавить в избранное');
+                if (icon) icon.className = 'far fa-heart';
             }
-        }
-
-        // 2. Try to get from localStorage
-        const localToken = localStorage.getItem('authToken');
-        if (localToken) {
-            console.log('✅ Token found in localStorage');
-            return localToken;
-        }
-
-        // 3. Try to get from sessionStorage
-        const sessionToken = sessionStorage.getItem('authToken');
-        if (sessionToken) {
-            console.log('✅ Token found in sessionStorage');
-            return sessionToken;
-        }
-
-        // 4. Try to get from cookie
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            const [name, value] = cookie.trim().split('=');
-            if (name === 'authToken' && value) {
-                console.log('✅ Token found in cookie');
-                return value;
-            }
-        }
-
-        console.warn('⚠️ No auth token found');
-        return null;
+        });
     }
 
-    function getAuthHeader() {
-        // 1. Try to get full header from meta tag
-        const metaHeader = document.querySelector('meta[name="auth-header"]');
-        if (metaHeader && metaHeader.getAttribute('content')) {
-            const header = metaHeader.getAttribute('content').trim();
-            if (header && header !== '' && header.startsWith('Bearer ')) {
-                return header;
+    // ✅ АЛЬТЕРНАТИВНЫЕ ФУНКЦИИ (если нужны отдельные кнопки)
+    function addToFavorites(storeId) {
+        console.log(`➕ Adding store ${storeId} to favorites`);
+
+        if (!isAuthenticated || !jwtToken) {
+            showNotification('Необходимо войти в систему', 'error');
+            return;
+        }
+
+        fetch(`/stores/api/${storeId}/add-favorite`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${jwtToken}`,
+                'Content-Type': 'application/json'
             }
-        }
-
-        // 2. Construct from token
-        const token = getAuthToken();
-        if (token) {
-            return `Bearer ${token}`;
-        }
-
-        return null;
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateFavoriteButtons(storeId, true);
+                    showNotification(data.message, 'success');
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding to favorites:', error);
+                showNotification('Ошибка добавления в избранное', 'error');
+            });
     }
 
-    function isUserAuthenticated() {
-        const metaAuth = document.querySelector('meta[name="is-authenticated"]');
-        if (metaAuth) {
-            return metaAuth.getAttribute('content') === 'true';
+    function removeFromFavorites(storeId) {
+        console.log(`➖ Removing store ${storeId} from favorites`);
+
+        if (!isAuthenticated || !jwtToken) {
+            showNotification('Необходимо войти в систему', 'error');
+            return;
         }
 
-        return getAuthToken() !== null;
+        fetch(`/stores/api/${storeId}/remove-favorite`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${jwtToken}`,
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateFavoriteButtons(storeId, false);
+                    showNotification(data.message, 'success');
+                } else {
+                    showNotification(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error removing from favorites:', error);
+                showNotification('Ошибка удаления из избранного', 'error');
+            });
     }
 
-    // Show notification
+    // ✅ ФУНКЦИЯ: Показ уведомлений
     function showNotification(message, type) {
-        // Simple notification implementation
+        // Удаляем предыдущие уведомления
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(n => n.remove());
+
+        // Создаем новое уведомление
         const notification = document.createElement('div');
-        notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
-        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999;';
-        notification.textContent = message;
+        notification.className = `notification alert alert-${type === 'success' ? 'success' : 'danger'} position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; max-width: 300px;';
+        notification.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                <span>${message}</span>
+                <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
 
         document.body.appendChild(notification);
 
+        // Автоматическое удаление через 3 секунды
         setTimeout(() => {
-            notification.remove();
+            if (notification.parentElement) {
+                notification.remove();
+            }
         }, 3000);
     }
 
-    // Debug information on page load
+    // ✅ СОВМЕСТИМОСТЬ: Старые функции для обратной совместимости
+    function getAuthToken() {
+        return jwtToken;
+    }
+
+    function getAuthHeader() {
+        return jwtToken ? `Bearer ${jwtToken}` : null;
+    }
+
+    function isUserAuthenticated() {
+        return isAuthenticated && !!jwtToken;
+    }
+
+    // ✅ ИНИЦИАЛИЗАЦИЯ
     document.addEventListener('DOMContentLoaded', function () {
-        console.log('🔍 Auth Debug Info:');
-        console.log('- Is Authenticated:', isUserAuthenticated());
-        console.log('- Auth Token:', getAuthToken() ? 'Present' : 'Missing');
-        console.log('- Auth Header:', getAuthHeader() ? 'Present' : 'Missing');
+        console.log('🔍 Store List Auth Debug Info:');
+        console.log('- Is Authenticated:', isAuthenticated);
+        console.log('- JWT Token:', jwtToken ? 'Present' : 'Missing');
+
+        // Добавляем обработчики событий для кнопок избранного
+        const favoriteButtons = document.querySelectorAll('.favorite-heart-btn, .store-favorite-btn');
+        favoriteButtons.forEach(btn => {
+            const storeId = btn.getAttribute('data-store-id');
+            if (storeId) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleFavorite(parseInt(storeId));
+                });
+            }
+        });
 
         // Store card animations and hover effects
         const storeCards = document.querySelectorAll('.store-card');
@@ -522,18 +470,7 @@
             });
         }
     });
-
-    // Search auto-complete (optional enhancement)
-    const searchInput = document.querySelector('.search-input[name="search"]');
-    if (searchInput) {
-        let searchTimeout;
-        searchInput.addEventListener('input', function () {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                // Implement search suggestions if needed
-            }, 300);
-        });
-    }
 </script>
+
 </body>
 </html>
