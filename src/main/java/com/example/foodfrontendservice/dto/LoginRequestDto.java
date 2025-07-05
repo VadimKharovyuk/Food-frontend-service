@@ -7,14 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-//
-//import lombok.Data;
-//
-//@Data
-//public class LoginRequestDto {
-//    private String email;
-//    private String password;
-//}
 
 @Builder
 @Data
@@ -58,18 +50,11 @@ public class LoginRequestDto {
         log.info("🐛 rememberMe установлен в: {}", this.rememberMe);
     }
 
-    // ✅ АЛЬТЕРНАТИВНЫЙ SETTER для Boolean
-    public void setRememberMe(Boolean rememberMe) {
-        log.info("🐛 setRememberMe(Boolean) вызван с: {}", rememberMe);
-        this.rememberMe = rememberMe != null ? rememberMe : false;
-    }
 
-    // ✅ NULL-SAFE GETTER
     public Boolean getRememberMe() {
         return this.rememberMe != null ? this.rememberMe : false;
     }
 
-    // ✅ toString для отладки
     @Override
     public String toString() {
         return String.format("LoginRequestDto{email='%s', password='%s', rememberMe=%s}",

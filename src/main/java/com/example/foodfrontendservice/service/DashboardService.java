@@ -42,7 +42,6 @@ public class DashboardService {
                 return "redirect:/login?error=user_not_found";
             }
 
-            // Проверяем соответствие роли
             if (user.getUserRole() != expectedRole) {
                 log.warn("🚫 Несоответствие ролей. Ожидается: {}, получена: {}",
                         expectedRole, user.getUserRole());
@@ -54,7 +53,7 @@ public class DashboardService {
             model.addAttribute("userRole", user.getUserRole());
             model.addAttribute("roleDisplayName", user.getUserRole().getDisplayName());
 
-            // Добавляем токен для AJAX запросов
+
             model.addAttribute("authToken", token);
 
             log.info("✅ Успешная загрузка дашборда {} для {}", expectedRole, user.getEmail());

@@ -223,26 +223,6 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
-    // ✅ ДОБАВЛЯЕМ TEST DTO ENDPOINT
-    @PostMapping("/login/test-dto")
-    public ResponseEntity<Map<String, Object>> testLoginDto(@RequestBody LoginRequestDto loginRequest) {
-
-        log.info("🧪 TEST DTO: Получен LoginRequestDto");
-        log.info("🧪   email: {}", loginRequest.getEmail());
-        log.info("🧪   password: {}", loginRequest.getPassword() != null ? "[PROTECTED]" : "null");
-        log.info("🧪   rememberMe: {} (type: {})",
-                loginRequest.getRememberMe(),
-                loginRequest.getRememberMe() != null ? loginRequest.getRememberMe().getClass().getSimpleName() : "null");
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("email", loginRequest.getEmail());
-        response.put("rememberMe", loginRequest.getRememberMe());
-        response.put("rememberMeType", loginRequest.getRememberMe() != null ?
-                loginRequest.getRememberMe().getClass().getSimpleName() : "null");
-        response.put("message", "DTO test completed on frontend-service");
-
-        return ResponseEntity.ok(response);
-    }
 
     @GetMapping("/me")
     public ResponseEntity<Map<String, Object>> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
