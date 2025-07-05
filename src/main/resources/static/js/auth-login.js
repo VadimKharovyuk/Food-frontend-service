@@ -14,7 +14,6 @@ class AuthLogin {
         this.bindEvents();
         this.checkExistingAuth();
         this.addInputAnimations();
-        this.setupGlobalHeaders();
     }
 
     bindEvents() {
@@ -104,7 +103,7 @@ class AuthLogin {
         return true;
     }
 
-    // ✅ УЛУЧШЕННАЯ обработка входа с Remember Me и редиректом по ролям
+    // ✅ ИСПРАВЛЕННАЯ обработка входа с правильным URL
     async handleLogin(e) {
         e.preventDefault();
 
@@ -121,11 +120,14 @@ class AuthLogin {
         this.setLoading(true);
 
         try {
+            // ✅ ПРАВИЛЬНЫЙ URL для AuthController
             const response = await fetch(`${this.API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
+                credentials: 'include', // ✅ ВАЖНО: включаем cookies
                 body: JSON.stringify({
                     email: email,
                     password: password,
@@ -133,25 +135,52 @@ class AuthLogin {
                 })
             });
 
-            const data = await response.json();
+            console.log(`📡 Ответ статус: ${response.status}`);
 
-            if (response.ok && data.success) {
-                const sessionType = data.rememberMe ? 'Сессия на 7 дней! 🍪' : 'Обычная сессия 🔒';
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            console.log('📥 Ответ сервера:', data);
+
+            if (data.success) {
+                const sessionType = data.rememberMe ? 'Сессия на 30 дней! 🍪' : 'Обычная сессия 🔒';
                 this.showSuccess(`Добро пожаловать! ${sessionType}`);
 
-                // ✅ Сохраняем данные авторизации
-                this.saveAuthData(data);
+                // ✅ Токен сохранен в cookies сервером
+                console.log('🍪 JWT токен установлен в cookies сервером');
 
-                // ✅ Сохраняем выбор пользователя для следующего раза
-                localStorage.setItem('lastRememberMe', rememberMe.toString());
+                // ✅ Сохраняем пользовательские данные локально
+                if (data.user) {
+                    const storage = data.rememberMe ? localStorage : sessionStorage;
+                    storage.setItem('user', JSON.stringify(data.user));
+                    localStorage.setItem('rememberMe', data.rememberMe.toString());
+                    localStorage.setItem('lastRememberMe', rememberMe.toString());
 
-                // ✅ Получаем роль пользователя и делаем редирект
-                const userRole = data.user?.userRole || data.user?.role;
-                console.log(`👤 Роль пользователя: ${userRole}`);
-                console.log(`🎫 Токен получен: ${data.token ? 'ДА' : 'НЕТ'}`);
+                    console.log(`💾 Данные пользователя сохранены в ${data.rememberMe ? 'localStorage' : 'sessionStorage'}`);
+                }
 
-                setTimeout(async () => {
-                    await this.redirectByRole(userRole);
+                // ✅ Используем redirectUrl из ответа или определяем по роли
+                const redirectUrl = data.redirectUrl ||
+                    this.roleRedirects[data.user?.userRole] ||
+                    '/dashboard';
+
+                console.log(`🎯 Запланирован редирект: ${redirectUrl}`);
+
+                // ✅ Проверяем что cookies действительно установлены
+                setTimeout(() => {
+                    const jwtCookie = this.getAuthToken();
+                    if (jwtCookie) {
+                        console.log(`✅ JWT cookie подтвержден (${jwtCookie.length} символов)`);
+                        window.location.href = redirectUrl;
+                    } else {
+                        console.error('❌ JWT cookie не установлен, повторяем попытку...');
+                        // Резервный редирект с токеном в параметрах
+                        const urlWithToken = new URL(redirectUrl, window.location.origin);
+                        urlWithToken.searchParams.set('token', data.token);
+                        window.location.href = urlWithToken.toString();
+                    }
                 }, 1500);
 
             } else {
@@ -160,173 +189,47 @@ class AuthLogin {
 
         } catch (error) {
             console.error('❌ Ошибка авторизации:', error);
-            this.showError('Ошибка соединения с сервером');
+
+            if (error.message.includes('Failed to fetch')) {
+                this.showError('Сервер недоступен. Проверьте подключение.');
+            } else if (error.message.includes('HTTP 401')) {
+                this.showError('Неверные учетные данные');
+            } else if (error.message.includes('HTTP 400')) {
+                this.showError('Ошибка в данных запроса');
+            } else {
+                this.showError('Ошибка соединения с сервером');
+            }
         } finally {
             this.setLoading(false);
-        }
-    }
-
-    // ✅ УЛУЧШЕННЫЙ метод редиректа по ролям с передачей токена
-    async redirectByRole(userRole) {
-        const redirectUrl = this.roleRedirects[userRole] || this.roleRedirects['BASE_USER'];
-
-        console.log(`🎯 Редирект по роли ${userRole} -> ${redirectUrl}`);
-
-        // Показываем пользователю куда перенаправляем
-        const roleNames = {
-            'ROLE_ADMIN': 'Панель администратора',
-            'ROLE_MANAGER': 'Панель менеджера',
-            'ROLE_USER': 'Пользовательская панель',
-            'BASE_USER': 'Пользовательская панель'
-        };
-
-        const roleName = roleNames[userRole] || 'Основная страница';
-        this.showSuccess(`Переходим в ${roleName}...`);
-
-        setTimeout(async () => {
-            await this.secureDashboardRedirect(redirectUrl);
-        }, 800);
-    }
-
-    // ✅ БЕЗОПАСНЫЙ редирект на дашборд с токеном
-    async secureDashboardRedirect(targetUrl = '/dashboard') {
-        const token = this.getAuthToken();
-
-        if (!token) {
-            console.error('❌ Токен не найден для редиректа');
-            window.location.href = '/login?error=no_token';
-            return;
-        }
-
-        console.log(`🔐 Выполняем безопасный редирект на ${targetUrl} с токеном`);
-
-        try {
-            // Попытка 1: POST запрос с токеном в заголовках
-            const response = await fetch(targetUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'X-Auth-Token': token,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    action: 'secure_redirect',
-                    timestamp: new Date().toISOString(),
-                    userAgent: navigator.userAgent
-                }),
-                redirect: 'follow'
-            });
-
-            if (response.redirected) {
-                console.log('✅ Сервер выполнил редирект, переходим');
-                window.location.href = response.url;
-                return;
-            }
-
-            if (response.ok) {
-                console.log('✅ Получили успешный ответ, обрабатываем');
-                const contentType = response.headers.get('content-type');
-
-                if (contentType && contentType.includes('text/html')) {
-                    const html = await response.text();
-
-                    // Проверяем на редирект в HTML
-                    if (html.includes('redirect:')) {
-                        const redirectMatch = html.match(/redirect:([^\s"']+)/);
-                        if (redirectMatch) {
-                            window.location.href = redirectMatch[1];
-                            return;
-                        }
-                    }
-
-                    // Заменяем содержимое страницы
-                    document.open();
-                    document.write(html);
-                    document.close();
-
-                    // Обновляем URL без перезагрузки
-                    history.pushState({}, '', targetUrl);
-                    return;
-                }
-            }
-
-            // Попытка 2: Редирект с токеном в URL параметрах
-            console.log('⚠️ POST не сработал, пробуем GET с токеном в параметрах');
-            this.fallbackRedirect(targetUrl, token);
-
-        } catch (error) {
-            console.error('❌ Ошибка при безопасном редиректе:', error);
-            this.fallbackRedirect(targetUrl, token);
-        }
-    }
-
-    // ✅ РЕЗЕРВНЫЙ метод редиректа
-    fallbackRedirect(targetUrl = '/dashboard', token = null) {
-        const authToken = token || this.getAuthToken();
-
-        if (authToken) {
-            console.log(`🔄 Fallback редирект на ${targetUrl} с токеном в параметрах`);
-
-            // Добавляем токен в URL параметры
-            const url = new URL(targetUrl, window.location.origin);
-            url.searchParams.set('token', authToken);
-            url.searchParams.set('auth', 'true');
-
-            window.location.href = url.toString();
-        } else {
-            console.error('❌ Токен не найден для fallback редиректа');
-            window.location.href = '/login?error=no_token';
-        }
-    }
-
-    // ✅ ИСПРАВЛЕННОЕ сохранение данных авторизации
-    saveAuthData(data) {
-        try {
-            console.log(`💾 Сохраняем данные авторизации (Remember Me: ${data.rememberMe})`);
-
-            const storage = data.rememberMe ? localStorage : sessionStorage;
-
-            if (data.token) {
-                storage.setItem('authToken', data.token);
-                console.log(`✅ Токен сохранен в ${data.rememberMe ? 'localStorage' : 'sessionStorage'}`);
-            }
-
-            if (data.user) {
-                storage.setItem('user', JSON.stringify(data.user));
-            }
-
-            if (data.type) {
-                storage.setItem('tokenType', data.type);
-            }
-
-            // Информацию о rememberMe всегда сохраняем в localStorage
-            localStorage.setItem('rememberMe', data.rememberMe.toString());
-
-        } catch (error) {
-            console.error('❌ Ошибка сохранения данных авторизации:', error);
         }
     }
 
     // ✅ УЛУЧШЕННАЯ проверка существующей авторизации
     checkExistingAuth() {
         try {
-            const token = this.getAuthToken();
+            const hasJwtCookie = this.getAuthToken();
+            const userData = this.getUserData();
 
-            if (token) {
-                const userData = this.getUserData();
-                if (userData?.userRole) {
-                    console.log(`🔍 Найден существующий токен. Роль: ${userData.userRole}`);
-                    // Можно сразу перенаправить авторизованного пользователя
-                    // this.redirectByRole(userData.userRole);
+            if (hasJwtCookie) {
+                console.log('🍪 Найден JWT cookie');
+
+                if (userData) {
+                    console.log(`👤 Найдены данные пользователя: ${userData.email} (${userData.userRole})`);
+
+                    // Можем показать информацию о существующей сессии
+                    this.showSuccess(`Добро пожаловать обратно, ${userData.email}!`);
                 }
+            } else {
+                console.log('❌ JWT cookie не найден');
+            }
 
-                // Восстанавливаем состояние checkbox
-                const rememberMeCheckbox = document.getElementById('rememberMe');
-                if (rememberMeCheckbox) {
-                    const lastRememberMe = localStorage.getItem('lastRememberMe');
-                    if (lastRememberMe === 'true') {
-                        rememberMeCheckbox.checked = true;
-                    }
+            // Восстанавливаем состояние checkbox Remember Me
+            const rememberMeCheckbox = document.getElementById('rememberMe');
+            if (rememberMeCheckbox) {
+                const lastRememberMe = localStorage.getItem('lastRememberMe');
+                if (lastRememberMe === 'true') {
+                    rememberMeCheckbox.checked = true;
+                    console.log('✅ Восстановлено состояние Remember Me');
                 }
             }
         } catch (error) {
@@ -334,20 +237,20 @@ class AuthLogin {
         }
     }
 
+    // ✅ УЛУЧШЕННАЯ очистка данных
     clearAuthData() {
         try {
-            localStorage.removeItem('authToken');
+            // Очищаем localStorage
             localStorage.removeItem('user');
-            localStorage.removeItem('tokenType');
             localStorage.removeItem('rememberMe');
+            localStorage.removeItem('lastRememberMe');
 
-            sessionStorage.removeItem('authToken');
+            // Очищаем sessionStorage
             sessionStorage.removeItem('user');
-            sessionStorage.removeItem('tokenType');
 
-            console.log('🧹 Данные авторизации очищены');
+            console.log('🧹 Локальные данные авторизации очищены');
         } catch (error) {
-            console.error('❌ Ошибка очистки данных авторизации:', error);
+            console.error('❌ Ошибка очистки данных:', error);
         }
     }
 
@@ -370,8 +273,24 @@ class AuthLogin {
         });
     }
 
+    // ✅ УЛУЧШЕННОЕ получение токена из cookies
     getAuthToken() {
-        return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+        try {
+            const cookies = document.cookie.split(';');
+            const jwtCookie = cookies.find(cookie =>
+                cookie.trim().startsWith('jwt=')
+            );
+
+            if (jwtCookie) {
+                const token = jwtCookie.split('=')[1].trim();
+                return token.length > 0 ? token : null;
+            }
+
+            return null;
+        } catch (error) {
+            console.error('❌ Ошибка извлечения токена из cookies:', error);
+            return null;
+        }
     }
 
     getUserData() {
@@ -389,102 +308,178 @@ class AuthLogin {
     }
 
     isAuthenticated() {
-        return !!this.getAuthToken();
-    }
-
-    logout() {
-        this.clearAuthData();
-        window.location.href = '/login';
-    }
-
-    // ✅ УЛУЧШЕННАЯ настройка глобальных заголовков
-    setupGlobalHeaders() {
         const token = this.getAuthToken();
-        if (token) {
-            console.log('🔧 Настраиваем глобальные заголовки с токеном');
-
-            const originalFetch = window.fetch;
-            window.fetch = function(url, options = {}) {
-                // Добавляем токен во все запросы
-                const headers = {
-                    'Authorization': `Bearer ${token}`,
-                    'X-Auth-Token': token,
-                    'X-Requested-With': 'XMLHttpRequest',
-                    ...options.headers
-                };
-
-                console.log(`📡 Fetch запрос на ${url} с токеном`);
-
-                return originalFetch(url, {
-                    ...options,
-                    headers
-                });
-            };
-
-            // Также настраиваем для XMLHttpRequest
-            const originalOpen = XMLHttpRequest.prototype.open;
-            XMLHttpRequest.prototype.open = function(method, url, ...args) {
-                this.addEventListener('loadstart', function() {
-                    this.setRequestHeader('Authorization', `Bearer ${token}`);
-                    this.setRequestHeader('X-Auth-Token', token);
-                    this.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-                });
-                return originalOpen.apply(this, [method, url, ...args]);
-            };
-        }
+        const userData = this.getUserData();
+        return !!(token && userData);
     }
 
-    // ✅ ДОПОЛНИТЕЛЬНЫЙ метод для принудительного редиректа с токеном
-    forceRedirectWithToken(targetUrl) {
-        const token = this.getAuthToken();
-        if (!token) {
-            window.location.href = '/login?error=no_token';
-            return;
-        }
+    // ✅ ИСПРАВЛЕННЫЙ logout с правильным URL
+    async logout() {
+        try {
+            console.log('🚪 Выполняется выход из системы...');
 
-        console.log(`🚀 Принудительный редирект на ${targetUrl} с токеном`);
+            // Отправляем запрос на правильный endpoint
+            const response = await fetch(`${this.API_BASE_URL}/api/auth/logout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'include'
+            });
 
-        // Создаем скрытую форму для POST запроса с токеном
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = targetUrl;
-        form.style.display = 'none';
-
-        // Добавляем токен как скрытое поле
-        const tokenInput = document.createElement('input');
-        tokenInput.type = 'hidden';
-        tokenInput.name = 'authToken';
-        tokenInput.value = token;
-        form.appendChild(tokenInput);
-
-        // Добавляем дополнительные поля
-        const actionInput = document.createElement('input');
-        actionInput.type = 'hidden';
-        actionInput.name = 'action';
-        actionInput.value = 'dashboard_access';
-        form.appendChild(actionInput);
-
-        document.body.appendChild(form);
-        form.submit();
-    }
-
-    // ✅ DEBUG методы
-    showDebugInfo() {
-        console.log('🔍 Debug Info:', {
-            hasToken: !!this.getAuthToken(),
-            rememberMe: this.isRememberMe(),
-            userData: this.getUserData(),
-            userRole: this.getUserData()?.userRole,
-            redirectUrl: this.roleRedirects[this.getUserData()?.userRole],
-            localStorage: {
-                authToken: !!localStorage.getItem('authToken'),
-                rememberMe: localStorage.getItem('rememberMe'),
-                lastRememberMe: localStorage.getItem('lastRememberMe')
-            },
-            sessionStorage: {
-                authToken: !!sessionStorage.getItem('authToken')
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ Logout успешен:', data.message);
+            } else {
+                console.warn('⚠️ Ошибка logout на сервере:', response.status);
             }
+        } catch (error) {
+            console.error('❌ Ошибка при logout:', error);
+        } finally {
+            // Очищаем локальные данные в любом случае
+            this.clearAuthData();
+
+            // Перенаправляем на страницу логина
+            window.location.href = '/login';
+        }
+    }
+
+    // ✅ РАСШИРЕННАЯ отладочная информация
+    showDebugInfo() {
+        const token = this.getAuthToken();
+        const userData = this.getUserData();
+
+        const debugInfo = {
+            // Состояние авторизации
+            authentication: {
+                hasJwtCookie: !!token,
+                tokenLength: token ? token.length : 0,
+                tokenPreview: token ? `${token.substring(0, 20)}...` : null,
+                isAuthenticated: this.isAuthenticated(),
+                userData: userData
+            },
+
+            // Состояние Remember Me
+            rememberMe: {
+                current: this.isRememberMe(),
+                last: localStorage.getItem('lastRememberMe')
+            },
+
+            // Cookies
+            cookies: {
+                all: document.cookie,
+                jwt: this.getAuthToken() ? 'PRESENT' : 'MISSING',
+                userRole: this.getCookie('userRole'),
+                userEmail: this.getCookie('userEmail')
+            },
+
+            // Локальное хранилище
+            storage: {
+                localStorage: {
+                    user: !!localStorage.getItem('user'),
+                    rememberMe: localStorage.getItem('rememberMe'),
+                    lastRememberMe: localStorage.getItem('lastRememberMe')
+                },
+                sessionStorage: {
+                    user: !!sessionStorage.getItem('user')
+                }
+            },
+
+            // Конфигурация
+            config: {
+                apiBaseUrl: this.API_BASE_URL,
+                roleRedirects: this.roleRedirects
+            }
+        };
+
+        console.log('🔍 AuthLogin Debug Info:', debugInfo);
+        return debugInfo;
+    }
+
+    // ✅ Проверка состояния авторизации
+    checkAuthStatus() {
+        const token = this.getAuthToken();
+        const userData = this.getUserData();
+
+        const status = {
+            authenticated: this.isAuthenticated(),
+            user: userData,
+            hasToken: !!token,
+            tokenLength: token ? token.length : 0,
+            rememberMe: this.isRememberMe()
+        };
+
+        console.log('🔍 Статус авторизации:', status);
+        return status;
+    }
+
+    // ✅ Вспомогательный метод для получения конкретного cookie
+    getCookie(name) {
+        try {
+            const cookies = document.cookie.split(';');
+            const cookie = cookies.find(c => c.trim().startsWith(`${name}=`));
+            return cookie ? cookie.split('=')[1].trim() : null;
+        } catch (error) {
+            console.error(`❌ Ошибка получения cookie '${name}':`, error);
+            return null;
+        }
+    }
+
+    // ✅ Проверка работоспособности API
+    async testConnection() {
+        try {
+            console.log('🔧 Тестирование подключения к API...');
+
+            const response = await fetch(`${this.API_BASE_URL}/api/auth/login/debug`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    test: true,
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ API доступен:', data);
+                return true;
+            } else {
+                console.error('❌ API недоступен:', response.status);
+                return false;
+            }
+        } catch (error) {
+            console.error('❌ Ошибка тестирования API:', error);
+            return false;
+        }
+    }
+
+    // ✅ Принудительная очистка всех данных
+    forceReset() {
+        console.log('🔄 Принудительная очистка всех данных авторизации...');
+
+        // Очищаем все возможные ключи
+        const keysToRemove = ['user', 'rememberMe', 'lastRememberMe', 'authToken', 'tokenType'];
+
+        keysToRemove.forEach(key => {
+            localStorage.removeItem(key);
+            sessionStorage.removeItem(key);
         });
+
+        // Очищаем cookies через JavaScript (ограниченно)
+        document.cookie = 'jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+        document.cookie = 'userEmail=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+        console.log('✅ Принудительная очистка завершена');
+
+        // Перезагружаем страницу
+        setTimeout(() => {
+            window.location.reload();
+        }, 500);
     }
 }
 
@@ -501,11 +496,21 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // Глобальные функции для отладки
         window.showAuthDebug = () => window.authLogin.showDebugInfo();
-        console.log('🎯 AuthLogin инициализирован. Debug: showAuthDebug()');
+        window.checkAuth = () => window.authLogin.checkAuthStatus();
+        window.testAuthAPI = () => window.authLogin.testConnection();
+        window.resetAuth = () => window.authLogin.forceReset();
+
+        console.log('🎯 AuthLogin инициализирован. Доступные команды:');
+        console.log('  showAuthDebug() - полная отладочная информация');
+        console.log('  checkAuth() - проверка статуса авторизации');
+        console.log('  testAuthAPI() - тест подключения к API');
+        console.log('  resetAuth() - принудительная очистка данных');
     }
 });
 
+// Экспорт для использования в других модулях
 if (typeof window !== 'undefined') {
     window.AuthLogin = AuthLogin;
 }

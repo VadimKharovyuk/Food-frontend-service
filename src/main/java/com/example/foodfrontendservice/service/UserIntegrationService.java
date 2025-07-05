@@ -69,7 +69,7 @@ public class UserIntegrationService {
         }
     }
 
-    // ✅ ИСПРАВЛЕННЫЙ метод loginUser с null-safe проверкой
+
     public AuthResponseDto loginUser(LoginRequestDto loginRequest) {
         try {
             log.info("🔐 Авторизуем пользователя: {}", loginRequest.getEmail());

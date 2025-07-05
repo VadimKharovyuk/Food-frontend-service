@@ -18,6 +18,7 @@
             --pure-white: #ffffff;
             --danger-red: #dc3545;
             --warning-orange: #fd7e14;
+            --info-blue: #0dcaf0;
         }
 
         * {
@@ -43,72 +44,121 @@
         .page-header {
             text-align: center;
             margin-bottom: 3rem;
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 8px 25px rgba(0, 217, 103, 0.3);
         }
 
         .page-title {
             font-size: 2.5rem;
             font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background: var(--pure-white);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-green);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
             color: var(--primary-black);
             margin-bottom: 0.5rem;
         }
 
-        .page-subtitle {
-            font-size: 1.1rem;
-            color: var(--text-gray);
-        }
-
-        .stats-bar {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin: 2rem 0;
-            padding: 1.5rem;
-            background: var(--pure-white);
-            border-radius: 1rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary-green);
-        }
-
         .stat-label {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: var(--text-gray);
+            font-weight: 500;
+        }
+
+        .user-info {
+            background: var(--info-blue);
+            color: white;
+        }
+
+        .user-info .stat-value {
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
         }
 
         .stores-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
             margin-top: 2rem;
         }
 
         .store-card {
             background: var(--pure-white);
-            border-radius: 1rem;
+            border-radius: 1.5rem;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             position: relative;
         }
 
         .store-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .store-image-container {
+            position: relative;
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
         }
 
         .store-image {
             width: 100%;
-            height: 200px;
+            height: 100%;
             object-fit: cover;
-            background: var(--light-gray);
+            transition: transform 0.3s ease;
+        }
+
+        .store-card:hover .store-image {
+            transform: scale(1.05);
+        }
+
+        .store-image-placeholder {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--light-gray), var(--border-light));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -116,79 +166,110 @@
             color: var(--text-gray);
         }
 
+        .store-status {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: var(--primary-green);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .remove-favorite {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            color: var(--danger-red);
+            font-size: 1.3rem;
+            cursor: pointer;
+            padding: 0.8rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .remove-favorite:hover {
+            background: var(--danger-red);
+            color: white;
+            transform: scale(1.1);
+        }
+
         .store-content {
-            padding: 1.5rem;
+            padding: 2rem;
         }
 
         .store-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .store-name {
-            font-size: 1.25rem;
-            font-weight: 600;
+            font-size: 1.4rem;
+            font-weight: 700;
             color: var(--primary-black);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.5rem;
         }
 
         .store-rating {
             display: flex;
             align-items: center;
-            gap: 0.25rem;
-            font-size: 0.9rem;
+            gap: 0.5rem;
+            font-size: 1rem;
             color: var(--warning-orange);
+            font-weight: 600;
         }
 
-        .remove-favorite {
-            background: none;
-            border: none;
-            color: var(--danger-red);
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .remove-favorite:hover {
-            background: rgba(220, 53, 69, 0.1);
+        .rating-stars {
+            display: flex;
+            gap: 2px;
         }
 
         .store-description {
             color: var(--text-gray);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-            line-height: 1.5;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
         }
 
         .store-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.85rem;
-            color: var(--text-gray);
-            margin-bottom: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--light-gray);
+            border-radius: 0.8rem;
         }
 
-        .delivery-time {
+        .delivery-info {
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        .added-date {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            font-style: italic;
         }
 
         .store-actions {
             display: flex;
-            gap: 0.5rem;
+            gap: 1rem;
         }
 
         .btn {
-            padding: 0.75rem 1.5rem;
+            padding: 1rem 1.5rem;
             border: none;
-            border-radius: 0.5rem;
-            font-weight: 500;
+            border-radius: 0.8rem;
+            font-weight: 600;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
@@ -196,18 +277,19 @@
             gap: 0.5rem;
             transition: all 0.3s ease;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            flex: 1;
         }
 
         .btn-primary {
             background: var(--primary-green);
             color: var(--pure-white);
-            flex: 1;
         }
 
         .btn-primary:hover {
             background: var(--secondary-green);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 217, 103, 0.3);
         }
 
         .btn-outline {
@@ -219,56 +301,98 @@
         .btn-outline:hover {
             background: var(--primary-green);
             color: var(--pure-white);
+            transform: translateY(-2px);
         }
 
         .empty-state {
             text-align: center;
-            padding: 4rem 2rem;
+            padding: 5rem 2rem;
             background: var(--pure-white);
-            border-radius: 1rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
         }
 
         .empty-icon {
-            font-size: 4rem;
+            font-size: 5rem;
             color: var(--text-gray);
-            margin-bottom: 1rem;
+            margin-bottom: 2rem;
+            opacity: 0.7;
         }
 
         .empty-title {
-            font-size: 1.5rem;
-            font-weight: 600;
+            font-size: 2rem;
+            font-weight: 700;
             color: var(--primary-black);
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
         }
 
         .empty-description {
+            font-size: 1.1rem;
             color: var(--text-gray);
+            margin-bottom: 3rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .message {
+            padding: 1.5rem;
+            border-radius: 1rem;
             margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 500;
         }
 
         .error-message {
             background: rgba(220, 53, 69, 0.1);
             color: var(--danger-red);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 2rem;
-            text-align: center;
+            border: 1px solid rgba(220, 53, 69, 0.3);
         }
 
         .success-message {
             background: var(--accent-green);
             color: var(--secondary-green);
-            padding: 1rem;
-            border-radius: 0.5rem;
-            margin-bottom: 2rem;
+            border: 1px solid rgba(0, 217, 103, 0.3);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
             text-align: center;
         }
 
-        .added-date {
-            font-size: 0.8rem;
-            color: var(--text-gray);
-            font-style: italic;
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--light-gray);
+            border-top: 4px solid var(--primary-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fade-out {
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
 
         @media (max-width: 768px) {
@@ -278,19 +402,28 @@
 
             .page-title {
                 font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
             }
 
             .stats-bar {
-                flex-direction: column;
+                grid-template-columns: 1fr;
                 gap: 1rem;
             }
 
             .stores-grid {
                 grid-template-columns: 1fr;
+                gap: 1.5rem;
             }
 
             .store-actions {
                 flex-direction: column;
+            }
+
+            .store-info {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
             }
         }
     </style>
@@ -299,37 +432,54 @@
 <!-- Подключение навигации -->
 <div th:replace="~{fragments/navigation :: navigation}"></div>
 
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p>Удаление из избранного...</p>
+    </div>
+</div>
+
 <div class="container">
     <!-- Заголовок страницы -->
     <div class="page-header">
         <h1 class="page-title">
-            <i class="fas fa-heart" style="color: var(--primary-green);"></i>
+            <i class="fas fa-heart"></i>
             Избранные магазины
         </h1>
         <p class="page-subtitle">Ваши любимые места для заказа еды</p>
     </div>
 
     <!-- Сообщения об ошибках -->
-    <div th:if="${error}" class="error-message">
+    <div th:if="${error}" class="message error-message">
         <i class="fas fa-exclamation-triangle"></i>
         <span th:text="${error}">Ошибка</span>
     </div>
 
     <!-- Статистика -->
     <div th:if="${hasStores}" class="stats-bar">
-        <div class="stat-item">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-store"></i>
+            </div>
             <div class="stat-value" th:text="${storesCount}">0</div>
             <div class="stat-label">Избранных магазинов</div>
         </div>
-        <div class="stat-item" th:if="${averageRating}">
+
+        <div class="stat-card" th:if="${averageRating}">
+            <div class="stat-icon">
+                <i class="fas fa-star"></i>
+            </div>
             <div class="stat-value" th:text="${averageRating}">0.0</div>
             <div class="stat-label">Средний рейтинг</div>
         </div>
-        <div class="stat-item" th:if="${userEmail}">
-            <div class="stat-value">
+
+        <div class="stat-card user-info" th:if="${userEmail}">
+            <div class="stat-icon">
                 <i class="fas fa-user"></i>
             </div>
-            <div class="stat-label" th:text="${userEmail}">user@example.com</div>
+            <div class="stat-value" th:text="${userEmail}">user@example.com</div>
+            <div class="stat-label">Ваш аккаунт</div>
         </div>
     </div>
 
@@ -337,41 +487,57 @@
     <div th:if="${hasStores}" class="stores-grid">
         <div th:each="favorite : ${favoriteStores}" class="store-card">
             <!-- Изображение магазина -->
-            <div class="store-image">
-                <img th:if="${favorite.store.picUrl}"
+            <div class="store-image-container">
+                <img th:if="${favorite.store.picUrl != null and !#strings.isEmpty(favorite.store.picUrl)}"
                      th:src="${favorite.store.picUrl}"
                      th:alt="${favorite.store.name}"
-                     style="width: 100%; height: 100%; object-fit: cover;">
-                <i th:unless="${favorite.store.picUrl}" class="fas fa-store"></i>
+                     class="store-image">
+                <div th:unless="${favorite.store.picUrl != null and !#strings.isEmpty(favorite.store.picUrl)}"
+                     class="store-image-placeholder">
+                    <i class="fas fa-store"></i>
+                </div>
+
+                <!-- Статус магазина -->
+                <div class="store-status" th:if="${favorite.store.isActive}">
+                    <i class="fas fa-check-circle"></i> Активен
+                </div>
+
+                <!-- Кнопка удаления из избранного -->
+                <button class="remove-favorite"
+                        th:onclick="'removeFromFavorites(' + ${favorite.id} + ')'"
+                        title="Удалить из избранного">
+                    <i class="fas fa-heart-broken"></i>
+                </button>
             </div>
 
             <!-- Контент карточки -->
             <div class="store-content">
                 <div class="store-header">
-                    <div>
-                        <h3 class="store-name" th:text="${favorite.store.name}">Название магазина</h3>
-                        <div class="store-rating" th:if="${favorite.store.rating}">
+                    <h3 class="store-name" th:text="${favorite.store.name}">Название магазина</h3>
+                    <div class="store-rating" th:if="${favorite.store.rating}">
+                        <div class="rating-stars">
                             <i class="fas fa-star"></i>
-                            <span th:text="${favorite.store.rating}">4.5</span>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
                         </div>
+                        <span th:text="${favorite.store.rating}">4.5</span>
                     </div>
-                    <button class="remove-favorite"
-                            th:onclick="'removeFromFavorites(' + ${favorite.id} + ')'"
-                            title="Удалить из избранного">
-                        <i class="fas fa-heart-broken"></i>
-                    </button>
                 </div>
 
-                <p class="store-description" th:text="${favorite.store.description}">
+                <p class="store-description"
+                   th:text="${favorite.store.description ?: 'Описание магазина отсутствует'}">
                     Описание магазина
                 </p>
 
                 <div class="store-info">
-                    <div class="delivery-time" th:if="${favorite.store.estimatedDeliveryTime}">
+                    <div class="delivery-info" th:if="${favorite.store.estimatedDeliveryTime}">
                         <i class="fas fa-clock"></i>
                         <span th:text="${favorite.store.estimatedDeliveryTime} + ' мин'">30 мин</span>
                     </div>
                     <div class="added-date" th:if="${favorite.createdAt}">
+                        <i class="fas fa-calendar-plus"></i>
                         Добавлено: <span th:text="${#temporals.format(favorite.createdAt, 'dd.MM.yyyy')}">01.01.2024</span>
                     </div>
                 </div>
@@ -397,7 +563,8 @@
         </div>
         <h2 class="empty-title">У вас пока нет избранных магазинов</h2>
         <p class="empty-description">
-            Добавляйте магазины в избранное, чтобы быстро находить их здесь
+            Добавляйте магазины в избранное, чтобы быстро находить их здесь.
+            Нажмите на иконку сердца рядом с любимым магазином!
         </p>
         <a href="/stores" class="btn btn-primary">
             <i class="fas fa-search"></i>
@@ -407,42 +574,185 @@
 </div>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Все cookies:', document.cookie);
+
+        // Попробуем найти jwt
+        const cookies = document.cookie.split(';');
+        const jwtCookie = cookies.find(cookie => cookie.trim().startsWith('jwt='));
+
+        if (jwtCookie) {
+            console.log('✅ JWT cookie найден:', jwtCookie);
+        } else {
+            console.log('❌ JWT cookie НЕ найден');
+            console.log('Доступные cookies:', cookies);
+        }
+    });
+    // ✅ Получаем токен и данные авторизации из Thymeleaf модели
+    const jwtToken = /*[[${jwtToken}]]*/ null;
+    const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
+    const userRole = /*[[${userRole}]]*/ null;
+
+    // Показать/скрыть loading overlay
+    function showLoading() {
+        document.getElementById('loadingOverlay').style.display = 'flex';
+    }
+
+    function hideLoading() {
+        document.getElementById('loadingOverlay').style.display = 'none';
+    }
+
     // Удаление из избранного
     function removeFromFavorites(favoriteId) {
         if (!confirm('Удалить магазин из избранного?')) {
             return;
         }
 
+        if (!isAuthenticated || !jwtToken) {
+            alert('Необходимо войти в систему');
+            window.location.href = '/login';
+            return;
+        }
+
+        showLoading();
+
         fetch(`/favorites/stores/remove/${favoriteId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
+                'X-Requested-With': 'XMLHttpRequest',
+                'Authorization': `Bearer ${jwtToken}`
             }
         })
-            .then(response => response.json())
+            .then(response => {
+                hideLoading();
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
-                    location.reload();
+                    // Показываем успешное сообщение
+                    showSuccessMessage('Магазин удален из избранного');
+
+                    // Перезагружаем страницу через небольшую задержку
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
                 } else {
-                    alert('Ошибка: ' + data.message);
+                    showErrorMessage('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
                 }
             })
             .catch(error => {
+                hideLoading();
                 console.error('Ошибка:', error);
-                alert('Произошла ошибка при удалении');
+                showErrorMessage('Произошла ошибка при удалении');
             });
     }
 
-    // Добавление уведомлений
+    // Показать сообщение об успехе
+    function showSuccessMessage(message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message success-message';
+        messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+
+        const container = document.querySelector('.container');
+        container.insertBefore(messageDiv, container.firstChild.nextSibling);
+
+        // Автоматически скрыть через 3 секунды
+        setTimeout(() => {
+            messageDiv.classList.add('fade-out');
+            setTimeout(() => messageDiv.remove(), 300);
+        }, 3000);
+    }
+
+    // Показать сообщение об ошибке
+    function showErrorMessage(message) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message error-message';
+        messageDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+
+        const container = document.querySelector('.container');
+        container.insertBefore(messageDiv, container.firstChild.nextSibling);
+
+        // Автоматически скрыть через 5 секунд
+        setTimeout(() => {
+            messageDiv.classList.add('fade-out');
+            setTimeout(() => messageDiv.remove(), 300);
+        }, 5000);
+    }
+
+    // ✅ Глобальная функция для аутентифицированных запросов
+    function makeAuthenticatedRequest(url, options = {}) {
+        if (!isAuthenticated || !jwtToken) {
+            alert('Необходимо войти в систему');
+            window.location.href = '/login';
+            return Promise.reject('No authentication');
+        }
+
+        options.headers = {
+            ...options.headers,
+            'Authorization': `Bearer ${jwtToken}`,
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+
+        return fetch(url, options);
+    }
+
+    // Инициализация страницы
     document.addEventListener('DOMContentLoaded', function() {
-        // Автоскрытие сообщений
-        const messages = document.querySelectorAll('.error-message, .success-message');
-        messages.forEach(message => {
+        // Автоскрытие существующих сообщений
+        const existingMessages = document.querySelectorAll('.message');
+        existingMessages.forEach(message => {
             setTimeout(() => {
-                message.style.opacity = '0';
+                message.classList.add('fade-out');
                 setTimeout(() => message.remove(), 300);
             }, 5000);
+        });
+
+        // Логирование состояния авторизации
+        if (isAuthenticated && jwtToken) {
+            console.log('✅ Пользователь авторизован, роль:', userRole);
+        } else {
+            console.warn('❌ Пользователь не авторизован');
+        }
+
+        // Анимация появления карточек
+        const storeCards = document.querySelectorAll('.store-card');
+        storeCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        // Добавляем обработчики для кнопок действий
+        document.querySelectorAll('.btn-primary, .btn-outline').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                if (!isAuthenticated) {
+                    e.preventDefault();
+                    alert('Необходимо войти в систему');
+                    window.location.href = '/login';
+                }
+            });
+        });
+    });
+
+    // Обработка ошибок загрузки изображений
+    document.addEventListener('DOMContentLoaded', function() {
+        const images = document.querySelectorAll('.store-image');
+        images.forEach(img => {
+            img.addEventListener('error', function() {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'store-image-placeholder';
+                placeholder.innerHTML = '<i class="fas fa-store"></i>';
+                this.parentNode.replaceChild(placeholder, this);
+            });
         });
     });
 </script>

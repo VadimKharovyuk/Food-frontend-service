@@ -218,7 +218,7 @@
                     <a href="#" class="nav-link">🛒 Мои заказы</a>
                 </li>
                 <li class="nav-item" th:if="${userRole?.name() == 'BASE_USER'}">
-                    <a href="#" class="nav-link">❤️ Избранное</a>
+                    <a href="/favorites/stores" class="nav-link">❤️ Избранное stores </a>
                 </li>
 
                 <li class="nav-item" th:if="${userRole?.name() == 'BUSINESS_USER'}">

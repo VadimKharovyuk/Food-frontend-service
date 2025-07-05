@@ -1,5 +1,6 @@
 package com.example.foodfrontendservice.controller;
 
+import com.example.foodfrontendservice.dto.LoginRequestDto;
 import com.example.foodfrontendservice.service.UserIntegrationService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class LoginController {
     @GetMapping("/login")
     public String autLogin(Model model) {
         log.info("📄 GET /login - Показываем страницу авторизации");
+        model.addAttribute("loginRequest", new LoginRequestDto());
         return "aut/login";
     }
 
