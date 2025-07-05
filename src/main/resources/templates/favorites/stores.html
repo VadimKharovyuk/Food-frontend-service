@@ -504,7 +504,7 @@
 
                 <!-- Кнопка удаления из избранного -->
                 <button class="remove-favorite"
-                        th:onclick="'removeFromFavorites(' + ${favorite.id} + ')'"
+                        th:onclick="'removeFromFavorites(' + ${favorite.store.id} + ')'"
                         title="Удалить из избранного">
                     <i class="fas fa-heart-broken"></i>
                 </button>
@@ -574,24 +574,10 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Все cookies:', document.cookie);
-
-        // Попробуем найти jwt
-        const cookies = document.cookie.split(';');
-        const jwtCookie = cookies.find(cookie => cookie.trim().startsWith('jwt='));
-
-        if (jwtCookie) {
-            console.log('✅ JWT cookie найден:', jwtCookie);
-        } else {
-            console.log('❌ JWT cookie НЕ найден');
-            console.log('Доступные cookies:', cookies);
-        }
-    });
     // ✅ Получаем токен и данные авторизации из Thymeleaf модели
-    const jwtToken = /*[[${jwtToken}]]*/ null;
-    const isAuthenticated = /*[[${isAuthenticated}]]*/ false;
-    const userRole = /*[[${userRole}]]*/ null;
+    const jwtToken = '[[${jwtToken}]]';        // ✅ Получит реальный токен
+    const isAuthenticated = [[${isAuthenticated}]]; // ✅ Получит true
+    const userRole = '[[${userRole}]]';       // ✅ Получит роль
 
     // Показать/скрыть loading overlay
     function showLoading() {
@@ -603,7 +589,7 @@
     }
 
     // Удаление из избранного
-    function removeFromFavorites(favoriteId) {
+    function removeFromFavorites(storeId) {
         if (!confirm('Удалить магазин из избранного?')) {
             return;
         }
@@ -616,7 +602,7 @@
 
         showLoading();
 
-        fetch(`/favorites/stores/remove/${favoriteId}`, {
+        fetch(`/favorites/stores/remove/${storeId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
