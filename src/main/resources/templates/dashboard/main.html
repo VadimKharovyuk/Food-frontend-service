@@ -1,4 +1,142 @@
-<!-- Обновите файл dashboard/main.html -->
+<!--&lt;!&ndash; Обновите файл dashboard/main.html &ndash;&gt;-->
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="ru">-->
+<!--<head>-->
+<!--  <meta charset="UTF-8">-->
+<!--  <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--  <title>QuickFood - Дашборд</title>-->
+<!--  <style>-->
+<!--    body {-->
+<!--      font-family: Arial, sans-serif;-->
+<!--      margin: 0;-->
+<!--      padding: 20px;-->
+<!--      background-color: #f5f5f5;-->
+<!--    }-->
+
+<!--    .dashboard-header {-->
+<!--      background: white;-->
+<!--      padding: 20px;-->
+<!--      border-radius: 8px;-->
+<!--      margin-bottom: 20px;-->
+<!--      display: flex;-->
+<!--      justify-content: space-between;-->
+<!--      align-items: center;-->
+<!--      box-shadow: 0 2px 4px rgba(0,0,0,0.1);-->
+<!--    }-->
+
+<!--    .user-info {-->
+<!--      display: flex;-->
+<!--      align-items: center;-->
+<!--      gap: 15px;-->
+<!--    }-->
+
+<!--    .logout-btn {-->
+<!--      background: #dc3545;-->
+<!--      color: white;-->
+<!--      border: none;-->
+<!--      padding: 8px 16px;-->
+<!--      border-radius: 4px;-->
+<!--      cursor: pointer;-->
+<!--    }-->
+
+<!--    .logout-btn:hover {-->
+<!--      background: #c82333;-->
+<!--    }-->
+
+<!--    .dashboard-content {-->
+<!--      background: white;-->
+<!--      padding: 20px;-->
+<!--      border-radius: 8px;-->
+<!--      box-shadow: 0 2px 4px rgba(0,0,0,0.1);-->
+<!--    }-->
+
+<!--    .dashboard-sections {-->
+<!--      display: grid;-->
+<!--      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));-->
+<!--      gap: 20px;-->
+<!--      margin-top: 20px;-->
+<!--    }-->
+
+<!--    .dashboard-section {-->
+<!--      border: 1px solid #ddd;-->
+<!--      border-radius: 8px;-->
+<!--      padding: 15px;-->
+<!--      background: #f8f9fa;-->
+<!--    }-->
+
+<!--    .dashboard-section h3 {-->
+<!--      margin: 0 0 10px 0;-->
+<!--      color: #333;-->
+<!--    }-->
+
+<!--    .dashboard-section button {-->
+<!--      background: #007bff;-->
+<!--      color: white;-->
+<!--      border: none;-->
+<!--      padding: 8px 16px;-->
+<!--      border-radius: 4px;-->
+<!--      cursor: pointer;-->
+<!--      margin-bottom: 10px;-->
+<!--    }-->
+
+<!--    .dashboard-section button:hover {-->
+<!--      background: #0056b3;-->
+<!--    }-->
+
+<!--    .section-content {-->
+<!--      background: white;-->
+<!--      padding: 10px;-->
+<!--      border-radius: 4px;-->
+<!--      margin-top: 10px;-->
+<!--      max-height: 300px;-->
+<!--      overflow-y: auto;-->
+<!--    }-->
+
+<!--    .error-message {-->
+<!--      text-align: center;-->
+<!--      padding: 40px;-->
+<!--      background: white;-->
+<!--      border-radius: 8px;-->
+<!--      box-shadow: 0 2px 4px rgba(0,0,0,0.1);-->
+<!--    }-->
+
+<!--    .error-message h2 {-->
+<!--      color: #dc3545;-->
+<!--      margin-bottom: 15px;-->
+<!--    }-->
+
+<!--    .error-message button {-->
+<!--      background: #007bff;-->
+<!--      color: white;-->
+<!--      border: none;-->
+<!--      padding: 10px 20px;-->
+<!--      border-radius: 4px;-->
+<!--      cursor: pointer;-->
+<!--      margin: 0 5px;-->
+<!--    }-->
+
+<!--    .loading {-->
+<!--      text-align: center;-->
+<!--      padding: 40px;-->
+<!--      background: white;-->
+<!--      border-radius: 8px;-->
+<!--      box-shadow: 0 2px 4px rgba(0,0,0,0.1);-->
+<!--    }-->
+<!--  </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div id="dashboard-container">-->
+<!--  <div class="loading">-->
+<!--    <h2>🔄 Загрузка дашборда...</h2>-->
+<!--    <p>Проверяем авторизацию...</p>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!--&lt;!&ndash; ✅ Подключаем JavaScript для дашборда &ndash;&gt;-->
+<!--<script src="/js/dashboard-auth.js"></script>-->
+<!--</body>-->
+<!--</html>-->
 
 <!DOCTYPE html>
 <html lang="ru">
@@ -6,130 +144,739 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QuickFood - Дашборд</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
-    body {
-      font-family: Arial, sans-serif;
+    * {
       margin: 0;
-      padding: 20px;
-      background-color: #f5f5f5;
+      padding: 0;
+      box-sizing: border-box;
     }
 
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+
+    /* Header */
     .dashboard-header {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      margin-bottom: 20px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 20px 30px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    .user-info {
+    .logo-section {
       display: flex;
       align-items: center;
       gap: 15px;
     }
 
+    .logo {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      font-weight: bold;
+    }
+
+    .brand-info h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #2D3748;
+      margin-bottom: 2px;
+    }
+
+    .brand-info .subtitle {
+      font-size: 14px;
+      color: #718096;
+      font-weight: 500;
+    }
+
+    .user-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: #2D3748;
+      font-size: 16px;
+    }
+
+    .user-role {
+      font-size: 13px;
+      color: #718096;
+      padding: 4px 12px;
+      background: #EDF2F7;
+      border-radius: 20px;
+      margin-top: 4px;
+    }
+
     .logout-btn {
-      background: #dc3545;
+      background: linear-gradient(135deg, #667eea, #764ba2);
       color: white;
       border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
+      padding: 12px 24px;
+      border-radius: 12px;
       cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .logout-btn:hover {
-      background: #c82333;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
     }
 
-    .dashboard-content {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    /* Main Container */
+    .dashboard-container {
+      padding: 30px;
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
-    .dashboard-sections {
+    /* Welcome Section */
+    .welcome-section {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .welcome-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: #2D3748;
+      margin-bottom: 8px;
+    }
+
+    .welcome-subtitle {
+      font-size: 16px;
+      color: #718096;
+      margin-bottom: 20px;
+    }
+
+    .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 20px;
       margin-top: 20px;
     }
 
-    .dashboard-section {
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 15px;
-      background: #f8f9fa;
-    }
-
-    .dashboard-section h3 {
-      margin: 0 0 10px 0;
-      color: #333;
-    }
-
-    .dashboard-section button {
-      background: #007bff;
+    .stat-card {
+      background: linear-gradient(135deg, #FF6B6B, #FF8E53);
       color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-bottom: 10px;
-    }
-
-    .dashboard-section button:hover {
-      background: #0056b3;
-    }
-
-    .section-content {
-      background: white;
-      padding: 10px;
-      border-radius: 4px;
-      margin-top: 10px;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-
-    .error-message {
+      padding: 20px;
+      border-radius: 16px;
       text-align: center;
-      padding: 40px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
     }
 
-    .error-message h2 {
-      color: #dc3545;
-      margin-bottom: 15px;
+    .stat-card:hover {
+      transform: translateY(-5px);
     }
 
-    .error-message button {
-      background: #007bff;
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    /* Sections Grid */
+    .dashboard-sections {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 25px;
+    }
+
+    .dashboard-section {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dashboard-section:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #2D3748;
+    }
+
+    .section-icon {
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+    }
+
+    .section-btn {
+      background: linear-gradient(135deg, #667eea, #764ba2);
       color: white;
       border: none;
       padding: 10px 20px;
-      border-radius: 4px;
+      border-radius: 10px;
       cursor: pointer;
-      margin: 0 5px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .loading {
+    .section-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .section-content {
+      background: #F7FAFC;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Role-specific colors */
+    .base-user .section-icon { background: linear-gradient(135deg, #4299E1, #3182CE); }
+    .business-user .section-icon { background: linear-gradient(135deg, #48BB78, #38A169); }
+    .courier .section-icon { background: linear-gradient(135deg, #ED8936, #DD6B20); }
+    .admin .section-icon { background: linear-gradient(135deg, #9F7AEA, #805AD5); }
+
+    /* Loading & Error States */
+    .loading, .error-message {
       text-align: center;
-      padding: 40px;
-      background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 60px 40px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .loading h2, .error-message h2 {
+      font-size: 28px;
+      margin-bottom: 15px;
+      color: #2D3748;
+    }
+
+    .loading p, .error-message p {
+      font-size: 16px;
+      color: #718096;
+      margin-bottom: 20px;
+    }
+
+    .error-message h2 {
+      color: #E53E3E;
+    }
+
+    .error-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 25px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #EDF2F7;
+      color: #4A5568;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .dashboard-section {
+      animation: fadeInUp 0.6s ease forwards;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .dashboard-header {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .dashboard-container {
+        padding: 20px 15px;
+      }
+
+      .dashboard-sections {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Hidden by default - will be shown by JavaScript based on role */
+    .role-section {
+      display: none;
+    }
+
+    .role-section.visible {
+      display: block;
     }
   </style>
 </head>
 <body>
-<div id="dashboard-container">
-  <div class="loading">
-    <h2>🔄 Загрузка дашборда...</h2>
-    <p>Проверяем авторизацию...</p>
+<!-- Header -->
+<div class="dashboard-header">
+  <div class="logo-section">
+    <div class="logo">🚀</div>
+    <div class="brand-info">
+      <h1>QuickFood</h1>
+      <div class="subtitle">Быстрая доставка еды</div>
+    </div>
+  </div>
+  <div class="user-section">
+    <div class="user-info">
+      <div class="user-name" id="user-name">Загрузка...</div>
+      <div class="user-role" id="user-role">Проверка роли...</div>
+    </div>
+    <button onclick="dashboardAuth.logout()" class="logout-btn">
+      <i class="fas fa-sign-out-alt"></i>
+      Выйти
+    </button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="dashboard-container">
+  <div id="dashboard-content">
+    <div class="loading">
+      <h2>🔄 Загрузка дашборда...</h2>
+      <p>Проверяем авторизацию и настраиваем интерфейс...</p>
+    </div>
+  </div>
+</div>
+
+<!-- Dashboard Templates (will be populated by JavaScript) -->
+<div id="dashboard-templates" style="display: none;">
+
+  <!-- BASE_USER Template -->
+  <div id="base-user-template" class="base-user">
+    <div class="welcome-section">
+      <h2 class="welcome-title">Добро пожаловать в QuickFood! 🍕</h2>
+      <p class="welcome-subtitle">Ваш личный кабинет для заказа любимой еды</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">15</div>
+          <div class="stat-label">Всего заказов</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">5</div>
+          <div class="stat-label">Избранных мест</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">15,420₽</div>
+          <div class="stat-label">Потрачено</div>
+        </div>
+      </div>
+    </div>
+    <div class="dashboard-sections">
+      <div class="dashboard-section role-section" data-role="BASE_USER" data-section="orders">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-shopping-bag"></i></div>
+            Мои заказы
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('orders')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-orders">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+
+      <div class="dashboard-section role-section" data-role="BASE_USER" data-section="favorites">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-heart"></i></div>
+            Избранное
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('favorites')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-favorites">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+
+      <div class="dashboard-section role-section" data-role="BASE_USER" data-section="profile">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-user"></i></div>
+            Профиль
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('profile')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-profile">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+
+      <div class="dashboard-section role-section" data-role="BASE_USER" data-section="addresses">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-map-marker-alt"></i></div>
+            Адреса доставки
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('addresses')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-addresses">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUSINESS_USER Template -->
+  <div id="business-user-template" class="business-user">
+    <div class="welcome-section">
+      <h2 class="welcome-title">Кабинет владельца бизнеса 🏪</h2>
+      <p class="welcome-subtitle">Управляйте своим рестораном и заказами</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">47</div>
+          <div class="stat-label">Заказов сегодня</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">15,420₽</div>
+          <div class="stat-label">Выручка сегодня</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">4.8</div>
+          <div class="stat-label">Рейтинг</div>
+        </div>
+      </div>
+    </div>
+    <div class="dashboard-sections">
+      <div class="dashboard-section role-section" data-role="BUSINESS_USER" data-section="restaurant">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-store"></i></div>
+            Мой ресторан
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('restaurant')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-restaurant">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+
+      <div class="dashboard-section role-section" data-role="BUSINESS_USER" data-section="orders">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-receipt"></i></div>
+            Заказы
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('orders')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-orders">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+
+      <div class="dashboard-section role-section" data-role="BUSINESS_USER" data-section="menu">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-utensils"></i></div>
+            Меню
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('menu')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-menu">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+
+      <div class="dashboard-section role-section" data-role="BUSINESS_USER" data-section="analytics">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-chart-bar"></i></div>
+            Аналитика
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('analytics')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-analytics">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COURIER Template -->
+  <div id="courier-template" class="courier">
+    <div class="welcome-section">
+      <h2 class="welcome-title">Кабинет курьера 🚚</h2>
+      <p class="welcome-subtitle">Управляйте доставками и отслеживайте заработок</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">12</div>
+          <div class="stat-label">Доставок сегодня</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">1,840₽</div>
+          <div class="stat-label">Заработано сегодня</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">4.9</div>
+          <div class="stat-label">Рейтинг</div>
+        </div>
+      </div>
+    </div>
+    <div class="dashboard-sections">
+      <div class="dashboard-section role-section" data-role="COURIER" data-section="deliveries">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-truck"></i></div>
+            Мои доставки
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('deliveries')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-deliveries">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+
+      <div class="dashboard-section role-section" data-role="COURIER" data-section="available-orders">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-list"></i></div>
+            Доступные заказы
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('available-orders')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-available-orders">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+
+      <div class="dashboard-section role-section" data-role="COURIER" data-section="earnings">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-money-bill-wave"></i></div>
+            Заработок
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('earnings')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-earnings">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+
+      <div class="dashboard-section role-section" data-role="COURIER" data-section="profile">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-user"></i></div>
+            Профиль курьера
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('profile')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-profile">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN Template -->
+  <div id="admin-template" class="admin">
+    <div class="welcome-section">
+      <h2 class="welcome-title">Панель администратора 👑</h2>
+      <p class="welcome-subtitle">Полный контроль над платформой QuickFood</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">1,247</div>
+          <div class="stat-label">Всего пользователей</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">86</div>
+          <div class="stat-label">Ресторанов</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">5,432</div>
+          <div class="stat-label">Заказов</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">234,560₽</div>
+          <div class="stat-label">Общая выручка</div>
+        </div>
+      </div>
+    </div>
+    <div class="dashboard-sections">
+      <div class="dashboard-section role-section" data-role="ADMIN" data-section="analytics">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-chart-line"></i></div>
+            Аналитика платформы
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('analytics')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-analytics">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+
+      <div class="dashboard-section role-section" data-role="ADMIN" data-section="users">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-users"></i></div>
+            Пользователи
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('users')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-users">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+
+      <div class="dashboard-section role-section" data-role="ADMIN" data-section="restaurants">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-building"></i></div>
+            Рестораны
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('restaurants')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-restaurants">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+
+      <div class="dashboard-section role-section" data-role="ADMIN" data-section="system">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="section-icon"><i class="fas fa-cogs"></i></div>
+            Система
+          </div>
+          <button class="section-btn" onclick="dashboardAuth.loadSection('system')">
+            <i class="fas fa-sync"></i> Обновить
+          </button>
+        </div>
+        <div class="section-content" id="section-system">
+          Нажмите "Обновить" для загрузки данных
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 

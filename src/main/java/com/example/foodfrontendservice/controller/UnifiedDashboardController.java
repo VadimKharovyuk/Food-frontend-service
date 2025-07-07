@@ -28,12 +28,18 @@ public class UnifiedDashboardController {
     public String dashboard(HttpServletRequest request, Model model) {
         log.info("🏠 Загрузка единого дашборда");
 
-        // ✅ НОВЫЙ ПОДХОД: Не проверяем токен на сервере при первом запросе
-        // Токен будет проверен через JavaScript API
-
         // ✅ Передаем базовую конфигурацию без проверки токена
+        // Проверка авторизации будет выполнена через JavaScript API
         model.addAttribute("needsAuth", true);
         model.addAttribute("apiBaseUrl", "http://localhost:8082");
+
+        // ✅ Передаем информацию о всех доступных ролях для frontend
+        model.addAttribute("availableRoles", Map.of(
+                "BASE_USER", "Покупатель",
+                "BUSINESS_USER", "Владелец магазина",
+                "COURIER", "Курьер",
+                "ADMIN", "Администратор"
+        ));
 
         log.info("✅ Дашборд загружен - проверка авторизации будет через JavaScript");
 
@@ -131,29 +137,20 @@ public class UnifiedDashboardController {
         log.info("📊 Загрузка данных секции '{}' для пользователя {} ({})",
                 section, user.getEmail(), user.getUserRole());
 
-        try {
-            // ✅ Возвращаем данные в зависимости от роли и секции
-            Map<String, Object> sectionData = loadSectionData(user.getUserRole(), section, user);
-
-            // Добавляем метаданные
-            sectionData.put("_meta", Map.of(
-                    "section", section,
-                    "userRole", user.getUserRole().name(),
-                    "loadedAt", java.time.LocalDateTime.now(),
-                    "userId", user.getId()
-            ));
-
-            return sectionData;
-
-        } catch (Exception e) {
-            log.error("❌ Ошибка загрузки данных секции {}: {}", section, e.getMessage());
-            return Map.of(
-                    "error", "Ошибка загрузки данных секции",
-                    "code", "DATA_LOAD_ERROR",
-                    "section", section,
-                    "message", e.getMessage()
-            );
-        }
+        // ✅ TODO: Здесь будет реальная логика загрузки данных из сервисов
+        // Пока возвращаем заглушку что секция в разработке
+        return Map.of(
+                "message", "Секция '" + section + "' в разработке",
+                "section", section,
+                "userRole", user.getUserRole().name(),
+                "status", "coming_soon",
+                "_meta", Map.of(
+                        "section", section,
+                        "userRole", user.getUserRole().name(),
+                        "loadedAt", java.time.LocalDateTime.now(),
+                        "userId", user.getId()
+                )
+        );
     }
 
     /**
@@ -327,235 +324,5 @@ public class UnifiedDashboardController {
         );
 
         return accessMap.getOrDefault(role, List.of()).contains(section);
-    }
-
-    /**
-     * 📋 Загрузка данных секции
-     */
-    private Map<String, Object> loadSectionData(UserRole role, String section, UserResponseDto user) {
-        // ✅ В зависимости от роли и секции возвращаем нужные данные
-        return switch (role) {
-            case ADMIN -> loadAdminSectionData(section);
-            case BASE_USER -> loadUserSectionData(section, user);
-            case BUSINESS_USER -> loadBusinessSectionData(section, user);
-            case COURIER -> loadCourierSectionData(section, user);
-        };
-    }
-
-    // ========== ДАННЫЕ ДЛЯ РОЛЕЙ ==========
-
-    private Map<String, Object> loadAdminSectionData(String section) {
-        return switch (section) {
-            case "analytics" -> Map.of(
-                    "totalUsers", 1247,
-                    "totalOrders", 5432,
-                    "totalRevenue", "234560₽",
-                    "growthRate", "+12.5%",
-                    "period", "Текущий месяц"
-            );
-
-            case "users" -> Map.of(
-                    "users", List.of(
-                            Map.of("id", 1, "name", "Иван Петров", "role", "BASE_USER", "status", "active", "lastLogin", "2 часа назад"),
-                            Map.of("id", 2, "name", "Анна Сидорова", "role", "BUSINESS_USER", "status", "active", "lastLogin", "1 день назад"),
-                            Map.of("id", 3, "name", "Петр Курьеров", "role", "COURIER", "status", "active", "lastLogin", "30 минут назад")
-                    ),
-                    "totalCount", 1247,
-                    "activeUsers", 987,
-                    "newUsersToday", 12
-            );
-
-            case "restaurants" -> Map.of(
-                    "restaurants", List.of(
-                            Map.of("id", 1, "name", "Пиццерия Мама Миа", "status", "active", "owner", "Иван Петров", "rating", 4.8),
-                            Map.of("id", 2, "name", "Tokyo Sushi", "status", "pending", "owner", "Анна Сидорова", "rating", 4.6),
-                            Map.of("id", 3, "name", "Burger Street", "status", "blocked", "owner", "Михаил Петров", "rating", 3.2)
-                    ),
-                    "totalCount", 86,
-                    "pendingApproval", 5,
-                    "activeRestaurants", 78
-            );
-
-            case "categories" -> Map.of(
-                    "categories", List.of(
-                            Map.of("id", 1, "name", "Пицца", "restaurantsCount", 15, "status", "active"),
-                            Map.of("id", 2, "name", "Суши", "restaurantsCount", 8, "status", "active"),
-                            Map.of("id", 3, "name", "Бургеры", "restaurantsCount", 23, "status", "active")
-                    ),
-                    "totalCount", 12
-            );
-
-            case "system" -> Map.of(
-                    "systemInfo", Map.of(
-                            "version", "1.0.0",
-                            "uptime", "15 дней",
-                            "activeConnections", 1250,
-                            "memoryUsage", "68%",
-                            "diskUsage", "45%"
-                    ),
-                    "recentLogs", List.of(
-                            Map.of("time", "10:30", "level", "INFO", "message", "Новый пользователь зарегистрирован"),
-                            Map.of("time", "10:25", "level", "WARN", "message", "Превышен лимит запросов для IP"),
-                            Map.of("time", "10:20", "level", "ERROR", "message", "Ошибка подключения к базе данных")
-                    )
-            );
-
-            default -> Map.of("error", "Секция не найдена");
-        };
-    }
-
-    private Map<String, Object> loadUserSectionData(String section, UserResponseDto user) {
-        return switch (section) {
-            case "orders" -> Map.of(
-                    "orders", List.of(
-                            Map.of("id", 1247, "restaurant", "Пиццерия Мама Миа", "status", "delivered", "total", "890₽", "date", "Сегодня 14:30"),
-                            Map.of("id", 1248, "restaurant", "Tokyo Sushi", "status", "cooking", "total", "1200₽", "date", "Сегодня 15:45"),
-                            Map.of("id", 1249, "restaurant", "Burger Street", "status", "cancelled", "total", "650₽", "date", "Вчера 19:20")
-                    ),
-                    "totalCount", 15,
-                    "totalSpent", "15420₽",
-                    "avgOrderValue", "1028₽"
-            );
-
-            case "favorites" -> Map.of(
-                    "favorites", List.of(
-                            Map.of("id", 1, "name", "Пиццерия Мама Миа", "cuisine", "Итальянская", "rating", 4.9, "deliveryTime", "25-35 мин"),
-                            Map.of("id", 2, "name", "Tokyo Sushi", "cuisine", "Японская", "rating", 4.7, "deliveryTime", "30-40 мин"),
-                            Map.of("id", 3, "name", "Burger Street", "cuisine", "Американская", "rating", 4.5, "deliveryTime", "15-25 мин")
-                    ),
-                    "totalCount", 5
-            );
-
-            case "profile" -> Map.of(
-                    "profile", Map.of(
-                            "id", user.getId(),
-                            "email", user.getEmail(),
-                            "firstName", user.getFirstName(),
-                            "lastName", user.getLastName(),
-                            "phone", "+7 XXX XXX-XX-XX",
-                            "registeredAt", "15 января 2024",
-                            "totalOrders", 15,
-                            "favoriteRestaurants", 5
-                    )
-            );
-
-            case "addresses" -> Map.of(
-                    "addresses", List.of(
-                            Map.of("id", 1, "title", "Дом", "address", "ул. Пушкина, д. 10, кв. 5", "isDefault", true),
-                            Map.of("id", 2, "title", "Работа", "address", "пр. Ленина, д. 50, оф. 205", "isDefault", false)
-                    ),
-                    "totalCount", 2
-            );
-
-            default -> Map.of("error", "Секция не найдена");
-        };
-    }
-
-    private Map<String, Object> loadBusinessSectionData(String section, UserResponseDto user) {
-        return switch (section) {
-            case "restaurant" -> Map.of(
-                    "restaurant", Map.of(
-                            "name", "Ресторан пользователя",
-                            "status", "active",
-                            "rating", 4.8,
-                            "ordersToday", 23,
-                            "revenueToday", "15420₽",
-                            "avgDeliveryTime", "28 мин"
-                    )
-            );
-
-            case "orders" -> Map.of(
-                    "orders", List.of(
-                            Map.of("id", 1247, "items", "2x Пицца Маргарита, 1x Кока-кола", "status", "cooking", "total", "890₽", "time", "12 мин назад"),
-                            Map.of("id", 1248, "items", "1x Бургер Делюкс, 1x Картофель фри", "status", "new", "total", "650₽", "time", "8 мин назад"),
-                            Map.of("id", 1249, "items", "3x Суши сет, 2x Мисо суп", "status", "ready", "total", "1850₽", "time", "5 мин назад")
-                    ),
-                    "totalCount", 47,
-                    "newOrders", 3,
-                    "cookingOrders", 8
-            );
-
-            case "menu" -> Map.of(
-                    "menuItems", List.of(
-                            Map.of("id", 1, "name", "Пицца Маргарита", "price", "450₽", "category", "Пицца", "available", true),
-                            Map.of("id", 2, "name", "Бургер Делюкс", "price", "380₽", "category", "Бургеры", "available", true),
-                            Map.of("id", 3, "name", "Суши сет", "price", "850₽", "category", "Суши", "available", false)
-                    ),
-                    "totalItems", 45,
-                    "availableItems", 42
-            );
-
-            case "analytics" -> Map.of(
-                    "revenue", Map.of(
-                            "today", "15420₽",
-                            "week", "98750₽",
-                            "month", "425630₽"
-                    ),
-                    "orders", Map.of(
-                            "today", 23,
-                            "week", 156,
-                            "month", 687
-                    ),
-                    "topDishes", List.of(
-                            Map.of("name", "Пицца Маргарита", "orders", 45),
-                            Map.of("name", "Бургер Делюкс", "orders", 38),
-                            Map.of("name", "Суши сет", "orders", 29)
-                    )
-            );
-
-            default -> Map.of("error", "Секция не найдена");
-        };
-    }
-
-    private Map<String, Object> loadCourierSectionData(String section, UserResponseDto user) {
-        return switch (section) {
-            case "deliveries" -> Map.of(
-                    "activeDeliveries", List.of(
-                            Map.of("id", 1247, "restaurant", "Пиццерия Мама Миа", "customer", "Иван П.", "status", "picked_up", "distance", "2.1 км", "payment", "890₽"),
-                            Map.of("id", 1248, "restaurant", "Tokyo Sushi", "customer", "Анна С.", "status", "waiting", "distance", "1.5 км", "payment", "1200₽")
-                    ),
-                    "totalCount", 2,
-                    "completedToday", 8
-            );
-
-            case "available-orders" -> Map.of(
-                    "availableOrders", List.of(
-                            Map.of("id", 1250, "restaurant", "Burger Street", "distance", "1.2 км", "payment", "750₽", "tip", "120₽"),
-                            Map.of("id", 1251, "restaurant", "Кафе Уют", "distance", "2.8 км", "payment", "1100₽", "tip", "150₽"),
-                            Map.of("id", 1252, "restaurant", "Пиццерия Мама Миа", "distance", "0.8 км", "payment", "650₽", "tip", "80₽")
-                    ),
-                    "totalAvailable", 15
-            );
-
-            case "earnings" -> Map.of(
-                    "today", "1840₽",
-                    "thisWeek", "12450₽",
-                    "thisMonth", "54230₽",
-                    "deliveriesToday", 12,
-                    "avgDeliveryTime", "24 мин",
-                    "rating", 4.9,
-                    "tips", Map.of(
-                            "today", "340₽",
-                            "week", "2150₽",
-                            "month", "8970₽"
-                    )
-            );
-
-            case "profile" -> Map.of(
-                    "profile", Map.of(
-                            "id", user.getId(),
-                            "email", user.getEmail(),
-                            "firstName", user.getFirstName(),
-                            "lastName", user.getLastName(),
-                            "phone", "+7 XXX XXX-XX-XX",
-                            "vehicle", "Велосипед",
-                            "workingSince", "15 марта 2024",
-                            "totalDeliveries", 892,
-                            "rating", 4.9
-                    )
-            );
-
-            default -> Map.of("error", "Секция не найдена");
-        };
     }
 }
