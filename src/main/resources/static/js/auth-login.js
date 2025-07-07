@@ -2,10 +2,14 @@ class AuthLogin {
     constructor(config = {}) {
         this.API_BASE_URL = config.apiBaseUrl || 'http://localhost:8082';
         this.roleRedirects = config.roleRedirects || {
-            'ROLE_ADMIN': '/admin/dashboard',
-            'ROLE_MANAGER': '/manager/dashboard',
+            'ROLE_ADMIN': '/dashboard',
             'ROLE_USER': '/dashboard',
-            'BASE_USER': '/dashboard'
+            'ROLE_BUSINESS': '/dashboard',
+            'ROLE_COURIER': '/dashboard',
+            'BASE_USER': '/dashboard',
+            'BUSINESS_USER': '/dashboard',
+            'COURIER': '/dashboard',
+            'ADMIN': '/dashboard'
         };
         this.init();
     }
@@ -103,9 +107,12 @@ class AuthLogin {
         return true;
     }
 
-    // ✅ ИСПРАВЛЕННАЯ обработка входа с правильным URL
+    // ✅ ИСПРАВЛЕННАЯ обработка входа для нового API
     async handleLogin(e) {
         e.preventDefault();
+
+        // 🔍 ОТЛАДКА - проверяем текущий URL
+        console.log('🚀 НАЧАЛО handleLogin - текущий URL:', window.location.href);
 
         const email = document.getElementById('email')?.value?.trim();
         const password = document.getElementById('password')?.value;
@@ -120,14 +127,13 @@ class AuthLogin {
         this.setLoading(true);
 
         try {
-            // ✅ ПРАВИЛЬНЫЙ URL для AuthController
+            // ✅ Запрос к новому API
             const response = await fetch(`${this.API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-                credentials: 'include', // ✅ ВАЖНО: включаем cookies
                 body: JSON.stringify({
                     email: email,
                     password: password,
@@ -138,53 +144,54 @@ class AuthLogin {
             console.log(`📡 Ответ статус: ${response.status}`);
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                if (response.status === 401) {
+                    throw new Error('Неверный email или пароль');
+                } else if (response.status === 400) {
+                    throw new Error('Ошибка в данных запроса');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
             }
 
             const data = await response.json();
             console.log('📥 Ответ сервера:', data);
 
-            if (data.success) {
-                const sessionType = data.rememberMe ? 'Сессия на 30 дней! 🍪' : 'Обычная сессия 🔒';
-                this.showSuccess(`Добро пожаловать! ${sessionType}`);
+            // ✅ Новый API возвращает AuthResponseDto напрямую
+            if (data.token && data.user) {
+                const sessionType = data.rememberMe ? 'Сессия на 30 дней! 💾' : 'Обычная сессия 🔒';
+                this.showSuccess(`Добро пожаловать, ${data.user.firstName}! ${sessionType}`);
 
-                // ✅ Токен сохранен в cookies сервером
-                console.log('🍪 JWT токен установлен в cookies сервером');
+                // ✅ Сохраняем токен в localStorage/sessionStorage
+                const storage = data.rememberMe ? localStorage : sessionStorage;
 
-                // ✅ Сохраняем пользовательские данные локально
-                if (data.user) {
-                    const storage = data.rememberMe ? localStorage : sessionStorage;
-                    storage.setItem('user', JSON.stringify(data.user));
-                    localStorage.setItem('rememberMe', data.rememberMe.toString());
-                    localStorage.setItem('lastRememberMe', rememberMe.toString());
+                storage.setItem('authToken', data.token);
+                storage.setItem('tokenType', data.type || 'Bearer');
+                storage.setItem('user', JSON.stringify(data.user));
+                storage.setItem('rememberMe', data.rememberMe.toString());
 
-                    console.log(`💾 Данные пользователя сохранены в ${data.rememberMe ? 'localStorage' : 'sessionStorage'}`);
+                // Сохраняем последний выбор Remember Me
+                localStorage.setItem('lastRememberMe', rememberMe.toString());
+
+                console.log(`💾 Данные авторизации сохранены в ${data.rememberMe ? 'localStorage' : 'sessionStorage'}`);
+                console.log(`🔑 Токен: ${data.token.substring(0, 20)}... (${data.token.length} символов)`);
+
+                // ✅ Определяем редирект - всегда на единый дашборд
+                let redirectUrl = '/dashboard';
+
+                // 🔄 Проверяем, если backend вернул редирект с ролью - исправляем его
+                if (window.location.pathname.includes('/dashboard/')) {
+                    window.history.replaceState(null, '', '/dashboard');
                 }
-
-                // ✅ Используем redirectUrl из ответа или определяем по роли
-                const redirectUrl = data.redirectUrl ||
-                    this.roleRedirects[data.user?.userRole] ||
-                    '/dashboard';
 
                 console.log(`🎯 Запланирован редирект: ${redirectUrl}`);
 
-                // ✅ Проверяем что cookies действительно установлены
+                // ✅ Небольшая задержка для показа сообщения
                 setTimeout(() => {
-                    const jwtCookie = this.getAuthToken();
-                    if (jwtCookie) {
-                        console.log(`✅ JWT cookie подтвержден (${jwtCookie.length} символов)`);
-                        window.location.href = redirectUrl;
-                    } else {
-                        console.error('❌ JWT cookie не установлен, повторяем попытку...');
-                        // Резервный редирект с токеном в параметрах
-                        const urlWithToken = new URL(redirectUrl, window.location.origin);
-                        urlWithToken.searchParams.set('token', data.token);
-                        window.location.href = urlWithToken.toString();
-                    }
+                    window.location.href = redirectUrl;
                 }, 1500);
 
             } else {
-                this.showError(data.message || 'Ошибка авторизации');
+                throw new Error('Неполные данные в ответе сервера');
             }
 
         } catch (error) {
@@ -192,35 +199,27 @@ class AuthLogin {
 
             if (error.message.includes('Failed to fetch')) {
                 this.showError('Сервер недоступен. Проверьте подключение.');
-            } else if (error.message.includes('HTTP 401')) {
-                this.showError('Неверные учетные данные');
-            } else if (error.message.includes('HTTP 400')) {
-                this.showError('Ошибка в данных запроса');
             } else {
-                this.showError('Ошибка соединения с сервером');
+                this.showError(error.message);
             }
         } finally {
             this.setLoading(false);
         }
     }
 
-    // ✅ УЛУЧШЕННАЯ проверка существующей авторизации
+    // ✅ ОБНОВЛЕННАЯ проверка существующей авторизации
     checkExistingAuth() {
         try {
-            const hasJwtCookie = this.getAuthToken();
+            const token = this.getAuthToken();
             const userData = this.getUserData();
 
-            if (hasJwtCookie) {
-                console.log('🍪 Найден JWT cookie');
+            if (token && userData) {
+                console.log(`🔑 Найден токен авторизации (${token.substring(0, 20)}...)`);
+                console.log(`👤 Найдены данные пользователя: ${userData.email} (${userData.userRole})`);
 
-                if (userData) {
-                    console.log(`👤 Найдены данные пользователя: ${userData.email} (${userData.userRole})`);
-
-                    // Можем показать информацию о существующей сессии
-                    this.showSuccess(`Добро пожаловать обратно, ${userData.email}!`);
-                }
+                this.showSuccess(`Добро пожаловать обратно, ${userData.firstName || userData.email}!`);
             } else {
-                console.log('❌ JWT cookie не найден');
+                console.log('❌ Токен авторизации не найден');
             }
 
             // Восстанавливаем состояние checkbox Remember Me
@@ -237,18 +236,18 @@ class AuthLogin {
         }
     }
 
-    // ✅ УЛУЧШЕННАЯ очистка данных
+    // ✅ ОБНОВЛЕННАЯ очистка данных
     clearAuthData() {
         try {
             // Очищаем localStorage
-            localStorage.removeItem('user');
-            localStorage.removeItem('rememberMe');
-            localStorage.removeItem('lastRememberMe');
+            const localStorageKeys = ['authToken', 'tokenType', 'user', 'rememberMe', 'lastRememberMe'];
+            localStorageKeys.forEach(key => localStorage.removeItem(key));
 
             // Очищаем sessionStorage
-            sessionStorage.removeItem('user');
+            const sessionStorageKeys = ['authToken', 'tokenType', 'user', 'rememberMe'];
+            sessionStorageKeys.forEach(key => sessionStorage.removeItem(key));
 
-            console.log('🧹 Локальные данные авторизации очищены');
+            console.log('🧹 Данные авторизации очищены');
         } catch (error) {
             console.error('❌ Ошибка очистки данных:', error);
         }
@@ -273,29 +272,47 @@ class AuthLogin {
         });
     }
 
-    // ✅ УЛУЧШЕННОЕ получение токена из cookies
+    // ✅ ОБНОВЛЕННОЕ получение токена из storage
     getAuthToken() {
         try {
-            const cookies = document.cookie.split(';');
-            const jwtCookie = cookies.find(cookie =>
-                cookie.trim().startsWith('jwt=')
-            );
+            // Проверяем localStorage сначала (для Remember Me)
+            let token = localStorage.getItem('authToken');
+            if (token) return token;
 
-            if (jwtCookie) {
-                const token = jwtCookie.split('=')[1].trim();
-                return token.length > 0 ? token : null;
-            }
-
-            return null;
+            // Затем sessionStorage
+            token = sessionStorage.getItem('authToken');
+            return token;
         } catch (error) {
-            console.error('❌ Ошибка извлечения токена из cookies:', error);
+            console.error('❌ Ошибка получения токена:', error);
             return null;
         }
     }
 
+    getTokenType() {
+        try {
+            return localStorage.getItem('tokenType') ||
+                sessionStorage.getItem('tokenType') ||
+                'Bearer';
+        } catch (error) {
+            console.error('❌ Ошибка получения типа токена:', error);
+            return 'Bearer';
+        }
+    }
+
+    getAuthHeader() {
+        const token = this.getAuthToken();
+        const tokenType = this.getTokenType();
+        return token ? `${tokenType} ${token}` : null;
+    }
+
     getUserData() {
         try {
-            const userData = localStorage.getItem('user') || sessionStorage.getItem('user');
+            // Проверяем localStorage сначала (для Remember Me)
+            let userData = localStorage.getItem('user');
+            if (userData) return JSON.parse(userData);
+
+            // Затем sessionStorage
+            userData = sessionStorage.getItem('user');
             return userData ? JSON.parse(userData) : null;
         } catch (error) {
             console.error('❌ Ошибка получения данных пользователя:', error);
@@ -313,27 +330,24 @@ class AuthLogin {
         return !!(token && userData);
     }
 
-    // ✅ ИСПРАВЛЕННЫЙ logout с правильным URL
+    // ✅ ОБНОВЛЕННЫЙ logout
     async logout() {
         try {
             console.log('🚪 Выполняется выход из системы...');
 
-            // Отправляем запрос на правильный endpoint
-            const response = await fetch(`${this.API_BASE_URL}/api/auth/logout`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                credentials: 'include'
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                console.log('✅ Logout успешен:', data.message);
-            } else {
-                console.warn('⚠️ Ошибка logout на сервере:', response.status);
+            // Можно добавить вызов API logout, если он будет нужен
+            const authHeader = this.getAuthHeader();
+            if (authHeader) {
+                const response = await fetch(`${this.API_BASE_URL}/api/auth/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': authHeader,
+                        'Content-Type': 'application/json'
+                    }
+                });
             }
+
+            console.log('✅ Logout выполнен');
         } catch (error) {
             console.error('❌ Ошибка при logout:', error);
         } finally {
@@ -345,7 +359,7 @@ class AuthLogin {
         }
     }
 
-    // ✅ РАСШИРЕННАЯ отладочная информация
+    // ✅ ОБНОВЛЕННАЯ отладочная информация
     showDebugInfo() {
         const token = this.getAuthToken();
         const userData = this.getUserData();
@@ -353,9 +367,11 @@ class AuthLogin {
         const debugInfo = {
             // Состояние авторизации
             authentication: {
-                hasJwtCookie: !!token,
+                hasToken: !!token,
                 tokenLength: token ? token.length : 0,
-                tokenPreview: token ? `${token.substring(0, 20)}...` : null,
+                tokenPreview: token ? `${token.substring(0, 30)}...` : null,
+                tokenType: this.getTokenType(),
+                authHeader: this.getAuthHeader() ? `${this.getTokenType()} ${token?.substring(0, 20)}...` : null,
                 isAuthenticated: this.isAuthenticated(),
                 userData: userData
             },
@@ -366,23 +382,20 @@ class AuthLogin {
                 last: localStorage.getItem('lastRememberMe')
             },
 
-            // Cookies
-            cookies: {
-                all: document.cookie,
-                jwt: this.getAuthToken() ? 'PRESENT' : 'MISSING',
-                userRole: this.getCookie('userRole'),
-                userEmail: this.getCookie('userEmail')
-            },
-
-            // Локальное хранилище
+            // Хранилище
             storage: {
                 localStorage: {
+                    authToken: !!localStorage.getItem('authToken'),
+                    tokenType: localStorage.getItem('tokenType'),
                     user: !!localStorage.getItem('user'),
                     rememberMe: localStorage.getItem('rememberMe'),
                     lastRememberMe: localStorage.getItem('lastRememberMe')
                 },
                 sessionStorage: {
-                    user: !!sessionStorage.getItem('user')
+                    authToken: !!sessionStorage.getItem('authToken'),
+                    tokenType: sessionStorage.getItem('tokenType'),
+                    user: !!sessionStorage.getItem('user'),
+                    rememberMe: sessionStorage.getItem('rememberMe')
                 }
             },
 
@@ -407,6 +420,8 @@ class AuthLogin {
             user: userData,
             hasToken: !!token,
             tokenLength: token ? token.length : 0,
+            tokenType: this.getTokenType(),
+            authHeader: this.getAuthHeader(),
             rememberMe: this.isRememberMe()
         };
 
@@ -414,45 +429,60 @@ class AuthLogin {
         return status;
     }
 
-    // ✅ Вспомогательный метод для получения конкретного cookie
-    getCookie(name) {
-        try {
-            const cookies = document.cookie.split(';');
-            const cookie = cookies.find(c => c.trim().startsWith(`${name}=`));
-            return cookie ? cookie.split('=')[1].trim() : null;
-        } catch (error) {
-            console.error(`❌ Ошибка получения cookie '${name}':`, error);
-            return null;
-        }
-    }
-
     // ✅ Проверка работоспособности API
     async testConnection() {
         try {
             console.log('🔧 Тестирование подключения к API...');
 
-            const response = await fetch(`${this.API_BASE_URL}/api/auth/login/debug`, {
+            // Тестируем основной endpoint логина
+            const response = await fetch(`${this.API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    test: true,
-                    timestamp: new Date().toISOString(),
-                    userAgent: navigator.userAgent
+                    email: 'test@example.com',
+                    password: 'test'
                 })
             });
 
+            console.log(`📡 API ответил со статусом: ${response.status}`);
+            return response.status !== 404; // API доступен, даже если логин неверный
+        } catch (error) {
+            console.error('❌ Ошибка тестирования API:', error);
+            return false;
+        }
+    }
+
+    // ✅ Валидация токена через API
+    async validateToken() {
+        const authHeader = this.getAuthHeader();
+        if (!authHeader) {
+            console.log('❌ Токен отсутствует');
+            return false;
+        }
+
+        try {
+            console.log('🔍 Валидация токена через API...');
+
+            const response = await fetch(`${this.API_BASE_URL}/api/auth/validate-token-simple`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': authHeader,
+                    'Content-Type': 'application/json'
+                }
+            });
+
             if (response.ok) {
-                const data = await response.json();
-                console.log('✅ API доступен:', data);
-                return true;
+                const isValid = await response.json();
+                console.log(`✅ Токен ${isValid ? 'действителен' : 'недействителен'}`);
+                return isValid;
             } else {
-                console.error('❌ API недоступен:', response.status);
+                console.log('❌ Ошибка валидации токена:', response.status);
                 return false;
             }
         } catch (error) {
-            console.error('❌ Ошибка тестирования API:', error);
+            console.error('❌ Ошибка валидации токена:', error);
             return false;
         }
     }
@@ -462,17 +492,16 @@ class AuthLogin {
         console.log('🔄 Принудительная очистка всех данных авторизации...');
 
         // Очищаем все возможные ключи
-        const keysToRemove = ['user', 'rememberMe', 'lastRememberMe', 'authToken', 'tokenType'];
+        const keysToRemove = [
+            'authToken', 'tokenType', 'user', 'rememberMe', 'lastRememberMe',
+            // Старые ключи для совместимости
+            'jwt', 'userRole', 'userEmail'
+        ];
 
         keysToRemove.forEach(key => {
             localStorage.removeItem(key);
             sessionStorage.removeItem(key);
         });
-
-        // Очищаем cookies через JavaScript (ограниченно)
-        document.cookie = 'jwt=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        document.cookie = 'userRole=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-        document.cookie = 'userEmail=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 
         console.log('✅ Принудительная очистка завершена');
 
@@ -489,10 +518,14 @@ document.addEventListener('DOMContentLoaded', function() {
         window.authLogin = new AuthLogin({
             apiBaseUrl: 'http://localhost:8082',
             roleRedirects: {
-                'ROLE_ADMIN': '/admin/dashboard',
-                'ROLE_MANAGER': '/manager/dashboard',
+                'ROLE_ADMIN': '/dashboard',
                 'ROLE_USER': '/dashboard',
-                'BASE_USER': '/dashboard'
+                'ROLE_BUSINESS': '/dashboard',
+                'ROLE_COURIER': '/dashboard',
+                'BASE_USER': '/dashboard',
+                'BUSINESS_USER': '/dashboard',
+                'COURIER': '/dashboard',
+                'ADMIN': '/dashboard'
             }
         });
 
@@ -500,12 +533,14 @@ document.addEventListener('DOMContentLoaded', function() {
         window.showAuthDebug = () => window.authLogin.showDebugInfo();
         window.checkAuth = () => window.authLogin.checkAuthStatus();
         window.testAuthAPI = () => window.authLogin.testConnection();
+        window.validateAuthToken = () => window.authLogin.validateToken();
         window.resetAuth = () => window.authLogin.forceReset();
 
         console.log('🎯 AuthLogin инициализирован. Доступные команды:');
         console.log('  showAuthDebug() - полная отладочная информация');
         console.log('  checkAuth() - проверка статуса авторизации');
         console.log('  testAuthAPI() - тест подключения к API');
+        console.log('  validateAuthToken() - валидация токена через API');
         console.log('  resetAuth() - принудительная очистка данных');
     }
 });

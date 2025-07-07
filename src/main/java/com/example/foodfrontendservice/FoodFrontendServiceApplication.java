@@ -6,13 +6,14 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 
 
-
-@EnableFeignClients
 @SpringBootApplication
+@EnableFeignClients
 public class FoodFrontendServiceApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(FoodFrontendServiceApplication.class, args);
+
+
     }
 
 

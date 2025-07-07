@@ -1,52 +1,107 @@
-package com.example.foodfrontendservice.Client;
+package com.example.foodfrontendservice.Client;//package com.example.foodfrontendservice.Client;
 import com.example.foodfrontendservice.Client.Fallback.UserServiceClientFallback;
-
 import com.example.foodfrontendservice.config.FeignConfig;
-import com.example.foodfrontendservice.dto.AuthResponseDto;
-import com.example.foodfrontendservice.dto.LoginRequestDto;
-import com.example.foodfrontendservice.dto.UserRegistrationDto;
-import com.example.foodfrontendservice.dto.UserResponseDto;
+import com.example.foodfrontendservice.dto.*;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
 import com.example.foodfrontendservice.enums.UserRole;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
+
 
 @FeignClient(
         name = "user-service",
+        url = "http://localhost:8081",
+        path = "/api",
         fallback = UserServiceClientFallback.class,
-        configuration = FeignConfig.class
+        configuration = FeignConfig.class,
+        contextId = "userServiceClient"
 )
 public interface UserServiceClient {
 
-    // 📋 Получить доступные роли
-    @GetMapping("/api/registration/roles")
+    @PostMapping("/auth/login")
+    AuthResponseDto login(@RequestBody LoginRequestDto loginRequest);
+
+    @GetMapping("/auth/user-by-token")
+    UserResponseDto getUserByToken(@RequestHeader("Authorization") String authHeader);
+
+    @PostMapping("/auth/validate-token-simple")
+    Boolean validateTokenSimple(@RequestHeader("Authorization") String authHeader);
+
+    @GetMapping("/auth/me")
+    ResponseEntity<ApiResponse<UserResponseDto>> getCurrentUser(@RequestHeader("Authorization") String authHeader);
+
+    @PostMapping("/auth/validate-token")
+    ResponseEntity<ApiResponse<TokenValidationDto>> validateToken(@RequestHeader("Authorization") String authHeader);
+
+    @PostMapping("/auth/logout")
+    ResponseEntity<ApiResponse<LogoutResponseDto>> logout(@RequestHeader("Authorization") String authHeader);
+
+    @GetMapping("/auth/test")
+    ResponseEntity<ApiResponse<ServiceHealthDto>> testAuthService();
+
+    @GetMapping("/registration/roles")
     ResponseEntity<List<UserRole>> getAvailableRoles();
 
-    // 📝 Регистрация пользователя
-    @PostMapping("/api/registration/register")
+    @PostMapping("/registration/register")
     ResponseEntity<UserResponseDto> register(@RequestBody UserRegistrationDto registrationDto);
 
-    // ✅ Проверка доступности email
-    @GetMapping("/api/registration/check-email")
+    @GetMapping("/registration/check-email")
     ResponseEntity<Boolean> checkEmailAvailability(@RequestParam String email);
 
-    // 🔐 Авторизация пользователя
-    @PostMapping("/api/auth/login")
-    ResponseEntity<AuthResponseDto> login(@RequestBody LoginRequestDto loginRequest);
-
-    // 👤 Получить профиль текущего пользователя
-    @GetMapping("/api/auth/me")
-    ResponseEntity<UserResponseDto> getCurrentUser(@RequestHeader("Authorization") String authHeader);
-
-    // ✅ Валидация токена
-    @PostMapping("/api/auth/validate-token")
-    ResponseEntity<Boolean> validateToken(@RequestHeader("Authorization") String authHeader);
-
-    // 🧪 Тестовые endpoints
-    @GetMapping("/api/auth/test")
-    ResponseEntity<String> testAuthService();
-
-    @GetMapping("/api/registration/test")
+    @GetMapping("/registration/test")
     ResponseEntity<String> testRegistrationService();
+
+
+    @GetMapping("/auth/user-by-token-response")
+    ResponseEntity<UserResponseDto> getUserByTokenWithResponse(@RequestHeader("Authorization") String authHeader);
+
+    // ========== DTO КЛАССЫ ДЛЯ КЛИЕНТСКИХ ENDPOINTS ==========
+
+    /**
+     * DTO для детальной валидации токена
+     */
+    @lombok.Data
+    @lombok.Builder
+    @lombok.NoArgsConstructor
+    @lombok.AllArgsConstructor
+    class TokenValidationDto {
+        private Boolean valid;
+        private Long userId;
+        private String email;
+        private String role;
+        private Boolean hasLocation;
+        private String locationStatus;
+    }
+
+    /**
+     * DTO для ответа logout
+     */
+    @lombok.Data
+    @lombok.Builder
+    @lombok.NoArgsConstructor
+    @lombok.AllArgsConstructor
+    class LogoutResponseDto {
+        private Boolean success;
+        private String userEmail;
+        private String message;
+        private java.time.LocalDateTime logoutTime;
+    }
+
+    /**
+     * DTO для health check
+     */
+    @lombok.Data
+    @lombok.Builder
+    @lombok.NoArgsConstructor
+    @lombok.AllArgsConstructor
+    class ServiceHealthDto {
+        private String serviceName;
+        private String status;
+        private String message;
+        private String version;
+        private java.time.LocalDateTime timestamp;
+    }
 }

@@ -1,16 +1,15 @@
 package com.example.foodfrontendservice.service;
-
 import com.example.foodfrontendservice.Client.UserServiceClient;
-import com.example.foodfrontendservice.dto.AuthResponseDto;
-import com.example.foodfrontendservice.dto.LoginRequestDto;
-import com.example.foodfrontendservice.dto.UserRegistrationDto;
-import com.example.foodfrontendservice.dto.UserResponseDto;
+import com.example.foodfrontendservice.dto.*;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
 import com.example.foodfrontendservice.enums.UserRole;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -19,160 +18,214 @@ public class UserIntegrationService {
 
     private final UserServiceClient userServiceClient;
 
-    public List<UserRole> getAvailableRoles() {
-        try {
-            log.info("📋 Получаем доступные роли из User Service");
-            ResponseEntity<List<UserRole>> response = userServiceClient.getAvailableRoles();
-
-            if (response.getBody() != null) {
-                log.info("✅ Получено {} ролей", response.getBody().size());
-                return response.getBody();
-            } else {
-                log.warn("⚠️ Пустой ответ при получении ролей");
-                return List.of();
-            }
-        } catch (Exception e) {
-            log.error("❌ Ошибка получения ролей: {}", e.getMessage(), e);
-            throw new RuntimeException("Не удалось получить список ролей");
-        }
-    }
-
-    public UserResponseDto registerUser(UserRegistrationDto registrationDto) {
-        try {
-            log.info("📝 Регистрируем пользователя: {}", registrationDto.getEmail());
-            ResponseEntity<UserResponseDto> response = userServiceClient.register(registrationDto);
-
-            if (response.getBody() != null) {
-                log.info("✅ Пользователь успешно зарегистрирован: {}", registrationDto.getEmail());
-                return response.getBody();
-            } else {
-                log.error("❌ Пустой ответ при регистрации пользователя: {}", registrationDto.getEmail());
-                throw new RuntimeException("Пустой ответ от сервера регистрации");
-            }
-        } catch (Exception e) {
-            log.error("❌ Ошибка регистрации пользователя {}: {}", registrationDto.getEmail(), e.getMessage(), e);
-            throw new RuntimeException("Ошибка регистрации: " + e.getMessage());
-        }
-    }
-
-    public Boolean checkEmailAvailability(String email) {
-        try {
-            log.debug("📧 Проверяем доступность email: {}", email);
-            ResponseEntity<Boolean> response = userServiceClient.checkEmailAvailability(email);
-
-            Boolean result = response.getBody();
-            log.debug("✅ Email {} {}", email, Boolean.TRUE.equals(result) ? "доступен" : "занят");
-            return result != null ? result : true;
-        } catch (Exception e) {
-            log.error("❌ Ошибка проверки email {}: {}", email, e.getMessage());
-            return true; // По умолчанию считаем доступным
-        }
-    }
 
 
     public AuthResponseDto loginUser(LoginRequestDto loginRequest) {
         try {
-            log.info("🔐 Авторизуем пользователя: {}", loginRequest.getEmail());
+            log.info("🔗 Вызов User Service для авторизации: {}", loginRequest.getEmail());
 
-            // ✅ ДОБАВЛЯЕМ ДЕТАЛЬНОЕ ЛОГИРОВАНИЕ
-            log.info("🍪 Remember Me в запросе: {} (type: {})",
-                    loginRequest.getRememberMe(),
-                    loginRequest.getRememberMe() != null ? loginRequest.getRememberMe().getClass().getSimpleName() : "null");
+            // ✅ Используем межсервисный endpoint
+            AuthResponseDto response = userServiceClient.login(loginRequest);
 
-            // ✅ ЛОГИРУЕМ ВСЕ ДАННЫЕ ЗАПРОСА
-            log.info("📤 Отправляем данные в User Service:");
-            log.info("   📧 Email: {}", loginRequest.getEmail());
-            log.info("   🔒 Password: {}", loginRequest.getPassword() != null ? "[PROTECTED]" : "null");
-            log.info("   🍪 Remember Me: {}", loginRequest.getRememberMe());
-
-            ResponseEntity<AuthResponseDto> response = userServiceClient.login(loginRequest);
-
-            if (response.getBody() != null && response.getBody().getToken() != null) {
-                AuthResponseDto authResponse = response.getBody();
-
-                // ✅ ДЕТАЛЬНОЕ ЛОГИРОВАНИЕ ОТВЕТА
-                log.info("📥 Получен ответ от User Service:");
-                log.info("   🎫 Token: {}", authResponse.getToken() != null ? "PRESENT" : "NULL");
-                log.info("   🏷️ Type: {}", authResponse.getType());
-                log.info("   👤 User: {}", authResponse.getUser() != null ? authResponse.getUser().getEmail() : "NULL");
-                log.info("   🍪 Remember Me в ответе: {} (type: {})",
-                        authResponse.getRememberMe(),
-                        authResponse.getRememberMe() != null ? authResponse.getRememberMe().getClass().getSimpleName() : "null");
-
-                // ✅ NULL-SAFE ПРОВЕРКА СООТВЕТСТВИЯ
-                Boolean requestRememberMe = loginRequest.getRememberMe() != null ? loginRequest.getRememberMe() : false;
-                Boolean responseRememberMe = authResponse.getRememberMe() != null ? authResponse.getRememberMe() : false;
-
-                if (!requestRememberMe.equals(responseRememberMe)) {
-                    log.warn("⚠️ НЕСООТВЕТСТВИЕ Remember Me!");
-                    log.warn("   Отправили: {} (normalized: {})", loginRequest.getRememberMe(), requestRememberMe);
-                    log.warn("   Получили: {} (normalized: {})", authResponse.getRememberMe(), responseRememberMe);
-                }
-
-                log.info("✅ Пользователь успешно авторизован: {}", loginRequest.getEmail());
-                return authResponse;
+            if (response != null && response.getUser() != null) {
+                log.info("✅ Успешная авторизация через User Service: {}", response.getUser().getEmail());
+                return response;
             } else {
-                log.error("❌ Пустой ответ или токен при авторизации: {}", loginRequest.getEmail());
-                log.error("   Response body: {}", response.getBody());
-                log.error("   Token: {}", response.getBody() != null ? response.getBody().getToken() : "NULL");
-                throw new RuntimeException("Неверные учетные данные");
+                throw new RuntimeException("Пустой ответ от User Service");
             }
+
+        } catch (feign.RetryableException e) {
+            log.error("🔌 Ошибка подключения к User Service: {}", e.getMessage());
+            throw new RuntimeException("User Service недоступен. Проверьте подключение к сервису.");
+
+        } catch (feign.FeignException.Unauthorized e) {
+            log.error("🔐 Ошибка авторизации в User Service: {}", e.getMessage());
+            throw new RuntimeException("Неверный email или пароль");
+
+        } catch (feign.FeignException.ServiceUnavailable e) {
+            log.error("🚫 User Service недоступен: {}", e.getMessage());
+            throw new RuntimeException("Сервис авторизации временно недоступен");
+
+        } catch (feign.FeignException e) {
+            log.error("🌐 Ошибка Feign при вызове User Service: {} - {}", e.status(), e.getMessage());
+
+            if (e.status() == 401) {
+                throw new RuntimeException("Неверный email или пароль");
+            } else if (e.status() == 404) {
+                throw new RuntimeException("Сервис авторизации не найден");
+            } else if (e.status() >= 500) {
+                throw new RuntimeException("Внутренняя ошибка сервиса авторизации");
+            } else {
+                throw new RuntimeException("Ошибка авторизации: " + e.getMessage());
+            }
+
         } catch (Exception e) {
-            log.error("❌ Ошибка авторизации пользователя {}: {}", loginRequest.getEmail(), e.getMessage(), e);
+            log.error("❌ Неожиданная ошибка при вызове User Service login: {}", e.getMessage(), e);
 
-            // ✅ ДОПОЛНИТЕЛЬНАЯ ОТЛАДОЧНАЯ ИНФОРМАЦИЯ
-            if (e.getCause() != null) {
-                log.error("❌ Причина ошибки: {}", e.getCause().getMessage());
-            }
-
-            throw new RuntimeException("Ошибка авторизации: " + e.getMessage());
+            // Детальная обработка различных типов ошибок
+            String errorMessage = determineErrorMessage(e);
+            throw new RuntimeException(errorMessage);
         }
     }
 
-    public UserResponseDto getCurrentUser(String authHeader) {
-        try {
-            log.info("👤 Получаем профиль пользователя по токену");
+    /**
+     * 🔍 Определение типа ошибки для пользователя
+     */
+    private String determineErrorMessage(Exception e) {
+        String message = e.getMessage().toLowerCase();
 
-            String finalAuthHeader = authHeader;
-            if (!authHeader.startsWith("Bearer ")) {
-                finalAuthHeader = "Bearer " + authHeader;
-                log.debug("🔧 Добавлен префикс Bearer к токену");
-            }
-
-            ResponseEntity<UserResponseDto> response = userServiceClient.getCurrentUser(finalAuthHeader);
-
-            if (response.getBody() != null) {
-                UserResponseDto user = response.getBody();
-                log.info("✅ Профиль получен: {} (роль: {})", user.getEmail(), user.getUserRole());
-                return user;
-            } else {
-                log.error("❌ Пустой ответ при получении профиля пользователя");
-                throw new RuntimeException("Не удалось получить профиль пользователя");
-            }
-        } catch (Exception e) {
-            log.error("❌ Ошибка получения профиля: {}", e.getMessage(), e);
-            throw new RuntimeException("Ошибка получения профиля пользователя: " + e.getMessage());
+        if (message.contains("connect timed out") || message.contains("connection refused")) {
+            return "Сервис авторизации недоступен. Попробуйте позже.";
+        } else if (message.contains("read timed out")) {
+            return "Превышено время ожидания ответа от сервиса авторизации.";
+        } else if (message.contains("unknown host") || message.contains("name resolution")) {
+            return "Не удается найти сервис авторизации.";
+        } else if (message.contains("eureka")) {
+            return "Ошибка обнаружения сервисов. Проверьте конфигурацию.";
+        } else {
+            return "Ошибка авторизации: " + e.getMessage();
         }
     }
 
-    public Boolean validateToken(String authHeader) {
+    /**
+     * 🔗 Получение пользователя по токену - МЕЖСЕРВИСНЫЙ ВЫЗОВ
+     * Для внутренней валидации в других endpoints
+     */
+    public UserResponseDto getUserByToken(String token) {
         try {
-            log.debug("🔍 Валидируем токен");
+            log.debug("🔗 Вызов User Service для получения пользователя по токену");
 
-            // Убеждаемся, что заголовок имеет правильный формат
-            String finalAuthHeader = authHeader;
-            if (!authHeader.startsWith("Bearer ")) {
-                finalAuthHeader = "Bearer " + authHeader;
-            }
+            // ✅ Используем межсервисный endpoint
+            UserResponseDto user = userServiceClient.getUserByToken("Bearer " + token);
 
-            ResponseEntity<Boolean> response = userServiceClient.validateToken(finalAuthHeader);
-            Boolean isValid = response.getBody();
+            log.debug("✅ Получен пользователь: {}", user.getEmail());
+            return user;
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка получения пользователя: {}", e.getMessage());
+            throw new RuntimeException("Пользователь не найден");
+        }
+    }
+
+    /**
+     * 🔗 Простая валидация токена - МЕЖСЕРВИСНЫЙ ВЫЗОВ
+     * Для быстрых проверок без получения полных данных пользователя
+     */
+    public boolean validateToken(String token) {
+        try {
+            log.debug("🔗 Вызов User Service для валидации токена");
+
+            // ✅ Используем межсервисный endpoint
+            Boolean isValid = userServiceClient.validateTokenSimple("Bearer " + token);
 
             log.debug("✅ Результат валидации токена: {}", isValid);
             return Boolean.TRUE.equals(isValid);
+
         } catch (Exception e) {
             log.error("❌ Ошибка валидации токена: {}", e.getMessage());
-            return false;
+            return false; // Безопасно считаем невалидным
         }
+    }
+
+
+    // ========== REGISTRATION МЕТОДЫ ==========
+
+    /**
+     * 📋 Получение доступных ролей
+     */
+    public ResponseEntity<List<UserRole>> getAvailableRoles() {
+        try {
+            log.debug("📋 Получение доступных ролей из User Service");
+
+            ResponseEntity<List<UserRole>> response = userServiceClient.getAvailableRoles();
+            List<UserRole> roles = response.getBody();
+
+            log.debug("✅ Получено {} ролей", roles != null ? roles.size() : 0);
+            return response;
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка получения ролей: {}", e.getMessage());
+
+            // Fallback роли
+            List<UserRole> fallbackRoles = List.of(UserRole.BASE_USER, UserRole.BUSINESS_USER);
+            return ResponseEntity.ok(fallbackRoles);
+        }
+    }
+
+    /**
+     * 📝 Регистрация пользователя
+     */
+    public ResponseEntity<UserResponseDto> registerUser(UserRegistrationDto registrationDto) {
+        try {
+            log.info("📝 Регистрация пользователя через User Service: {}", registrationDto.getEmail());
+
+            ResponseEntity<UserResponseDto> response = userServiceClient.register(registrationDto);
+            UserResponseDto user = response.getBody();
+
+            if (user != null) {
+                log.info("✅ Пользователь {} успешно зарегистрирован (ID: {})",
+                        user.getEmail(), user.getId());
+            }
+
+            return response;
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка регистрации: {}", e.getMessage());
+            throw new RuntimeException("Ошибка регистрации: " + e.getMessage());
+        }
+    }
+
+    /**
+     * ✅ Проверка доступности email
+     */
+    public ResponseEntity<Boolean> checkEmailAvailability(String email) {
+        try {
+            log.debug("✅ Проверка доступности email: {}", email);
+
+            ResponseEntity<Boolean> response = userServiceClient.checkEmailAvailability(email);
+            Boolean isAvailable = response.getBody();
+
+            log.debug("✅ Email {} - доступен: {}", email, isAvailable);
+            return response;
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка проверки email: {}", e.getMessage());
+
+            // Безопасно считаем занятым при ошибке
+            return ResponseEntity.ok(false);
+        }
+    }
+
+    /**
+     * 🧪 Тест регистрационного сервиса
+     */
+    public ResponseEntity<String> testRegistrationService() {
+        try {
+            log.debug("🧪 Тестирование Registration Service");
+
+            ResponseEntity<String> response = userServiceClient.testRegistrationService();
+            String result = response.getBody();
+
+            log.debug("✅ Registration Service тест: {}", result);
+            return response;
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка тестирования: {}", e.getMessage());
+            return ResponseEntity.status(503).body("Service Unavailable: " + e.getMessage());
+        }
+    }
+
+    /**
+     * DTO для статистики подключения к сервисам
+     */
+    @lombok.Data
+    @lombok.Builder
+    @lombok.NoArgsConstructor
+    @lombok.AllArgsConstructor
+    public static class ServiceConnectionStats {
+        private Boolean authServiceAvailable;
+        private Boolean registrationServiceAvailable;
+        private Integer totalAvailableRoles;
+        private java.time.LocalDateTime lastChecked;
     }
 }

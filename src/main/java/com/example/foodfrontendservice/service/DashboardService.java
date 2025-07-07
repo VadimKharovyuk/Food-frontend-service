@@ -8,9 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Map;
-
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -18,260 +15,195 @@ public class DashboardService {
 
     private final UserIntegrationService userIntegrationService;
 
-    public String loadRoleSpecificDashboard(HttpServletRequest request, Model model,
-                                            UserRole expectedRole, String viewName) {
-        try {
-            // Пытаемся получить пользователя из сессии
-            UserResponseDto user = (UserResponseDto) request.getSession().getAttribute("currentUser");
-            String token = (String) request.getSession().getAttribute("authToken");
+    /**
+     * 🔑 Получение JWT токена из запроса
+     * Проверяет Header Authorization и Cookie
+     */
+    public String extractTokenFromRequest(HttpServletRequest request) {
+        // ✅ 1. Проверяем Authorization header
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            log.debug("🔑 Токен найден в Authorization header");
+            return token;
+        }
 
-            // Если нет в сессии, получаем заново
-            if (user == null || token == null) {
-                token = extractToken(request);
-                if (token != null) {
-                    user = userIntegrationService.getCurrentUser("Bearer " + token);
-                    if (user != null) {
-                        request.getSession().setAttribute("currentUser", user);
-                        request.getSession().setAttribute("authToken", token);
-                    }
+        // ✅ 2. Проверяем cookies (если используются)
+        if (request.getCookies() != null) {
+            for (var cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName()) || "authToken".equals(cookie.getName())) {
+                    log.debug("🍪 Токен найден в cookie: {}", cookie.getName());
+                    return cookie.getValue();
                 }
             }
-
-            if (user == null) {
-                log.warn("❌ Пользователь не найден для роли: {}", expectedRole);
-                return "redirect:/login?error=user_not_found";
-            }
-
-            if (user.getUserRole() != expectedRole) {
-                log.warn("🚫 Несоответствие ролей. Ожидается: {}, получена: {}",
-                        expectedRole, user.getUserRole());
-                return "redirect:/dashboard";
-            }
-
-            // Добавляем данные в модель
-            model.addAttribute("user", user);
-            model.addAttribute("userRole", user.getUserRole());
-            model.addAttribute("roleDisplayName", user.getUserRole().getDisplayName());
-
-
-            model.addAttribute("authToken", token);
-
-            log.info("✅ Успешная загрузка дашборда {} для {}", expectedRole, user.getEmail());
-
-            return viewName;
-
-        } catch (Exception e) {
-            log.error("💥 Ошибка загрузки дашборда для роли {}: {}", expectedRole, e.getMessage(), e);
-            model.addAttribute("error", "Ошибка загрузки дашборда");
-            return "error/dashboard";
-        }
-    }
-
-    /**
-     * 🔄 Обработка главного дашборда с перенаправлением на роль-специфичный
-     */
-    public String processDashboardRedirect(HttpServletRequest request) {
-        log.info("🏠 Обработка перенаправления дашборда от IP: {}", getClientIP(request));
-
-        try {
-            // Получаем токен из разных источников
-            String token = extractToken(request);
-
-            if (token == null) {
-                log.warn("❌ Токен авторизации не найден");
-                return "redirect:/login?error=no_token";
-            }
-
-            log.debug("🔑 Токен найден (длина: {}), получаем профиль пользователя...", token.length());
-
-            // Устанавливаем токен в атрибуты запроса для Feign
-            request.setAttribute("Authorization", "Bearer " + token);
-
-            // Получаем профиль пользователя через сервис
-            UserResponseDto user = userIntegrationService.getCurrentUser("Bearer " + token);
-
-            if (user == null || user.getUserRole() == null) {
-                log.warn("❌ Не удалось получить данные пользователя или роль отсутствует");
-                return "redirect:/login?error=invalid_user";
-            }
-
-            // Сохраняем данные в сессию
-            request.getSession().setAttribute("currentUser", user);
-            request.getSession().setAttribute("authToken", token);
-            request.setAttribute("currentUser", user);
-
-            log.info("✅ Пользователь {} (роль: {}) успешно аутентифицирован",
-                    user.getEmail(), user.getUserRole());
-
-            // Перенаправляем на роль-специфичный дашборд
-            String roleBasedPath = "/dashboard/" + user.getUserRole().name();
-            log.info("🔄 Перенаправление {} на {}", user.getEmail(), roleBasedPath);
-
-            return "redirect:" + roleBasedPath;
-
-        } catch (Exception e) {
-            log.error("💥 Ошибка в обработке дашборда: {}", e.getMessage(), e);
-            return "redirect:/login?error=dashboard_error";
-        }
-    }
-
-    /**
-     * 🔐 Обработка POST запроса с токеном в заголовках
-     */
-    public String processDashboardPost(HttpServletRequest request, Map<String, Object> requestBody) {
-        log.info("🏠 POST запрос дашборда от IP: {} с телом: {}",
-                getClientIP(request), requestBody);
-
-        try {
-            String token = extractTokenFromHeaders(request);
-
-            if (token == null) {
-                token = extractToken(request);
-            }
-
-            if (token == null) {
-                log.warn("❌ Токен не найден в POST запросе");
-                return "redirect:/login?error=no_token";
-            }
-
-            log.debug("🔑 Токен найден в POST (длина: {})", token.length());
-
-            // Устанавливаем токен и атрибуты для Feign
-            request.setAttribute("Authorization", "Bearer " + token);
-
-            // Получаем профиль пользователя
-            UserResponseDto user = userIntegrationService.getCurrentUser("Bearer " + token);
-
-            if (user == null || user.getUserRole() == null) {
-                log.warn("❌ Не удалось получить данные пользователя");
-                return "redirect:/login?error=invalid_user";
-            }
-
-            // Сохраняем в сессию
-            request.getSession().setAttribute("currentUser", user);
-            request.getSession().setAttribute("authToken", token);
-            request.setAttribute("currentUser", user);
-
-            log.info("✅ POST: Пользователь {} (роль: {}) аутентифицирован",
-                    user.getEmail(), user.getUserRole());
-
-            // Возвращаем URL для перенаправления
-            String roleBasedPath = "/dashboard/" + user.getUserRole().name();
-            log.info("🔄 POST перенаправление на: {}", roleBasedPath);
-
-            return "redirect:" + roleBasedPath;
-
-        } catch (Exception e) {
-            log.error("💥 Ошибка в POST дашборде: {}", e.getMessage(), e);
-            return "redirect:/login?error=dashboard_error";
-        }
-    }
-
-    /**
-     * 🔑 Извлечение токена из заголовков (для POST запросов)
-     */
-    private String extractTokenFromHeaders(HttpServletRequest request) {
-        // Authorization заголовок
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            log.debug("✅ Токен найден в Authorization заголовке");
-            return authHeader.substring(7);
         }
 
-        // Кастомный заголовок X-Auth-Token
-        String customToken = request.getHeader("X-Auth-Token");
-        if (customToken != null && !customToken.trim().isEmpty()) {
-            log.debug("✅ Токен найден в X-Auth-Token заголовке");
-            return customToken;
-        }
-
-        log.debug("❌ Токен не найден в заголовках");
-        return null;
-    }
-
-    /**
-     * 🔑 Извлечение токена из запроса с детальным логированием
-     */
-    private String extractToken(HttpServletRequest request) {
-        log.debug("🔍 Поиск токена авторизации...");
-
-        // 1. Authorization заголовок (приоритет)
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            log.debug("✅ Токен найден в Authorization заголовке");
-            return authHeader.substring(7);
-        }
-
-        // 2. Параметр запроса (при первичном переходе)
+        // ✅ 3. Проверяем параметр запроса (для особых случаев)
         String tokenParam = request.getParameter("token");
         if (tokenParam != null && !tokenParam.isEmpty()) {
-            log.debug("✅ Токен найден в параметрах запроса");
+            log.debug("🔗 Токен найден в параметре запроса");
             return tokenParam;
         }
 
-        // 3. Кастомный заголовок
-        String customHeader = request.getHeader("X-Auth-Token");
-        if (customHeader != null && !customHeader.isEmpty()) {
-            log.debug("✅ Токен найден в X-Auth-Token заголовке");
-            return customHeader;
-        }
-
-        // 4. Из сессии
-        String sessionToken = (String) request.getSession().getAttribute("authToken");
-        if (sessionToken != null && !sessionToken.isEmpty()) {
-            log.debug("✅ Токен найден в сессии");
-            return sessionToken;
-        }
-
-        log.warn("❌ Токен не найден ни в одном из источников");
+        log.debug("❌ JWT токен не найден в запросе");
         return null;
     }
 
     /**
-     * 🌐 Получение IP адреса клиента
-     */
-    private String getClientIP(HttpServletRequest request) {
-        String xForwardedFor = request.getHeader("X-Forwarded-For");
-        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
-            return xForwardedFor.split(",")[0].trim();
-        }
-
-        String xRealIP = request.getHeader("X-Real-IP");
-        if (xRealIP != null && !xRealIP.isEmpty()) {
-            return xRealIP;
-        }
-
-        return request.getRemoteAddr();
-    }
-
-    /**
-     * 📊 Получение текущего пользователя из сессии
+     * 👤 Получение текущего пользователя через JWT токен
      */
     public UserResponseDto getCurrentUserFromSession(HttpServletRequest request) {
-        return (UserResponseDto) request.getSession().getAttribute("currentUser");
+        try {
+            String token = extractTokenFromRequest(request);
+
+            if (token == null) {
+                log.debug("❌ Токен отсутствует - пользователь не авторизован");
+                return null;
+            }
+
+            // ✅ Получаем пользователя через User Service
+            UserResponseDto user = userIntegrationService.getUserByToken(token);
+
+            if (user != null) {
+                log.debug("✅ Пользователь получен: {} ({})", user.getEmail(), user.getUserRole());
+                return user;
+            } else {
+                log.debug("❌ Пользователь не найден по токену");
+                return null;
+            }
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка получения пользователя: {}", e.getMessage());
+            return null;
+        }
     }
 
     /**
-     * 🔑 Получение токена из сессии
+     * 🔑 Получение токена из запроса (публичный метод)
      */
     public String getTokenFromSession(HttpServletRequest request) {
-        return (String) request.getSession().getAttribute("authToken");
+        return extractTokenFromRequest(request);
     }
 
     /**
      * ✅ Проверка авторизации пользователя
      */
     public boolean isUserAuthenticated(HttpServletRequest request) {
-        UserResponseDto user = getCurrentUserFromSession(request);
-        String token = getTokenFromSession(request);
-        return user != null && token != null;
+        try {
+            String token = extractTokenFromRequest(request);
+
+            if (token == null) {
+                return false;
+            }
+
+            // ✅ Быстрая валидация токена без получения полных данных
+            boolean isValid = userIntegrationService.validateToken(token);
+
+            log.debug("🔍 Результат валидации токена: {}", isValid);
+            return isValid;
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка проверки авторизации: {}", e.getMessage());
+            return false;
+        }
     }
 
     /**
      * 🔒 Проверка роли пользователя
      */
     public boolean hasRole(HttpServletRequest request, UserRole requiredRole) {
-        UserResponseDto user = getCurrentUserFromSession(request);
-        return user != null && user.getUserRole() == requiredRole;
+        try {
+            UserResponseDto user = getCurrentUserFromSession(request);
+
+            if (user == null) {
+                log.debug("❌ Пользователь не найден - доступ запрещен");
+                return false;
+            }
+
+            boolean hasRole = user.getUserRole() == requiredRole;
+            log.debug("🔒 Проверка роли {} для пользователя {}: {}",
+                    requiredRole, user.getEmail(), hasRole);
+
+            return hasRole;
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка проверки роли: {}", e.getMessage());
+            return false;
+        }
+    }
+
+
+
+    /**
+     * 🔍 Получение информации о токене
+     */
+    public TokenInfo getTokenInfo(HttpServletRequest request) {
+        try {
+            String token = extractTokenFromRequest(request);
+
+            if (token == null) {
+                return TokenInfo.builder()
+                        .valid(false)
+                        .message("Токен отсутствует")
+                        .build();
+            }
+
+            boolean isValid = userIntegrationService.validateToken(token);
+            UserResponseDto user = null;
+
+            if (isValid) {
+                user = userIntegrationService.getUserByToken(token);
+            }
+
+            return TokenInfo.builder()
+                    .valid(isValid)
+                    .token(token.substring(0, Math.min(20, token.length())) + "...")
+                    .user(user)
+                    .message(isValid ? "Токен действителен" : "Токен недействителен")
+                    .build();
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка получения информации о токене: {}", e.getMessage());
+            return TokenInfo.builder()
+                    .valid(false)
+                    .message("Ошибка проверки токена: " + e.getMessage())
+                    .build();
+        }
+    }
+
+    /**
+     * 🧹 Очистка токена (для logout)
+     */
+    public void clearUserSession(HttpServletRequest request) {
+        try {
+            // Очищаем сессию если используется
+            if (request.getSession(false) != null) {
+                request.getSession().invalidate();
+                log.debug("🧹 HTTP сессия очищена");
+            }
+
+            // Токен очищается на клиенте (localStorage/sessionStorage)
+            log.info("✅ Пользовательская сессия очищена");
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка очистки сессии: {}", e.getMessage());
+        }
+    }
+
+    // ========== DTO КЛАССЫ ==========
+
+    /**
+     * DTO для информации о токене
+     */
+    @lombok.Data
+    @lombok.Builder
+    @lombok.NoArgsConstructor
+    @lombok.AllArgsConstructor
+    public static class TokenInfo {
+        private Boolean valid;
+        private String token;
+        private UserResponseDto user;
+        private String message;
+        private java.time.LocalDateTime checkedAt = java.time.LocalDateTime.now();
     }
 }
