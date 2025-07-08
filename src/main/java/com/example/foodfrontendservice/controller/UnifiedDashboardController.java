@@ -1,5 +1,4 @@
 package com.example.foodfrontendservice.controller;
-
 import com.example.foodfrontendservice.dto.UserResponseDto;
 import com.example.foodfrontendservice.enums.UserRole;
 import com.example.foodfrontendservice.service.DashboardService;
@@ -20,20 +19,76 @@ import java.util.Map;
 public class UnifiedDashboardController {
 
     private final DashboardService dashboardService;
+    /**
+     * 🚪 JWT-aware Logout endpoint
+     */
+    @PostMapping("/logout")
+    @ResponseBody
+    public Map<String, Object> logout(HttpServletRequest request) {
+        log.info("🚪 Запрос выхода из системы");
+
+        try {
+            // ✅ Получаем информацию о пользователе перед выходом
+            UserResponseDto user = dashboardService.getCurrentUserFromSession(request);
+            String userEmail = user != null ? user.getEmail() : "unknown";
+
+            // ✅ Очищаем сессию через DashboardService
+            dashboardService.clearUserSession(request);
+
+            log.info("✅ Пользователь {} успешно вышел из системы", userEmail);
+
+            return Map.of(
+                    "success", true,
+                    "message", "Успешный выход из системы",
+                    "redirectUrl", "/login",
+                    "userEmail", userEmail,
+                    "logoutTime", java.time.LocalDateTime.now()
+            );
+
+        } catch (Exception e) {
+            log.error("❌ Ошибка при logout: {}", e.getMessage());
+            return Map.of(
+                    "success", false,
+                    "error", "Ошибка выхода",
+                    "message", e.getMessage(),
+                    "redirectUrl", "/login"
+            );
+        }
+    }
 
     /**
-     * 🏠 Главная страница дашборда - единая для всех ролей
+     * 🏠 Главная страница дашборда - единая для всех ролей с SSR контентом
      */
     @GetMapping
     public String dashboard(HttpServletRequest request, Model model) {
         log.info("🏠 Загрузка единого дашборда");
 
-        // ✅ Передаем базовую конфигурацию без проверки токена
-        // Проверка авторизации будет выполнена через JavaScript API
+        // ✅ ПРОВЕРЯЕМ авторизацию через DashboardService
+        UserResponseDto user = dashboardService.getCurrentUserFromSession(request);
+
+        if (user != null) {
+            // ✅ Пользователь авторизован - передаем данные в модель
+            log.info("👤 Авторизованный пользователь: {} ({})", user.getEmail(), user.getUserRole());
+
+            model.addAttribute("isAuthenticated", true);
+            model.addAttribute("user", user);
+            model.addAttribute("userRole", user.getUserRole().name());
+            model.addAttribute("roleDisplayName", user.getUserRole().getDisplayName());
+
+            // ✅ Добавляем статистику для разных ролей
+            addRoleSpecificData(model, user.getUserRole(), user);
+
+        } else {
+            // ✅ Пользователь НЕ авторизован - JavaScript проверит токен
+            log.info("❓ Авторизация будет проверена через JavaScript");
+            model.addAttribute("isAuthenticated", false);
+        }
+
+        // ✅ Общие данные
         model.addAttribute("needsAuth", true);
         model.addAttribute("apiBaseUrl", "http://localhost:8082");
 
-        // ✅ Передаем информацию о всех доступных ролях для frontend
+        // ✅ Информация о доступных ролях
         model.addAttribute("availableRoles", Map.of(
                 "BASE_USER", "Покупатель",
                 "BUSINESS_USER", "Владелец магазина",
@@ -41,9 +96,43 @@ public class UnifiedDashboardController {
                 "ADMIN", "Администратор"
         ));
 
-        log.info("✅ Дашборд загружен - проверка авторизации будет через JavaScript");
-
+        log.info("✅ Дашборд загружен");
         return "dashboard/main";
+    }
+
+    /**
+     * 📊 Добавление данных специфичных для роли
+     */
+    private void addRoleSpecificData(Model model, UserRole role, UserResponseDto user) {
+        switch (role) {
+            case BASE_USER -> {
+                // ✅ Данные для покупателя
+                model.addAttribute("totalOrders", 15);
+                model.addAttribute("favoriteStoresCount", 5);
+                model.addAttribute("totalSpent", "15,420₽");
+            }
+            case BUSINESS_USER -> {
+                // ✅ Данные для владельца бизнеса
+                model.addAttribute("ordersToday", 47);
+                model.addAttribute("revenueToday", "15,420₽");
+                model.addAttribute("rating", 4.8);
+            }
+            case COURIER -> {
+                // ✅ Данные для курьера
+                model.addAttribute("deliveriesToday", 12);
+                model.addAttribute("earningsToday", "1,840₽");
+                model.addAttribute("courierRating", 4.9);
+            }
+            case ADMIN -> {
+                // ✅ Данные для администратора
+                model.addAttribute("totalUsers", 1247);
+                model.addAttribute("totalRestaurants", 86);
+                model.addAttribute("totalOrders", 5432);
+                model.addAttribute("totalRevenue", "234,560₽");
+            }
+        }
+
+        log.debug("✅ Добавлены данные для роли: {}", role);
     }
 
     /**
@@ -153,42 +242,7 @@ public class UnifiedDashboardController {
         );
     }
 
-    /**
-     * 🚪 JWT-aware Logout endpoint
-     */
-    @PostMapping("/logout")
-    @ResponseBody
-    public Map<String, Object> logout(HttpServletRequest request) {
-        log.info("🚪 Запрос выхода из системы");
 
-        try {
-            // ✅ Получаем информацию о пользователе перед выходом
-            UserResponseDto user = dashboardService.getCurrentUserFromSession(request);
-            String userEmail = user != null ? user.getEmail() : "unknown";
-
-            // ✅ Очищаем сессию через DashboardService
-            dashboardService.clearUserSession(request);
-
-            log.info("✅ Пользователь {} успешно вышел из системы", userEmail);
-
-            return Map.of(
-                    "success", true,
-                    "message", "Успешный выход из системы",
-                    "redirectUrl", "/login",
-                    "userEmail", userEmail,
-                    "logoutTime", java.time.LocalDateTime.now()
-            );
-
-        } catch (Exception e) {
-            log.error("❌ Ошибка при logout: {}", e.getMessage());
-            return Map.of(
-                    "success", false,
-                    "error", "Ошибка выхода",
-                    "message", e.getMessage(),
-                    "redirectUrl", "/login"
-            );
-        }
-    }
 
     /**
      * 🔍 API endpoint для проверки статуса токена
