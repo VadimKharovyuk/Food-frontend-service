@@ -6,6 +6,8 @@
     <title>QuickFood - Избранные магазины</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+
+
         :root {
             --primary-green: #00d967;
             --secondary-green: #00b852;
@@ -575,11 +577,43 @@
     </div>
 </div>
 
+<!-- Только JavaScript часть - остальное без изменений -->
 <script>
-    // ✅ Получаем токен и данные авторизации из Thymeleaf модели
-    const jwtToken = '[[${jwtToken}]]';        // ✅ Получит реальный токен
-    const isAuthenticated = [[${isAuthenticated}]]; // ✅ Получит true
-    const userRole = '[[${userRole}]]';       // ✅ Получит роль
+    // ✅ ИСПРАВЛЕНИЕ: Получаем токен из cookie или localStorage (НЕ из Thymeleaf)
+    function getAuthToken() {
+        // 1. Пробуем получить из localStorage (от дашборда)
+        let token = localStorage.getItem('authToken');
+        if (token) return token;
+
+        // 2. Пробуем получить из sessionStorage
+        token = sessionStorage.getItem('authToken');
+        if (token) return token;
+
+        // 3. Пробуем получить из cookie
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'authToken') {
+                return value;
+            }
+        }
+
+        return null;
+    }
+
+    // ✅ Получаем данные из Thymeleaf модели (безопасные данные)
+    const isAuthenticated = [[${isAuthenticated}]]; // ✅ Получит true/false
+    const userRole = '[[${userRole}]]';              // ✅ Получит роль
+    const userEmail = '[[${userEmail}]]';            // ✅ Получит email
+
+    // ✅ Получаем токен через функцию (НЕ из Thymeleaf)
+    const jwtToken = getAuthToken();
+
+    // ✅ Логирование для отладки
+    console.log('🔍 Favorites Page Auth Debug:');
+    console.log('- Is Authenticated:', isAuthenticated);
+    console.log('- User Role:', userRole);
+    console.log('- JWT Token:', jwtToken ? 'Found' : 'Missing');
 
     // Показать/скрыть loading overlay
     function showLoading() {
@@ -590,13 +624,16 @@
         document.getElementById('loadingOverlay').style.display = 'none';
     }
 
-    // Удаление из избранного
+    // ✅ ИСПРАВЛЕННАЯ функция удаления из избранного
     function removeFromFavorites(storeId) {
         if (!confirm('Удалить магазин из избранного?')) {
             return;
         }
 
-        if (!isAuthenticated || !jwtToken) {
+        // ✅ Получаем свежий токен
+        const token = getAuthToken();
+
+        if (!isAuthenticated || !token) {
             alert('Необходимо войти в систему');
             window.location.href = '/login';
             return;
@@ -609,22 +646,24 @@
             headers: {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                'Authorization': `Bearer ${jwtToken}`
+                'Authorization': `Bearer ${token}`
             }
         })
             .then(response => {
                 hideLoading();
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        alert('Сессия истекла, войдите заново');
+                        window.location.href = '/login';
+                        return;
+                    }
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 return response.json();
             })
             .then(data => {
                 if (data.success) {
-                    // Показываем успешное сообщение
                     showSuccessMessage('Магазин удален из избранного');
-
-                    // Перезагружаем страницу через небольшую задержку
                     setTimeout(() => {
                         location.reload();
                     }, 1000);
@@ -648,7 +687,6 @@
         const container = document.querySelector('.container');
         container.insertBefore(messageDiv, container.firstChild.nextSibling);
 
-        // Автоматически скрыть через 3 секунды
         setTimeout(() => {
             messageDiv.classList.add('fade-out');
             setTimeout(() => messageDiv.remove(), 300);
@@ -664,16 +702,17 @@
         const container = document.querySelector('.container');
         container.insertBefore(messageDiv, container.firstChild.nextSibling);
 
-        // Автоматически скрыть через 5 секунд
         setTimeout(() => {
             messageDiv.classList.add('fade-out');
             setTimeout(() => messageDiv.remove(), 300);
         }, 5000);
     }
 
-    // ✅ Глобальная функция для аутентифицированных запросов
+    // ✅ Улучшенная функция для аутентифицированных запросов
     function makeAuthenticatedRequest(url, options = {}) {
-        if (!isAuthenticated || !jwtToken) {
+        const token = getAuthToken();
+
+        if (!isAuthenticated || !token) {
             alert('Необходимо войти в систему');
             window.location.href = '/login';
             return Promise.reject('No authentication');
@@ -681,7 +720,7 @@
 
         options.headers = {
             ...options.headers,
-            'Authorization': `Bearer ${jwtToken}`,
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest'
         };
@@ -691,6 +730,12 @@
 
     // Инициализация страницы
     document.addEventListener('DOMContentLoaded', function() {
+        // ✅ Проверяем наличие токена при загрузке
+        if (isAuthenticated && !getAuthToken()) {
+            console.warn('⚠️ Пользователь должен быть авторизован, но токен не найден');
+            // Можно показать предупреждение или перенаправить на логин
+        }
+
         // Автоскрытие существующих сообщений
         const existingMessages = document.querySelectorAll('.message');
         existingMessages.forEach(message => {
@@ -699,13 +744,6 @@
                 setTimeout(() => message.remove(), 300);
             }, 5000);
         });
-
-        // Логирование состояния авторизации
-        if (isAuthenticated && jwtToken) {
-            console.log('✅ Пользователь авторизован, роль:', userRole);
-        } else {
-            console.warn('❌ Пользователь не авторизован');
-        }
 
         // Анимация появления карточек
         const storeCards = document.querySelectorAll('.store-card');
@@ -722,17 +760,15 @@
         // Добавляем обработчики для кнопок действий
         document.querySelectorAll('.btn-primary, .btn-outline').forEach(btn => {
             btn.addEventListener('click', function(e) {
-                if (!isAuthenticated) {
+                if (!isAuthenticated || !getAuthToken()) {
                     e.preventDefault();
                     alert('Необходимо войти в систему');
                     window.location.href = '/login';
                 }
             });
         });
-    });
 
-    // Обработка ошибок загрузки изображений
-    document.addEventListener('DOMContentLoaded', function() {
+        // Обработка ошибок загрузки изображений
         const images = document.querySelectorAll('.store-image');
         images.forEach(img => {
             img.addEventListener('error', function() {
@@ -744,6 +780,175 @@
         });
     });
 </script>
+<!--<script>-->
+<!--    // ✅ Получаем токен и данные авторизации из Thymeleaf модели-->
+<!--    const jwtToken = '[[${jwtToken}]]';        // ✅ Получит реальный токен-->
+<!--    const isAuthenticated = [[${isAuthenticated}]]; // ✅ Получит true-->
+<!--    const userRole = '[[${userRole}]]';       // ✅ Получит роль-->
+
+<!--    // Показать/скрыть loading overlay-->
+<!--    function showLoading() {-->
+<!--        document.getElementById('loadingOverlay').style.display = 'flex';-->
+<!--    }-->
+
+<!--    function hideLoading() {-->
+<!--        document.getElementById('loadingOverlay').style.display = 'none';-->
+<!--    }-->
+
+<!--    // Удаление из избранного-->
+<!--    function removeFromFavorites(storeId) {-->
+<!--        if (!confirm('Удалить магазин из избранного?')) {-->
+<!--            return;-->
+<!--        }-->
+
+<!--        if (!isAuthenticated || !jwtToken) {-->
+<!--            alert('Необходимо войти в систему');-->
+<!--            window.location.href = '/login';-->
+<!--            return;-->
+<!--        }-->
+
+<!--        showLoading();-->
+
+<!--        fetch(`/favorites/stores/remove/${storeId}`, {-->
+<!--            method: 'DELETE',-->
+<!--            headers: {-->
+<!--                'Content-Type': 'application/json',-->
+<!--                'X-Requested-With': 'XMLHttpRequest',-->
+<!--                'Authorization': `Bearer ${jwtToken}`-->
+<!--            }-->
+<!--        })-->
+<!--            .then(response => {-->
+<!--                hideLoading();-->
+<!--                if (!response.ok) {-->
+<!--                    throw new Error(`HTTP error! status: ${response.status}`);-->
+<!--                }-->
+<!--                return response.json();-->
+<!--            })-->
+<!--            .then(data => {-->
+<!--                if (data.success) {-->
+<!--                    // Показываем успешное сообщение-->
+<!--                    showSuccessMessage('Магазин удален из избранного');-->
+
+<!--                    // Перезагружаем страницу через небольшую задержку-->
+<!--                    setTimeout(() => {-->
+<!--                        location.reload();-->
+<!--                    }, 1000);-->
+<!--                } else {-->
+<!--                    showErrorMessage('Ошибка: ' + (data.message || 'Неизвестная ошибка'));-->
+<!--                }-->
+<!--            })-->
+<!--            .catch(error => {-->
+<!--                hideLoading();-->
+<!--                console.error('Ошибка:', error);-->
+<!--                showErrorMessage('Произошла ошибка при удалении');-->
+<!--            });-->
+<!--    }-->
+
+<!--    // Показать сообщение об успехе-->
+<!--    function showSuccessMessage(message) {-->
+<!--        const messageDiv = document.createElement('div');-->
+<!--        messageDiv.className = 'message success-message';-->
+<!--        messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;-->
+
+<!--        const container = document.querySelector('.container');-->
+<!--        container.insertBefore(messageDiv, container.firstChild.nextSibling);-->
+
+<!--        // Автоматически скрыть через 3 секунды-->
+<!--        setTimeout(() => {-->
+<!--            messageDiv.classList.add('fade-out');-->
+<!--            setTimeout(() => messageDiv.remove(), 300);-->
+<!--        }, 3000);-->
+<!--    }-->
+
+<!--    // Показать сообщение об ошибке-->
+<!--    function showErrorMessage(message) {-->
+<!--        const messageDiv = document.createElement('div');-->
+<!--        messageDiv.className = 'message error-message';-->
+<!--        messageDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;-->
+
+<!--        const container = document.querySelector('.container');-->
+<!--        container.insertBefore(messageDiv, container.firstChild.nextSibling);-->
+
+<!--        // Автоматически скрыть через 5 секунд-->
+<!--        setTimeout(() => {-->
+<!--            messageDiv.classList.add('fade-out');-->
+<!--            setTimeout(() => messageDiv.remove(), 300);-->
+<!--        }, 5000);-->
+<!--    }-->
+
+<!--    // ✅ Глобальная функция для аутентифицированных запросов-->
+<!--    function makeAuthenticatedRequest(url, options = {}) {-->
+<!--        if (!isAuthenticated || !jwtToken) {-->
+<!--            alert('Необходимо войти в систему');-->
+<!--            window.location.href = '/login';-->
+<!--            return Promise.reject('No authentication');-->
+<!--        }-->
+
+<!--        options.headers = {-->
+<!--            ...options.headers,-->
+<!--            'Authorization': `Bearer ${jwtToken}`,-->
+<!--            'Content-Type': 'application/json',-->
+<!--            'X-Requested-With': 'XMLHttpRequest'-->
+<!--        };-->
+
+<!--        return fetch(url, options);-->
+<!--    }-->
+
+<!--    // Инициализация страницы-->
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        // Автоскрытие существующих сообщений-->
+<!--        const existingMessages = document.querySelectorAll('.message');-->
+<!--        existingMessages.forEach(message => {-->
+<!--            setTimeout(() => {-->
+<!--                message.classList.add('fade-out');-->
+<!--                setTimeout(() => message.remove(), 300);-->
+<!--            }, 5000);-->
+<!--        });-->
+
+<!--        // Логирование состояния авторизации-->
+<!--        if (isAuthenticated && jwtToken) {-->
+<!--            console.log('✅ Пользователь авторизован, роль:', userRole);-->
+<!--        } else {-->
+<!--            console.warn('❌ Пользователь не авторизован');-->
+<!--        }-->
+
+<!--        // Анимация появления карточек-->
+<!--        const storeCards = document.querySelectorAll('.store-card');-->
+<!--        storeCards.forEach((card, index) => {-->
+<!--            card.style.opacity = '0';-->
+<!--            card.style.transform = 'translateY(20px)';-->
+<!--            setTimeout(() => {-->
+<!--                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';-->
+<!--                card.style.opacity = '1';-->
+<!--                card.style.transform = 'translateY(0)';-->
+<!--            }, index * 100);-->
+<!--        });-->
+
+<!--        // Добавляем обработчики для кнопок действий-->
+<!--        document.querySelectorAll('.btn-primary, .btn-outline').forEach(btn => {-->
+<!--            btn.addEventListener('click', function(e) {-->
+<!--                if (!isAuthenticated) {-->
+<!--                    e.preventDefault();-->
+<!--                    alert('Необходимо войти в систему');-->
+<!--                    window.location.href = '/login';-->
+<!--                }-->
+<!--            });-->
+<!--        });-->
+<!--    });-->
+
+<!--    // Обработка ошибок загрузки изображений-->
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        const images = document.querySelectorAll('.store-image');-->
+<!--        images.forEach(img => {-->
+<!--            img.addEventListener('error', function() {-->
+<!--                const placeholder = document.createElement('div');-->
+<!--                placeholder.className = 'store-image-placeholder';-->
+<!--                placeholder.innerHTML = '<i class="fas fa-store"></i>';-->
+<!--                this.parentNode.replaceChild(placeholder, this);-->
+<!--            });-->
+<!--        });-->
+<!--    });-->
+<!--</script>-->
 <script src="/js/bolt-navigation.js"></script>
 </body>
 </html>

@@ -24,7 +24,6 @@ public class FavoriteStoreController {
     private final FavoriteStoreClientService favoriteStoreClientService;
 
 
-
     /**
      * Добавить ресторан в избранное (тестовый endpoint)
      * POST /api/test/favorites/stores/{storeId}

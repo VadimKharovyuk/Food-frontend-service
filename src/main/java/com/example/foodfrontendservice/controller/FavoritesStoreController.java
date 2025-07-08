@@ -1,6 +1,7 @@
 package com.example.foodfrontendservice.controller;
 
 import com.example.foodfrontendservice.config.JwtUtil;
+import com.example.foodfrontendservice.config.TokenExtractor;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.Favorite.FavoriteStoreApiResponse;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.Favorite.FavoriteStoreResponseDto;
 import com.example.foodfrontendservice.service.FavoriteStoreClientService;
@@ -24,6 +25,92 @@ public class FavoritesStoreController {
 
     private final FavoriteStoreClientService storeClientService;
     private final JwtUtil jwtUtil;
+    private final TokenExtractor tokenExtractor;
+
+    /**
+     * Показать страницу избранных магазинов
+     */
+    @GetMapping
+    public String favoritesStores(
+            HttpServletRequest request,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        log.info("🛍️ Запрос избранных магазинов пользователя");
+
+        try {
+            logRequestDetails(request);
+
+            // ✅ ИСПРАВЛЕНИЕ: используем TokenExtractor
+            String token = tokenExtractor.extractToken(request);
+
+
+            if (token == null) {
+                log.warn("❌ JWT токен не найден - перенаправление на логин");
+                redirectAttributes.addFlashAttribute("error", "Необходимо войти в систему");
+                return "redirect:/login";
+            }
+
+            if (!jwtUtil.isTokenValid(token)) {
+                log.warn("❌ JWT токен недействителен - перенаправление на логин");
+                redirectAttributes.addFlashAttribute("error", "Сессия истекла, войдите заново");
+                return "redirect:/login";
+            }
+
+            String userEmail = jwtUtil.getEmailFromToken(token);
+            Long userId = jwtUtil.getUserIdFromToken(token);
+            String userRole = jwtUtil.getRoleFromToken(token);
+
+            log.info("👤 Пользователь: ID={}, Email={}, Role={}", userId, userEmail, userRole);
+
+
+            model.addAttribute("isAuthenticated", true);
+            model.addAttribute("userRole", userRole);
+            model.addAttribute("userEmail", userEmail);
+            model.addAttribute("userId", userId);
+
+            FavoriteStoreApiResponse<List<FavoriteStoreResponseDto>> response =
+                    storeClientService.getMyFavorites(token);
+
+            if (response != null && response.getSuccess()) {
+                List<FavoriteStoreResponseDto> favoriteStores = response.getData();
+
+                log.info("✅ Получено {} избранных магазинов", favoriteStores != null ? favoriteStores.size() : 0);
+
+                model.addAttribute("favoriteStores", favoriteStores != null ? favoriteStores : Collections.emptyList());
+                model.addAttribute("hasStores", favoriteStores != null && !favoriteStores.isEmpty());
+                model.addAttribute("storesCount", favoriteStores != null ? favoriteStores.size() : 0);
+
+                if (favoriteStores != null && !favoriteStores.isEmpty()) {
+                    double averageRating = favoriteStores.stream()
+                            .filter(store -> store.getStore() != null && store.getStore().getRating() != null)
+                            .mapToDouble(store -> store.getStore().getRating().doubleValue())
+                            .average()
+                            .orElse(0.0);
+
+                    model.addAttribute("averageRating", Math.round(averageRating * 10.0) / 10.0);
+                }
+
+            } else {
+                log.error("❌ Ошибка получения избранных магазинов: {}",
+                        response != null ? response.getMessage() : "Неизвестная ошибка");
+
+                model.addAttribute("favoriteStores", Collections.emptyList());
+                model.addAttribute("hasStores", false);
+                model.addAttribute("storesCount", 0);
+                model.addAttribute("error", response != null ? response.getMessage() : "Ошибка загрузки данных");
+            }
+
+        } catch (Exception e) {
+            log.error("💥 Исключение при получении избранных магазинов", e);
+            model.addAttribute("favoriteStores", Collections.emptyList());
+            model.addAttribute("hasStores", false);
+            model.addAttribute("isAuthenticated", false);
+            model.addAttribute("error", "Произошла ошибка при загрузке избранных магазинов");
+        }
+
+        return "favorites/stores";
+    }
 
 
     /**
@@ -158,88 +245,7 @@ public class FavoritesStoreController {
         }
     }
 
-    /**
-     * Показать страницу избранных магазинов
-     */
-    @GetMapping
-    public String favoritesStores(
-            HttpServletRequest request,
-            Model model,
-            RedirectAttributes redirectAttributes) {
 
-        log.info("🛍️ Запрос избранных магазинов пользователя");
-
-        try {
-            logRequestDetails(request);
-
-            String token = extractTokenFromRequest(request);
-
-            if (token == null) {
-                log.warn("❌ JWT токен не найден - перенаправление на логин");
-                redirectAttributes.addFlashAttribute("error", "Необходимо войти в систему");
-                return "redirect:/login";
-            }
-
-            if (!jwtUtil.isTokenValid(token)) {
-                log.warn("❌ JWT токен недействителен - перенаправление на логин");
-                redirectAttributes.addFlashAttribute("error", "Сессия истекла, войдите заново");
-                return "redirect:/login";
-            }
-
-            String userEmail = jwtUtil.getEmailFromToken(token);
-            Long userId = jwtUtil.getUserIdFromToken(token);
-            String userRole = jwtUtil.getRoleFromToken(token);
-
-            log.info("👤 Пользователь: ID={}, Email={}, Role={}", userId, userEmail, userRole);
-
-            model.addAttribute("jwtToken", token);
-            model.addAttribute("isAuthenticated", true);
-            model.addAttribute("userRole", userRole);
-            model.addAttribute("userEmail", userEmail);
-            model.addAttribute("userId", userId);
-
-            FavoriteStoreApiResponse<List<FavoriteStoreResponseDto>> response =
-                    storeClientService.getMyFavorites(token);
-
-            if (response != null && response.getSuccess()) {
-                List<FavoriteStoreResponseDto> favoriteStores = response.getData();
-
-                log.info("✅ Получено {} избранных магазинов", favoriteStores != null ? favoriteStores.size() : 0);
-
-                model.addAttribute("favoriteStores", favoriteStores != null ? favoriteStores : Collections.emptyList());
-                model.addAttribute("hasStores", favoriteStores != null && !favoriteStores.isEmpty());
-                model.addAttribute("storesCount", favoriteStores != null ? favoriteStores.size() : 0);
-
-                if (favoriteStores != null && !favoriteStores.isEmpty()) {
-                    double averageRating = favoriteStores.stream()
-                            .filter(store -> store.getStore() != null && store.getStore().getRating() != null)
-                            .mapToDouble(store -> store.getStore().getRating().doubleValue())
-                            .average()
-                            .orElse(0.0);
-
-                    model.addAttribute("averageRating", Math.round(averageRating * 10.0) / 10.0);
-                }
-
-            } else {
-                log.error("❌ Ошибка получения избранных магазинов: {}",
-                        response != null ? response.getMessage() : "Неизвестная ошибка");
-
-                model.addAttribute("favoriteStores", Collections.emptyList());
-                model.addAttribute("hasStores", false);
-                model.addAttribute("storesCount", 0);
-                model.addAttribute("error", response != null ? response.getMessage() : "Ошибка загрузки данных");
-            }
-
-        } catch (Exception e) {
-            log.error("💥 Исключение при получении избранных магазинов", e);
-            model.addAttribute("favoriteStores", Collections.emptyList());
-            model.addAttribute("hasStores", false);
-            model.addAttribute("isAuthenticated", false);
-            model.addAttribute("error", "Произошла ошибка при загрузке избранных магазинов");
-        }
-
-        return "favorites/stores";
-    }
 
     /**
      * ✅ УЛУЧШЕННЫЙ метод извлечения токена с детальным логированием

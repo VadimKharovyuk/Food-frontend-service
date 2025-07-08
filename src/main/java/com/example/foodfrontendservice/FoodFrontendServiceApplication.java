@@ -18,6 +18,17 @@ public class FoodFrontendServiceApplication {
 
 
 
+//    @Configuration
+//    @EnableFeignClients
+//    public class FeignConfig {
+//
+//        @Bean
+//        @LoadBalanced
+//        public RestTemplate restTemplate() {
+//            return new RestTemplate();
+//        }
+//    }
+
 //1. JwtUtil.java
 //2. JwtAuthenticationFilter.java
 //3. FeignAuthInterceptor.java

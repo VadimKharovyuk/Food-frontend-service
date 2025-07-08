@@ -11,6 +11,7 @@ import java.util.List;
 
 @FeignClient(
         name = "product-service",
+        url = "http://localhost:8083",
         path = "/api/favorites",
         fallback = FavoriteStoreServiceFallback.class,
         contextId = "favoriteStoreServiceClient",
