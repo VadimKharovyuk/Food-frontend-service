@@ -42,6 +42,13 @@
                     </a>
                 </li>
 
+                <li class="nav-item">
+                    <a th:href="@{/profile}" class="nav-link">
+                        <i class="fas fa-user-alt"></i>
+                        Мой профиль
+                    </a>
+                </li>
+
                 <li class="nav-item" th:if="${isAuthenticated}">
                     <a th:href="@{/dashboard}" class="nav-link dashboard-link">
                         <i class="fas fa-tachometer-alt"></i>
