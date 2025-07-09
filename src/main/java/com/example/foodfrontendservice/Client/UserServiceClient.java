@@ -4,6 +4,10 @@ import com.example.foodfrontendservice.config.FeignConfig;
 import com.example.foodfrontendservice.dto.*;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
 import com.example.foodfrontendservice.enums.UserRole;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -63,10 +67,10 @@ public interface UserServiceClient {
     /**
      * DTO для детальной валидации токена
      */
-    @lombok.Data
-    @lombok.Builder
-    @lombok.NoArgsConstructor
-    @lombok.AllArgsConstructor
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     class TokenValidationDto {
         private Boolean valid;
         private Long userId;
@@ -76,13 +80,11 @@ public interface UserServiceClient {
         private String locationStatus;
     }
 
-    /**
-     * DTO для ответа logout
-     */
-    @lombok.Data
-    @lombok.Builder
-    @lombok.NoArgsConstructor
-    @lombok.AllArgsConstructor
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     class LogoutResponseDto {
         private Boolean success;
         private String userEmail;
@@ -93,10 +95,10 @@ public interface UserServiceClient {
     /**
      * DTO для health check
      */
-    @lombok.Data
-    @lombok.Builder
-    @lombok.NoArgsConstructor
-    @lombok.AllArgsConstructor
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     class ServiceHealthDto {
         private String serviceName;
         private String status;
