@@ -16,7 +16,7 @@ import java.util.Map;
 @RequestMapping("/dashboard")
 @RequiredArgsConstructor
 @Slf4j
-public class UnifiedDashboardController {
+public class DashboardController {
 
     private final DashboardService dashboardService;
     /**
