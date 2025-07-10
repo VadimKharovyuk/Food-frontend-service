@@ -1,7 +1,7 @@
 /**
- * 📍 profile-location.js - Модуль управления геолокацией БЕЗ КАРТ
- * Интеграция с REST API /api/location/*
- * УПРОЩЕННАЯ ВЕРСИЯ
+ * 📍 profile-location.js - Модуль управления геолокацией с геокодированием
+ * Интеграция с REST API /api/location/* и OpenStreetMap Nominatim
+ * ПОЛНАЯ ВЕРСИЯ с определением города и страны
  */
 
 // ================================
@@ -16,7 +16,6 @@ function getAuthToken() {
 
     // 1. Проверяем все cookies
     const cookies = document.cookie.split(';');
-
     for (let cookie of cookies) {
         const [name, value] = cookie.trim().split('=');
         if (name === 'authToken') {
@@ -87,7 +86,7 @@ async function loadCurrentLocation() {
 }
 
 /**
- * Сохранение координат через REST API
+ * Сохранение координат через REST API с автоматическим геокодированием
  */
 async function saveCurrentLocation(lat, lon) {
     try {
@@ -104,6 +103,7 @@ async function saveCurrentLocation(lat, lon) {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
+        // Отправляем координаты - сервер сам определит адрес (autoGeocode: true)
         const response = await fetch('/api/location/me', {
             method: 'PUT',
             headers: headers,
@@ -117,7 +117,7 @@ async function saveCurrentLocation(lat, lon) {
 
         if (result.success) {
             console.log('✅ Координаты сохранены:', result.data);
-            showNotification('Координаты успешно сохранены!', 'success');
+            showNotification('Местоположение успешно сохранено!', 'success');
 
             // Перезагружаем страницу чтобы показать сохраненную геолокацию
             setTimeout(() => {
@@ -181,11 +181,11 @@ async function clearLocation() {
 }
 
 // ================================
-// 🌍 БРАУЗЕРНАЯ ГЕОЛОКАЦИЯ
+// 🌍 БРАУЗЕРНАЯ ГЕОЛОКАЦИЯ С ГЕОКОДИРОВАНИЕМ
 // ================================
 
 /**
- * Получение текущего местоположения через браузер
+ * Получение текущего местоположения через браузер с определением адреса
  */
 function getCurrentLocation() {
     const locationDiv = document.getElementById('current-location');
@@ -201,15 +201,29 @@ function getCurrentLocation() {
     console.log('🌍 Запрашиваем геолокацию у браузера...');
 
     navigator.geolocation.getCurrentPosition(
-        function(position) {
+        async function(position) {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
             const accuracy = position.coords.accuracy;
 
             console.log('✅ Геолокация получена:', { lat, lon, accuracy });
 
-            // Показываем простое отображение координат
-            locationDiv.innerHTML = createFoundLocationHTML(lat, lon, accuracy);
+            // Показываем загрузку определения адреса
+            locationDiv.innerHTML = createGeocodingLocationHTML(lat, lon, accuracy);
+
+            // Пытаемся определить адрес по координатам
+            try {
+                const address = await getAddressByCoordinates(lat, lon);
+                console.log('📍 Адрес определен:', address);
+
+                // Показываем результат с адресом
+                locationDiv.innerHTML = createFoundLocationWithAddressHTML(lat, lon, accuracy, address);
+            } catch (error) {
+                console.warn('⚠️ Не удалось определить адрес:', error);
+
+                // Показываем результат без адреса
+                locationDiv.innerHTML = createFoundLocationHTML(lat, lon, accuracy);
+            }
         },
         function(error) {
             console.error('❌ Ошибка геолокации:', error);
@@ -225,6 +239,73 @@ function getCurrentLocation() {
             maximumAge: 600000 // 10 минут кеш
         }
     );
+}
+
+/**
+ * Получение адреса по координатам через OpenStreetMap Nominatim API
+ * Возвращает объект в формате, совместимом с сервером
+ */
+async function getAddressByCoordinates(lat, lon) {
+    try {
+        console.log('🔍 Определяем адрес по координатам:', lat, lon);
+
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1&accept-language=ru`,
+            {
+                headers: {
+                    'User-Agent': 'QuickFood-WebApp/1.0'
+                }
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error('Ошибка запроса к геокодингу');
+        }
+
+        const data = await response.json();
+        console.log('🌍 Ответ от Nominatim:', data);
+
+        if (data && data.display_name && data.address) {
+            const addr = data.address;
+
+            // Определяем город (в порядке приоритета)
+            const city = addr.city || addr.town || addr.village || addr.municipality || addr.county;
+
+            // Определяем страну
+            const country = addr.country;
+
+            // Формируем короткий адрес как "Город, Страна"
+            let shortAddress = '';
+            if (city && country) {
+                shortAddress = `${city}, ${country}`;
+            } else if (city) {
+                shortAddress = city;
+            } else if (country) {
+                shortAddress = country;
+            } else {
+                // Если ничего не найдено, берем из display_name
+                const parts = data.display_name.split(',');
+                shortAddress = parts.slice(0, 2).join(',').trim();
+            }
+
+            return {
+                full: data.display_name,
+                short: shortAddress,
+                city: city || '',
+                country: country || '',
+                street: addr.road || '',
+                house_number: addr.house_number || '',
+                // Дополнительные поля для отладки
+                formattedCoordinates: `${lat.toFixed(6)}, ${lon.toFixed(6)}`,
+                hasLocation: true
+            };
+        } else {
+            throw new Error('Адрес не найден в ответе');
+        }
+    } catch (error) {
+        console.error('❌ Ошибка геокодирования:', error);
+        throw error;
+    }
 }
 
 /**
@@ -261,14 +342,102 @@ function createLoadingLocationHTML() {
 }
 
 /**
- * HTML для найденного местоположения (простое отображение без карты)
+ * HTML для состояния определения адреса
+ */
+function createGeocodingLocationHTML(lat, lon, accuracy) {
+    return `
+        <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%); padding: 20px; border-radius: 12px; border: 2px solid #ffc107;">
+            <div style="font-weight: 600; margin-bottom: 16px; text-align: center;">
+                <i class="fas fa-search-location" style="color: #856404; margin-right: 8px;"></i>
+                Определяем название места...
+            </div>
+            
+            <!-- Отображение координат -->
+            <div style="background: rgba(255,255,255,0.8); padding: 16px; border-radius: 8px; margin-bottom: 16px; text-align: center;">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px; color: #856404;">
+                    📍 ${lat.toFixed(6)}, ${lon.toFixed(6)}
+                </div>
+                <div style="font-size: 14px; color: #666;">
+                    🎯 Точность: ~${Math.round(accuracy)} метров
+                </div>
+            </div>
+            
+            <!-- Индикатор загрузки -->
+            <div style="text-align: center; padding: 20px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 12px; color: #856404;"></i>
+                <div style="font-size: 14px; color: #856404;">Получаем информацию о местоположении...</div>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * HTML для найденного местоположения С АДРЕСОМ
+ */
+function createFoundLocationWithAddressHTML(lat, lon, accuracy, address) {
+    return `
+        <div style="background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
+            <div style="font-weight: 600; margin-bottom: 16px; text-align: center;">
+                <i class="fas fa-map-marker-alt" style="color: #28a745; margin-right: 8px;"></i>
+                Местоположение успешно определено!
+            </div>
+            
+            <!-- Информация о месте -->
+            <div style="background: rgba(255,255,255,0.9); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 2px solid #28a745;">
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <i class="fas fa-location-arrow" style="font-size: 48px; margin-bottom: 12px; color: #28a745;"></i>
+                </div>
+                
+                <!-- Название места -->
+                <div style="text-align: center; margin-bottom: 16px; padding: 12px; background: rgba(40, 167, 69, 0.1); border-radius: 8px;">
+                    <div style="font-size: 20px; font-weight: 700; color: #155724; margin-bottom: 4px;">
+                        🏠 ${address.short}
+                    </div>
+                    ${address.city ? `<div style="font-size: 14px; color: #666; margin-bottom: 2px;">Город: ${address.city}</div>` : ''}
+                    ${address.country ? `<div style="font-size: 14px; color: #666; margin-bottom: 2px;">Страна: ${address.country}</div>` : ''}
+                    ${address.full !== address.short ? `<div style="font-size: 11px; color: #999; margin-top: 8px; font-style: italic;">Полный адрес: ${address.full}</div>` : ''}
+                </div>
+                
+                <!-- Координаты -->
+                <div style="text-align: center; margin-bottom: 12px;">
+                    <div style="font-size: 16px; font-weight: 600; color: #155724; margin-bottom: 4px;">
+                        📍 ${lat.toFixed(6)}, ${lon.toFixed(6)}
+                    </div>
+                    <div style="font-size: 14px; color: #666;">
+                        🎯 Точность: ~${Math.round(accuracy)} метров
+                    </div>
+                </div>
+                
+                <div style="text-align: center;">
+                    <div style="font-size: 14px; color: #28a745; font-weight: 500;">
+                        ✅ Готово к сохранению
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="saveCurrentLocation(${lat}, ${lon})" 
+                        style="flex: 1; min-width: 140px; background: #28a745; color: white; padding: 16px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;">
+                    <i class="fas fa-save" style="margin-right: 8px;"></i>Сохранить местоположение
+                </button>
+                <button class="btn btn-secondary" onclick="getCurrentLocation()" 
+                        style="flex: 0 0 auto; background: #6c757d; color: white; padding: 16px; border: none; border-radius: 8px; cursor: pointer;">
+                    <i class="fas fa-redo"></i> Обновить
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * HTML для найденного местоположения (простое отображение без адреса - fallback)
  */
 function createFoundLocationHTML(lat, lon, accuracy) {
     return `
         <div style="background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%); padding: 20px; border-radius: 12px; border: 2px solid #28a745;">
             <div style="font-weight: 600; margin-bottom: 16px; text-align: center;">
                 <i class="fas fa-map-marker-alt" style="color: #28a745; margin-right: 8px;"></i>
-                Местоположение успешно определено!
+                Местоположение определено!
             </div>
             
             <!-- Простое отображение координат -->
@@ -280,7 +449,10 @@ function createFoundLocationHTML(lat, lon, accuracy) {
                 <div style="font-size: 16px; margin-bottom: 12px; color: #666;">
                     🎯 Точность: ~${Math.round(accuracy)} метров
                 </div>
-                <div style="font-size: 14px; color: #28a745; font-weight: 500;">
+                <div style="font-size: 12px; color: #856404; font-style: italic;">
+                    ⚠️ Название места не определено
+                </div>
+                <div style="font-size: 14px; color: #28a745; font-weight: 500; margin-top: 8px;">
                     ✅ Готово к сохранению
                 </div>
             </div>
@@ -427,7 +599,7 @@ function addAddress() {
  * Инициализация модуля геолокации
  */
 function initializeLocationModule() {
-    console.log('📍 Инициализация модуля геолокации (без карт)...');
+    console.log('📍 Инициализация модуля геолокации (с геокодированием)...');
 
     // Загружаем текущую геолокацию при загрузке страницы
     loadCurrentLocation();
@@ -446,6 +618,7 @@ window.clearLocation = clearLocation;
 window.addAddress = addAddress;
 window.addAddressManually = addAddressManually;
 window.loadCurrentLocation = loadCurrentLocation;
+window.getAddressByCoordinates = getAddressByCoordinates;
 
 // Автоинициализация при загрузке DOM
 document.addEventListener('DOMContentLoaded', initializeLocationModule);
