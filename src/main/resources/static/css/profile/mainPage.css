@@ -527,4 +527,48 @@ body {
     .location-actions {
         flex-direction: column;
     }
+}    /* Дополнительные стили для карт */
+.leaflet-popup-content-wrapper {
+    border-radius: 8px !important;
+}
+
+.leaflet-popup-tip {
+    border-top-color: white !important;
+}
+
+.map-container {
+    transition: all 0.3s ease;
+}
+
+.map-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+/* Анимация загрузки для карт */
+@keyframes mapPulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+#saved-location-map:empty,
+#current-location-map:empty {
+    animation: mapPulse 2s infinite;
+}
+
+/* Responsive для карт */
+@media (max-width: 768px) {
+    #saved-location-map {
+        height: 200px !important;
+    }
+
+    .location-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .btn {
+        min-width: 100% !important;
+    }
 }

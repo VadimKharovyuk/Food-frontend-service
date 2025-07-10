@@ -5,9 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QuickFood - Мой профиль</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
     <link rel="stylesheet" href="/css/bolt-navigation.css">
     <link rel="stylesheet" href="/css/profile/mainPage.css">
+    <style>
+        .alert {
+            margin-bottom: 24px;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid;
+        }
+        .alert-error {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border-color: rgba(220, 53, 69, 0.3);
+        }
+        .alert-warning {
+            background: rgba(253, 126, 20, 0.1);
+            color: #fd7e14;
+            border-color: rgba(253, 126, 20, 0.3);
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background: #28a745;
+            color: white;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #28a745;
+            color: #28a745;
+        }
+    </style>
 </head>
 <body>
 
@@ -15,13 +57,13 @@
 <div th:replace="~{fragments/navigation :: navigation}"></div>
 
 <div class="container">
-    <!-- ✅ Сообщения об ошибках/предупреждениях -->
-    <div th:if="${error}" class="alert alert-error" style="margin-bottom: 24px; padding: 16px; background: rgba(220, 53, 69, 0.1); color: #dc3545; border-radius: var(--border-radius); border: 1px solid rgba(220, 53, 69, 0.3);">
+    <!-- Сообщения об ошибках/предупреждениях -->
+    <div th:if="${error}" class="alert alert-error">
         <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
         <span th:text="${error}">Ошибка</span>
     </div>
 
-    <div th:if="${warning}" class="alert alert-warning" style="margin-bottom: 24px; padding: 16px; background: rgba(253, 126, 20, 0.1); color: var(--warning-orange); border-radius: var(--border-radius); border: 1px solid rgba(253, 126, 20, 0.3);">
+    <div th:if="${warning}" class="alert alert-warning">
         <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
         <span th:text="${warning}">Предупреждение</span>
     </div>
@@ -81,11 +123,6 @@
                     <label class="form-label">Email</label>
                     <input type="email" class="form-input" th:value="${user.email}" disabled>
                 </div>
-<!--                <div class="form-group">-->
-<!--                    <label class="form-label">Телефон</label>-->
-<!--                    <input type="tel" class="form-input" th:value="${user.phone ?: 'Не указан'}" disabled>-->
-<!--                </div>-->
-                <!-- ✅ Убираем поле даты рождения, так как его нет в UserResponseDto -->
                 <div class="form-group">
                     <label class="form-label">Роль</label>
                     <input type="text" class="form-input" th:value="${user.roleDisplayName}" disabled>
@@ -97,19 +134,19 @@
             </form>
         </div>
 
-        <!-- Location & Addresses -->
+        <!-- Location & Addresses Section -->
         <div class="profile-section">
             <div class="section-header">
                 <div class="section-title">
                     <div class="section-icon"><i class="fas fa-map-marker-alt"></i></div>
-                    Адреса доставки
+                    Геолокация и адреса доставки
                 </div>
                 <button class="edit-btn" onclick="addAddress()">
-                    <i class="fas fa-plus"></i> Добавить
+                    <i class="fas fa-plus"></i> Добавить адрес
                 </button>
             </div>
 
-            <!-- ✅ Обновленная секция геолокации с данными из контроллера -->
+            <!-- Секция геолокации -->
             <div class="form-group">
                 <label class="form-label">
                     <i class="fas fa-location-arrow"></i> Текущее местоположение
@@ -119,50 +156,111 @@
                           style="font-size: 12px; margin-left: 8px;"></span>
                 </label>
 
-                <!-- Показываем сохраненную геолокацию если есть -->
-                <div th:if="${hasLocation}" class="saved-location" style="background: var(--accent-green); padding: 16px; border-radius: var(--border-radius); margin-bottom: 12px;">
-                    <div style="font-weight: 600; margin-bottom: 8px;">
-                        <i class="fas fa-map-marker-alt" style="color: var(--primary-green); margin-right: 8px;"></i>
-                        Сохраненное местоположение
+                <!-- СОХРАНЕННАЯ ГЕОЛОКАЦИЯ (упрощенная версия) -->
+                <div class="saved-location"
+                     th:style="${hasLocation} ? 'display: block;' : 'display: none;'"
+                     style="background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+                    padding: 20px; border-radius: 12px; margin-bottom: 16px;
+                    border: 2px solid #28a745; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.1);">
+
+                    <!-- Заголовок -->
+                    <div style="font-weight: 600; margin-bottom: 16px; display: flex; align-items: center;">
+                        <i class="fas fa-map-marker-alt" style="color: #28a745; margin-right: 12px; font-size: 18px;"></i>
+                        <span style="color: #155724;">Ваше сохраненное местоположение</span>
                     </div>
-                    <div style="font-size: 14px; color: var(--text-gray); margin-bottom: 8px;" th:if="${formattedCoordinates}">
-                        Координаты: <span th:text="${formattedCoordinates}">50.450100, 30.523400</span>
+
+                    <!-- Информация о координатах -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                        <div th:if="${formattedCoordinates}" style="padding: 12px; background: rgba(255,255,255,0.8); border-radius: 8px; text-align: center;">
+                            <div style="font-size: 12px; color: #666; margin-bottom: 4px;">📍 Координаты</div>
+                            <div style="font-weight: 600; color: #155724; font-size: 14px;" th:text="${formattedCoordinates}">36.859, 30.870</div>
+                        </div>
+                        <div th:if="${shortAddress}" style="padding: 12px; background: rgba(255,255,255,0.8); border-radius: 8px; text-align: center;">
+                            <div style="font-size: 12px; color: #666; margin-bottom: 4px;">🏠 Адрес</div>
+                            <div style="font-weight: 600; color: #155724; font-size: 14px;" th:text="${shortAddress}">Анталья, Турция</div>
+                        </div>
                     </div>
-                    <div style="font-size: 14px; color: var(--text-gray); margin-bottom: 8px;" th:if="${shortAddress}">
-                        Адрес: <span th:text="${shortAddress}">Киев, Украина</span>
+
+                    <!-- Время обновления -->
+                    <div th:if="${locationLastUpdated}" style="font-size: 12px; color: #666; margin-bottom: 16px; text-align: center;">
+                        🕒 Последнее обновление: <span th:text="${locationLastUpdated}">2024-01-01 12:00</span>
                     </div>
-                    <div style="font-size: 12px; color: var(--text-gray);" th:if="${locationLastUpdated}">
-                        Обновлено: <span th:text="${#temporals.format(locationLastUpdated, 'dd.MM.yyyy HH:mm')}">01.01.2024 12:00</span>
+
+                    <!-- Простое отображение местоположения -->
+                    <div style="background: rgba(255,255,255,0.9); padding: 24px; border-radius: 12px; margin-bottom: 16px; text-align: center; border: 2px dashed #28a745;">
+                        <i class="fas fa-location-arrow" style="font-size: 48px; margin-bottom: 12px; color: #28a745;"></i>
+                        <div style="font-size: 16px; font-weight: 600; color: #155724; margin-bottom: 8px;">
+                            ✅ Местоположение сохранено
+                        </div>
+                        <div style="font-size: 14px; color: #666;">
+                            Ваши координаты успешно определены и сохранены в системе
+                        </div>
+                    </div>
+
+                    <!-- Кнопки управления -->
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn btn-outline" onclick="getCurrentLocation()"
+                                style="flex: 1; min-width: 140px; border-color: #28a745; color: #28a745;">
+                            <i class="fas fa-sync"></i> Обновить местоположение
+                        </button>
+                        <button class="btn btn-warning" onclick="clearLocation()"
+                                style="flex: 0 0 auto; min-width: 100px;">
+                            <i class="fas fa-trash"></i> Очистить
+                        </button>
                     </div>
                 </div>
 
-                <button class="btn btn-secondary" onclick="getCurrentLocation()" style="width: 100%;">
-                    <i class="fas fa-crosshairs"></i>
-                    <span th:text="${hasLocation} ? 'Обновить местоположение' : 'Определить автоматически'">Определить автоматически</span>
+                <!-- КНОПКА ОПРЕДЕЛЕНИЯ МЕСТОПОЛОЖЕНИЯ -->
+                <button class="btn btn-primary" onclick="getCurrentLocation()"
+                        style="width: 100%; padding: 16px; font-size: 16px; margin-bottom: 16px;">
+                    <i class="fas fa-crosshairs" style="margin-right: 8px;"></i>
+                    <span th:text="${hasLocation} ? 'Обновить местоположение' : 'Определить автоматически'">
+                Определить автоматически
+            </span>
                 </button>
 
-                <div id="current-location" class="map-container">
-                    <div>
-                        <i class="fas fa-map-marked-alt" style="font-size: 48px; margin-bottom: 8px;"></i>
-                        <div>Нажмите кнопку выше для получения/обновления геолокации</div>
+                <!-- БЛОК ТЕКУЩЕГО МЕСТОПОЛОЖЕНИЯ (без карты) -->
+                <div id="current-location" class="map-container"
+                     style="margin-top: 16px; border-radius: 12px; overflow: hidden;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                    <div style="text-align: center; padding: 40px;
+                        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                        border: 2px dashed #dee2e6; border-radius: 12px;">
+                        <i class="fas fa-map-marked-alt" style="font-size: 64px; margin-bottom: 16px; color: #6c757d;"></i>
+                        <div style="margin-bottom: 8px; font-weight: 600; font-size: 18px; color: #495057;">
+                            Определение местоположения
+                        </div>
+                        <div style="font-size: 14px; color: #6c757d; margin-bottom: 16px;">
+                            Нажмите кнопку выше для определения вашего местоположения<br>
+                            Координаты будут показаны здесь
+                        </div>
+                        <div style="font-size: 12px; color: #adb5bd;">
+                            🌍 Использует GPS вашего устройства
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Показываем блок, если хотя бы одно поле заполнено -->
-            <div th:if="${user.street} or ${user.city}">
-                <div class="location-item default">
+            <!-- ОСНОВНОЙ АДРЕС ИЗ ПРОФИЛЯ -->
+            <div th:if="${user.street} or ${user.city}" style="margin-top: 24px;">
+                <div class="location-item default"
+                     style="background: #fff; padding: 16px; border-radius: 12px;
+                    border: 2px solid #e9ecef; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                     <div class="location-info">
-                        <div class="location-address">🏠 Основной адрес</div>
-                        <div class="location-details">
+                        <div class="location-address" style="font-weight: 600; color: #495057;">
+                            🏠 Основной адрес из профиля
+                        </div>
+                        <div class="location-details" style="color: #6c757d; margin-top: 4px;">
                             <span th:if="${user.street}" th:text="${user.street}">ул. Пушкина, д. 15</span>
                             <span th:if="${user.city}" th:text="', ' + ${user.city}"></span>
                             <span th:if="${user.country}" th:text="', ' + ${user.country}"></span>
                         </div>
                     </div>
                     <div class="location-actions">
-                        <span class="location-tag">Из профиля</span>
-                        <button class="edit-btn">
+                        <span class="location-tag" style="background: #e7f3ff; color: #0056b3; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                            Из профиля
+                        </span>
+                        <button class="edit-btn" style="margin-left: 8px;">
                             <i class="fas fa-edit"></i>
                         </button>
                     </div>
@@ -189,25 +287,6 @@
                     <button class="edit-btn">Изменить</button>
                 </div>
             </div>
-
-            <div class="security-item">
-                <div class="security-info">
-                    <div class="security-title">Двухфакторная аутентификация</div>
-                    <div class="security-description">Дополнительная защита аккаунта</div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span class="security-status status-warning">Отключена</span>
-                    <button class="edit-btn">Настроить</button>
-                </div>
-            </div>
-
-            <div class="security-item">
-                <div class="security-info">
-                    <div class="security-title">Активные сессии</div>
-                    <div class="security-description">Просмотр устройств с доступом к аккаунту</div>
-                </div>
-                <button class="edit-btn">Управлять</button>
-            </div>
         </div>
 
         <!-- Preferences -->
@@ -226,130 +305,6 @@
                 </div>
                 <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
             </div>
-
-            <div class="preference-item">
-                <div class="preference-info">
-                    <div class="preference-title">SMS уведомления</div>
-                    <div class="preference-description">Получать SMS о статусе доставки</div>
-                </div>
-                <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
-            </div>
-
-            <div class="preference-item">
-                <div class="preference-info">
-                    <div class="preference-title">Push уведомления</div>
-                    <div class="preference-description">Уведомления в браузере</div>
-                </div>
-                <div class="toggle-switch active" onclick="toggleSwitch(this)"></div>
-            </div>
-
-            <div class="preference-item">
-                <div class="preference-info">
-                    <div class="preference-title">Рекламные рассылки</div>
-                    <div class="preference-description">Акции и специальные предложения</div>
-                </div>
-                <div class="toggle-switch" onclick="toggleSwitch(this)"></div>
-            </div>
-        </div>
-
-        <!-- Payment Methods -->
-        <div class="profile-section">
-            <div class="section-header">
-                <div class="section-title">
-                    <div class="section-icon"><i class="fas fa-credit-card"></i></div>
-                    Способы оплаты
-                </div>
-                <button class="edit-btn" onclick="addPaymentMethod()">
-                    <i class="fas fa-plus"></i> Добавить
-                </button>
-            </div>
-
-            <div class="location-item">
-                <div class="location-info">
-                    <div class="location-address">
-                        <i class="fab fa-cc-visa" style="color: #1a1f71; margin-right: 8px;"></i>
-                        **** **** **** 1234
-                    </div>
-                    <div class="location-details">Expires 12/26 • Основная карта</div>
-                </div>
-                <div class="location-actions">
-                    <span class="location-tag">По умолчанию</span>
-                    <button class="edit-btn">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="location-item">
-                <div class="location-info">
-                    <div class="location-address">
-                        <i class="fab fa-cc-mastercard" style="color: #eb001b; margin-right: 8px;"></i>
-                        **** **** **** 5678
-                    </div>
-                    <div class="location-details">Expires 08/27</div>
-                </div>
-                <div class="location-actions">
-                    <button class="edit-btn">Сделать основной</button>
-                    <button class="edit-btn" style="color: var(--danger-red);">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recent Activity -->
-        <div class="profile-section full-width-section">
-            <div class="section-header">
-                <div class="section-title">
-                    <div class="section-icon"><i class="fas fa-history"></i></div>
-                    Последняя активность
-                </div>
-                <button class="edit-btn">
-                    Показать всё
-                </button>
-            </div>
-
-            <div class="activity-timeline">
-                <div class="timeline-item">
-                    <div class="timeline-content">
-                        <div class="timeline-title">Заказ #1234 доставлен</div>
-                        <div class="timeline-time">2 часа назад</div>
-                        <div class="timeline-description">
-                            Пицца Маргарита из ресторана "Итальянский дворик" успешно доставлена
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-item">
-                    <div class="timeline-content">
-                        <div class="timeline-title">Добавлен новый адрес</div>
-                        <div class="timeline-time">1 день назад</div>
-                        <div class="timeline-description">
-                            Добавлен адрес "Работа" - Тверская ул., д. 7
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-item">
-                    <div class="timeline-content">
-                        <div class="timeline-title">Оставлен отзыв</div>
-                        <div class="timeline-time">3 дня назад</div>
-                        <div class="timeline-description">
-                            Отзыв на ресторан "Суши Мастер" - 5 звезд
-                        </div>
-                    </div>
-                </div>
-
-                <div class="timeline-item">
-                    <div class="timeline-content">
-                        <div class="timeline-title">Изменен пароль</div>
-                        <div class="timeline-time">1 неделя назад</div>
-                        <div class="timeline-description">
-                            Пароль аккаунта был успешно изменен
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -363,15 +318,12 @@
             <i class="fas fa-times"></i>
             Отменить
         </button>
-        <button class="btn btn-danger" onclick="deleteAccount()" style="margin-left: 16px;">
-            <i class="fas fa-user-times"></i>
-            Удалить аккаунт
-        </button>
     </div>
 </div>
 
+<script src="/js/profile/profile-location.js"></script>
 <script>
-    // Toggle edit mode for sections
+    // Основной JavaScript для страницы профиля
     function toggleEdit(sectionType) {
         const form = document.getElementById(`${sectionType}-form`);
         const inputs = form.querySelectorAll('.form-input');
@@ -384,253 +336,79 @@
         const btn = event.target.closest('.edit-btn');
         if (isEditing) {
             btn.innerHTML = '<i class="fas fa-save"></i> Сохранить';
-            btn.style.background = 'var(--primary-green)';
-            btn.style.color = 'var(--pure-white)';
+            btn.style.background = '#28a745';
+            btn.style.color = 'white';
         } else {
             btn.innerHTML = '<i class="fas fa-edit"></i> Редактировать';
-            btn.style.background = 'var(--light-gray)';
-            btn.style.color = 'var(--text-gray)';
-
-            // Здесь можно добавить AJAX запрос для сохранения данных
-            savePersonalInfo(form);
+            btn.style.background = '#f8f9fa';
+            btn.style.color = '#666';
         }
     }
 
-    // Toggle switch functionality
     function toggleSwitch(element) {
         element.classList.toggle('active');
-
-        // Здесь можно добавить логику сохранения настроек
-        const isActive = element.classList.contains('active');
-        console.log('Setting changed:', isActive);
     }
 
-    // Geolocation functionality
-    function getCurrentLocation() {
-        const locationDiv = document.getElementById('current-location');
-
-        if (!navigator.geolocation) {
-            alert('Геолокация не поддерживается вашим браузером');
-            return;
-        }
-
-        locationDiv.innerHTML = `
-            <div>
-                <i class="fas fa-spinner fa-spin" style="font-size: 48px; margin-bottom: 8px; color: var(--primary-green);"></i>
-                <div>Определяем ваше местоположение...</div>
-            </div>
-        `;
-
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
-
-                locationDiv.innerHTML = `
-                    <div style="text-align: left; width: 100%; padding: 16px;">
-                        <div style="font-weight: 600; margin-bottom: 8px;">
-                            <i class="fas fa-map-marker-alt" style="color: var(--primary-green); margin-right: 8px;"></i>
-                            Текущее местоположение найдено
-                        </div>
-                        <div style="font-size: 14px; color: var(--text-gray); margin-bottom: 8px;">
-                            Координаты: ${lat.toFixed(6)}, ${lon.toFixed(6)}
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button class="btn btn-primary" onclick="saveCurrentLocation(${lat}, ${lon})">
-                                <i class="fas fa-save"></i> Сохранить как адрес
-                            </button>
-                            <button class="btn btn-secondary" onclick="getCurrentLocation()">
-                                <i class="fas fa-redo"></i> Обновить
-                            </button>
-                        </div>
-                    </div>
-                `;
-
-                // Здесь можно добавить отображение карты или обратное геокодирование
-                console.log('Coordinates:', lat, lon);
-            },
-            function(error) {
-                let errorMessage = 'Не удалось определить местоположение';
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        errorMessage = 'Доступ к геолокации запрещен';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        errorMessage = 'Местоположение недоступно';
-                        break;
-                    case error.TIMEOUT:
-                        errorMessage = 'Время ожидания истекло';
-                        break;
-                }
-
-                locationDiv.innerHTML = `
-                    <div>
-                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 8px; color: var(--warning-orange);"></i>
-                        <div style="margin-bottom: 16px;">${errorMessage}</div>
-                        <button class="btn btn-secondary" onclick="getCurrentLocation()">
-                            <i class="fas fa-redo"></i> Попробовать снова
-                        </button>
-                    </div>
-                `;
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 300000
-            }
-        );
-    }
-
-    // Save current location as address
-    function saveCurrentLocation(lat, lon) {
-        // Здесь можно добавить обратное геокодирование для получения адреса
-        // и сохранение в базу данных
-
-        const mockAddress = `Координаты: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-
-        if (confirm(`Сохранить "${mockAddress}" как новый адрес доставки?`)) {
-            // AJAX запрос для сохранения
-            console.log('Saving location:', { lat, lon, address: mockAddress });
-
-            showNotification('Адрес успешно сохранен!', 'success');
-
-            // Можно добавить новый адрес в список
-            addLocationToList(mockAddress, 'Геолокация');
-        }
-    }
-
-    // Add new location to the list
-    function addLocationToList(address, type) {
-        const locationContainer = document.querySelector('.profile-section .location-item').parentElement;
-
-        const newLocation = document.createElement('div');
-        newLocation.className = 'location-item';
-        newLocation.innerHTML = `
-            <div class="location-info">
-                <div class="location-address">📍 ${type}</div>
-                <div class="location-details">${address}</div>
-            </div>
-            <div class="location-actions">
-                <button class="edit-btn">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="edit-btn" style="color: var(--danger-red);" onclick="removeLocation(this)">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
-
-        locationContainer.appendChild(newLocation);
-    }
-
-    // Remove location
-    function removeLocation(button) {
-        const locationItem = button.closest('.location-item');
-        const address = locationItem.querySelector('.location-details').textContent;
-
-        if (confirm(`Удалить адрес "${address}"?`)) {
-            locationItem.remove();
-            showNotification('Адрес удален', 'success');
-        }
-    }
-
-    // Add new address
-    function addAddress() {
-        const address = prompt('Введите новый адрес:');
-        if (address && address.trim()) {
-            addLocationToList(address.trim(), 'Новый адрес');
-            showNotification('Адрес добавлен!', 'success');
-        }
-    }
-
-    // Add payment method
-    function addPaymentMethod() {
-        alert('Функция добавления способа оплаты будет реализована позже');
-    }
-
-    // Save profile
     function saveProfile() {
         showNotification('Профиль сохранен!', 'success');
     }
 
-    // Cancel changes
     function cancelChanges() {
         if (confirm('Отменить все изменения?')) {
             location.reload();
         }
     }
 
-    // Delete account
-    function deleteAccount() {
-        const confirmation = prompt('Для удаления аккаунта введите "УДАЛИТЬ":');
-        if (confirmation === 'УДАЛИТЬ') {
-            if (confirm('Вы уверены? Это действие нельзя отменить!')) {
-                alert('Функция удаления аккаунта будет реализована позже');
-            }
-        }
-    }
-
-    // Save personal info via AJAX
-    function savePersonalInfo(form) {
-        const formData = new FormData(form);
-
-        // Здесь будет AJAX запрос для сохранения данных
-        console.log('Saving personal info:', Object.fromEntries(formData));
-
-        showNotification('Личная информация обновлена!', 'success');
-    }
-
-    // Show notification
     function showNotification(message, type = 'info') {
-        // Remove existing notifications
         const existingNotifications = document.querySelectorAll('.notification');
         existingNotifications.forEach(n => n.remove());
 
-        // Create new notification
         const notification = document.createElement('div');
-        notification.className = `notification`;
+        notification.className = 'notification';
         notification.style.cssText = `
             position: fixed;
             top: 100px;
             right: 20px;
             z-index: 9999;
-            max-width: 300px;
+            max-width: 350px;
             padding: 16px 20px;
             border-radius: 12px;
             color: white;
             font-weight: 500;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
             transform: translateX(100%);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         `;
 
-        // Set color based on type
-        switch(type) {
-            case 'success':
-                notification.style.background = 'var(--primary-green)';
-                break;
-            case 'error':
-                notification.style.background = 'var(--danger-red)';
-                break;
-            default:
-                notification.style.background = 'var(--info-blue)';
-        }
+        const colors = {
+            success: '#28a745',
+            error: '#dc3545',
+            warning: '#ffc107',
+            info: '#17a2b8'
+        };
+
+        notification.style.background = colors[type] || colors.info;
+
+        const icons = {
+            success: 'check-circle',
+            error: 'exclamation-triangle',
+            warning: 'exclamation-triangle',
+            info: 'info-circle'
+        };
 
         notification.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
-                <span>${message}</span>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <i class="fas fa-${icons[type] || icons.info}" style="font-size: 18px;"></i>
+                <span style="flex: 1;">${message}</span>
             </div>
         `;
 
         document.body.appendChild(notification);
 
-        // Animate in
         setTimeout(() => {
             notification.style.transform = 'translateX(0)';
         }, 100);
 
-        // Auto remove after 3 seconds
         setTimeout(() => {
             notification.style.transform = 'translateX(100%)';
             setTimeout(() => {
@@ -638,42 +416,12 @@
                     notification.remove();
                 }
             }, 300);
-        }, 3000);
+        }, 4000);
     }
 
-    // Initialize page
+    // Инициализация при загрузке
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Profile page loaded');
-
-        // Add smooth scrolling to all links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Add loading states to buttons
-        document.querySelectorAll('.btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                if (!this.classList.contains('loading')) {
-                    const originalContent = this.innerHTML;
-                    this.classList.add('loading');
-                    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Загрузка...';
-
-                    setTimeout(() => {
-                        this.classList.remove('loading');
-                        this.innerHTML = originalContent;
-                    }, 1000);
-                }
-            });
-        });
+        console.log('👤 Страница профиля загружена (упрощенная версия без карт)');
     });
 </script>
 <script src="/js/bolt-navigation.js"></script>

@@ -1,10 +1,7 @@
 package com.example.foodfrontendservice.controller.rest;
 
 import com.example.foodfrontendservice.config.CurrentUser;
-import com.example.foodfrontendservice.dto.AUTSERVICE.UpdateUserAddressDto;
-import com.example.foodfrontendservice.dto.AUTSERVICE.UpdateUserLocationDto;
-import com.example.foodfrontendservice.dto.AUTSERVICE.UserLocationDto;
-import com.example.foodfrontendservice.dto.AUTSERVICE.UserTokenInfo;
+import com.example.foodfrontendservice.dto.AUTSERVICE.*;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
 import com.example.foodfrontendservice.dto.UserResponseDto;
 import com.example.foodfrontendservice.service.UserLocationService;
@@ -19,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class LocationController {
 
+
     private final UserLocationService userLocationService;
 
     @GetMapping("/me")
@@ -31,8 +29,15 @@ public class LocationController {
 
     @PutMapping("/me")
     public ResponseEntity<ApiResponse<UserResponseDto>> updateUserLocation(
-            @Valid @RequestBody UpdateUserLocationDto locationDto,
+            @Valid @RequestBody UpdateUserCoordinatesDto coordinatesDto,  // ← Новый DTO
             @CurrentUser UserTokenInfo userInfo) {
+
+        // Конвертируем в полный DTO
+        UpdateUserLocationDto locationDto = UpdateUserLocationDto.builder()
+                .latitude(coordinatesDto.getLatitude())
+                .longitude(coordinatesDto.getLongitude())
+                .autoGeocode(true)  // Автоматически включаем геокодирование
+                .build();
 
         ApiResponse<UserResponseDto> response = userLocationService.updateUserLocation(locationDto, userInfo);
         return ResponseEntity.ok(response);

@@ -1,9 +1,12 @@
 package com.example.foodfrontendservice.controller;
 
 import com.example.foodfrontendservice.config.TokenExtractor;
+import com.example.foodfrontendservice.dto.AUTSERVICE.UserLocationDto;
 import com.example.foodfrontendservice.dto.AUTSERVICE.UserTokenInfo;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ApiResponse;
 import com.example.foodfrontendservice.dto.UserResponseDto;
 import com.example.foodfrontendservice.service.UserIntegrationService;
+import com.example.foodfrontendservice.service.UserLocationService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +26,7 @@ public class ProfileController {
 
     private final TokenExtractor tokenExtractor;
     private final UserIntegrationService userIntegrationService;
+    private final UserLocationService userLocationService;
 
     @GetMapping
     public String profile(HttpServletRequest request, Model model, RedirectAttributes redirectAttributes) {
@@ -53,7 +57,26 @@ public class ProfileController {
                 model.addAttribute("warning", "Не удалось загрузить полную информацию профиля");
             }
 
-            // 3. ✅ Добавляем данные в модель для Thymeleaf
+            // 3. ✅ НОВОЕ: Получаем детальную геолокацию через UserLocationService
+            UserLocationDto detailedLocation = null;
+            try {
+                ApiResponse<UserLocationDto> locationResponse = userLocationService.getUserLocation(tokenInfo);
+
+                if (locationResponse.isSuccess()) {
+                    detailedLocation = locationResponse.getData();
+                    log.info("📍 Получена детальная геолокация: hasLocation={}, coordinates=[{}, {}]",
+                            detailedLocation.getHasLocation(),
+                            detailedLocation.getLatitude(),
+                            detailedLocation.getLongitude());
+                } else {
+                    log.warn("⚠️ Не удалось получить детальную геолокацию: {}", locationResponse.getMessage());
+                }
+            } catch (Exception e) {
+                log.warn("⚠️ Ошибка получения детальной геолокации: {}", e.getMessage());
+
+            }
+
+            // 4. ✅ Добавляем данные в модель для Thymeleaf
 
             // Базовые данные авторизации
             model.addAttribute("isAuthenticated", true);
@@ -66,8 +89,8 @@ public class ProfileController {
             // Статистика пользователя (можно получать из других микросервисов)
             addUserStatistics(model, tokenInfo);
 
-            // Настройки геолокации
-            addLocationInfo(model, fullUserData);
+            // ✅ ОБНОВЛЕНО: Настройки геолокации с детальными данными
+            addLocationInfo(model, fullUserData, detailedLocation);
 
             log.info("✅ Страница профиля успешно подготовлена для пользователя: {}", tokenInfo.getEmail());
 
@@ -108,28 +131,78 @@ public class ProfileController {
     /**
      * 📍 Добавление информации о геолокации
      */
-    private void addLocationInfo(Model model, UserResponseDto userData) {
+    /**
+     * 📍 Добавление информации о геолокации с детальными данными
+     */
+    private void addLocationInfo(Model model, UserResponseDto userData, UserLocationDto detailedLocation) {
         try {
-            if (userData != null) {
+            boolean hasDetailedLocation = detailedLocation != null && detailedLocation.getHasLocation() != null && detailedLocation.getHasLocation();
+
+            if (hasDetailedLocation) {
+                // ✅ Используем детальные данные из UserLocationService (приоритет)
+                log.debug("📍 Используем детальные данные геолокации из UserLocationService");
+
+                model.addAttribute("hasLocation", true);
+                model.addAttribute("locationStatus", "Актуальна");
+
+                // Координаты
+                if (detailedLocation.getLatitude() != null && detailedLocation.getLongitude() != null) {
+                    model.addAttribute("latitude", detailedLocation.getLatitude());
+                    model.addAttribute("longitude", detailedLocation.getLongitude());
+                    model.addAttribute("formattedCoordinates",
+                            String.format("%.6f, %.6f", detailedLocation.getLatitude(), detailedLocation.getLongitude()));
+                }
+
+                // Адресная информация
+                model.addAttribute("street", detailedLocation.getStreet());
+                model.addAttribute("city", detailedLocation.getCity());
+                model.addAttribute("region", detailedLocation.getRegion());
+                model.addAttribute("country", detailedLocation.getCountry());
+                model.addAttribute("fullAddress", detailedLocation.getFullAddress());
+                model.addAttribute("shortAddress", detailedLocation.getShortAddress());
+
+                // Время обновления
+                model.addAttribute("locationUpdatedAt", detailedLocation.getLocationUpdatedAt());
+
+                // Дополнительная информация
+                model.addAttribute("detailedCoordinates", detailedLocation.getFormattedCoordinates());
+
+            } else if (userData != null && userData.getHasLocation() != null && userData.getHasLocation()) {
+                // ✅ Fallback - используем данные из UserResponseDto
+                log.debug("📍 Используем базовые данные геолокации из UserResponseDto (fallback)");
+
                 model.addAttribute("hasLocation", userData.getHasLocation());
-                model.addAttribute("locationStatus", userData.getLocationStatus());
+                model.addAttribute("locationStatus", userData.getLocationStatus() != null ? userData.getLocationStatus() : "Базовая");
                 model.addAttribute("formattedCoordinates", userData.getFormattedCoordinates());
                 model.addAttribute("shortAddress", userData.getShortAddress());
 
                 if (userData.getLocationUpdatedAt() != null) {
-                    model.addAttribute("locationLastUpdated", userData.getLocationUpdatedAt());
+                    model.addAttribute("locationUpdatedAt", userData.getLocationUpdatedAt());
                 }
 
-                log.debug("📍 Добавлена информация о геолокации. Has location: {}", userData.getHasLocation());
             } else {
+                // ✅ Нет геолокации
+                log.debug("📍 Геолокация не установлена");
+
                 model.addAttribute("hasLocation", false);
                 model.addAttribute("locationStatus", "Не установлена");
             }
 
+            // ✅ Дополнительные атрибуты для удобства работы в Thymeleaf
+            model.addAttribute("canUpdateLocation", true);
+            model.addAttribute("locationServiceAvailable", detailedLocation != null);
+
+            log.debug("📍 Добавлена информация о геолокации. Has location: {}, Service available: {}",
+                    model.getAttribute("hasLocation"), detailedLocation != null);
+
         } catch (Exception e) {
             log.warn("⚠️ Ошибка обработки геолокации: {}", e.getMessage());
+
+            // Fallback - безопасные значения
             model.addAttribute("hasLocation", false);
             model.addAttribute("locationStatus", "Ошибка загрузки");
+            model.addAttribute("canUpdateLocation", false);
+            model.addAttribute("locationServiceAvailable", false);
         }
     }
 

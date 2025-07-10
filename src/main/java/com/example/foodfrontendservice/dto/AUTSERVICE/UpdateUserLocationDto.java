@@ -1,8 +1,4 @@
 package com.example.foodfrontendservice.dto.AUTSERVICE;
-
-
-
-
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,13 +18,13 @@ public class UpdateUserLocationDto {
     @DecimalMin(value = "-90.0", message = "Широта должна быть не меньше -90")
     @DecimalMax(value = "90.0", message = "Широта должна быть не больше 90")
     @Digits(integer = 2, fraction = 8, message = "Некорректный формат широты")
-    private BigDecimal latitude;
+    private Double latitude;
 
     @NotNull(message = "Долгота обязательна")
     @DecimalMin(value = "-180.0", message = "Долгота должна быть не меньше -180")
     @DecimalMax(value = "180.0", message = "Долгота должна быть не больше 180")
     @Digits(integer = 3, fraction = 8, message = "Некорректный формат долготы")
-    private BigDecimal longitude;
+    private Double longitude;
 
     // 📍 Опциональный адрес
     @Size(max = 255, message = "Название улицы не должно превышать 255 символов")
