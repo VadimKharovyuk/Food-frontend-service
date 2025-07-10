@@ -1,5 +1,7 @@
 package com.example.foodfrontendservice.dto.PRODUCTSERVICE.category;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,35 +9,37 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/**
- * Универсальная обертка для одного объекта (для категорий)
- * @param <T> тип данных в ответе
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiResponse<T> {
 
     /**
      * Данные ответа
      */
+    @JsonProperty("data")
     private T data;
 
     /**
      * Статус успешности операции
      */
+    @JsonProperty("success")
     private Boolean success;
 
     /**
      * Сообщение об ошибке (если есть)
      */
+    @JsonProperty("message")
     private String message;
 
     /**
      * Временная метка создания ответа
+     * ✅ Изменено на String для совместимости с JSON
      */
-    private LocalDateTime timestamp;
+    @JsonProperty("timestamp")
+    private String timestamp;
 
     // ================================
     // СТАТИЧЕСКИЕ МЕТОДЫ ДЛЯ СОЗДАНИЯ
@@ -52,7 +56,23 @@ public class ApiResponse<T> {
                 .data(data)
                 .success(true)
                 .message(null)
-                .timestamp(LocalDateTime.now())
+                .timestamp(LocalDateTime.now().toString()) // ← Автоматически в String
+                .build();
+    }
+
+    /**
+     * Создать успешный ответ с данными и сообщением
+     * @param data данные для ответа
+     * @param message сообщение
+     * @param <T> тип данных
+     * @return успешный ответ
+     */
+    public static <T> ApiResponse<T> success(T data, String message) {
+        return ApiResponse.<T>builder()
+                .data(data)
+                .success(true)
+                .message(message)
+                .timestamp(LocalDateTime.now().toString())
                 .build();
     }
 
@@ -67,7 +87,7 @@ public class ApiResponse<T> {
                 .data(null)
                 .success(false)
                 .message(message)
-                .timestamp(LocalDateTime.now())
+                .timestamp(LocalDateTime.now().toString()) // ← Автоматически в String
                 .build();
     }
 
@@ -82,10 +102,9 @@ public class ApiResponse<T> {
                 .data(null)
                 .success(false)
                 .message(message)
-                .timestamp(LocalDateTime.now())
+                .timestamp(LocalDateTime.now().toString())
                 .build();
     }
-
 
     /**
      * Проверить, является ли ответ успешным
@@ -95,7 +114,6 @@ public class ApiResponse<T> {
         return success != null && success;
     }
 
-
     /**
      * Проверить, является ли ответ ошибкой
      * @return true если ответ содержит ошибку
@@ -103,6 +121,4 @@ public class ApiResponse<T> {
     public boolean isError() {
         return success == null || !success;
     }
-
-
 }

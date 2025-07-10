@@ -1,7 +1,5 @@
 package com.example.foodfrontendservice.config;
 
-import com.example.foodfrontendservice.config.CurrentUserArgumentResolver;
-import com.example.foodfrontendservice.config.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +14,8 @@ import java.util.List;
 public class WebConfig implements WebMvcConfigurer {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CurrentUserArgumentResolver currentUserArgumentResolver;
+    private final CurrentUserArgumentResolver currentUserArgumentResolver;           // для @CurrentUser Long userId
+    private final CurrentUserInfoArgumentResolver currentUserInfoArgumentResolver;   // для @CurrentUser UserTokenInfo userInfo
 
     @Bean
     public FilterRegistrationBean<JwtAuthenticationFilter> jwtFilter() {
@@ -30,6 +29,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(currentUserArgumentResolver);
+        // ✅ Добавляем оба ArgumentResolver для гибкости
+        resolvers.add(currentUserArgumentResolver);        // обрабатывает @CurrentUser Long userId
+        resolvers.add(currentUserInfoArgumentResolver);    // обрабатывает @CurrentUser UserTokenInfo userInfo
     }
 }
