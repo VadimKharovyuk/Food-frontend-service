@@ -6,8 +6,6 @@
     <title>QuickFood - Избранные магазины</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-
-
         :root {
             --primary-green: #00d967;
             --secondary-green: #00b852;
@@ -201,6 +199,12 @@
             transform: scale(1.1);
         }
 
+        .remove-favorite:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
         .store-content {
             padding: 2rem;
         }
@@ -357,39 +361,28 @@
             border: 1px solid rgba(0, 217, 103, 0.3);
         }
 
-        .loading-overlay {
+        .notification {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
+            top: 20px;
+            right: 20px;
+            max-width: 400px;
+            padding: 1rem 1.5rem;
+            border-radius: 0.8rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
         }
 
-        .loading-spinner {
-            background: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            text-align: center;
+        .notification.success {
+            background: var(--primary-green);
+            color: white;
         }
 
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--light-gray);
-            border-top: 4px solid var(--primary-green);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .notification.error {
+            background: var(--danger-red);
+            color: white;
         }
 
         .fade-out {
@@ -435,14 +428,6 @@
 
 <!-- Подключение навигации -->
 <div th:replace="~{fragments/navigation :: navigation}"></div>
-
-<!-- Loading Overlay -->
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner">
-        <div class="spinner"></div>
-        <p>Удаление из избранного...</p>
-    </div>
-</div>
 
 <div class="container">
     <!-- Заголовок страницы -->
@@ -495,7 +480,8 @@
                 <img th:if="${favorite.store.picUrl != null and !#strings.isEmpty(favorite.store.picUrl)}"
                      th:src="${favorite.store.picUrl}"
                      th:alt="${favorite.store.name}"
-                     class="store-image">
+                     class="store-image"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div th:unless="${favorite.store.picUrl != null and !#strings.isEmpty(favorite.store.picUrl)}"
                      class="store-image-placeholder">
                     <i class="fas fa-store"></i>
@@ -506,9 +492,9 @@
                     <i class="fas fa-check-circle"></i> Активен
                 </div>
 
-                <!-- Кнопка удаления из избранного -->
+                <!-- ✅ ОБНОВЛЕННАЯ кнопка удаления с data-атрибутом -->
                 <button class="remove-favorite"
-                        th:onclick="'removeFromFavorites(' + ${favorite.store.id} + ')'"
+                        th:data-store-id="${favorite.store.id}"
                         title="Удалить из избранного">
                     <i class="fas fa-heart-broken"></i>
                 </button>
@@ -520,11 +506,11 @@
                     <h3 class="store-name" th:text="${favorite.store.name}">Название магазина</h3>
                     <div class="store-rating" th:if="${favorite.store.rating}">
                         <div class="rating-stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star-half-alt"></i>
+                            <i class="fas fa-star" th:if="${favorite.store.rating >= 1}"></i>
+                            <i class="fas fa-star" th:if="${favorite.store.rating >= 2}"></i>
+                            <i class="fas fa-star" th:if="${favorite.store.rating >= 3}"></i>
+                            <i class="fas fa-star" th:if="${favorite.store.rating >= 4}"></i>
+                            <i class="fas fa-star" th:if="${favorite.store.rating >= 5}"></i>
                         </div>
                         <span th:text="${favorite.store.rating}">4.5</span>
                     </div>
@@ -577,172 +563,54 @@
     </div>
 </div>
 
-<!-- Только JavaScript часть - остальное без изменений -->
 <script>
-    // ✅ ИСПРАВЛЕНИЕ: Получаем токен из cookie или localStorage (НЕ из Thymeleaf)
-    function getAuthToken() {
-        // 1. Пробуем получить из localStorage (от дашборда)
-        let token = localStorage.getItem('authToken');
-        if (token) return token;
+    // ✅ УПРОЩЕННОЕ получение токена и данных из Thymeleaf
+    const jwtToken = '[[${jwtToken}]]';
+    const isAuthenticated = [[${isAuthenticated}]];
+    const userEmail = '[[${userEmail}]]';
 
-        // 2. Пробуем получить из sessionStorage
-        token = sessionStorage.getItem('authToken');
-        if (token) return token;
-
-        // 3. Пробуем получить из cookie
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            const [name, value] = cookie.trim().split('=');
-            if (name === 'authToken') {
-                return value;
-            }
-        }
-
-        return null;
-    }
-
-    // ✅ Получаем данные из Thymeleaf модели (безопасные данные)
-    const isAuthenticated = [[${isAuthenticated}]]; // ✅ Получит true/false
-    const userRole = '[[${userRole}]]';              // ✅ Получит роль
-    const userEmail = '[[${userEmail}]]';            // ✅ Получит email
-
-    // ✅ Получаем токен через функцию (НЕ из Thymeleaf)
-    const jwtToken = getAuthToken();
-
-    // ✅ Логирование для отладки
-    console.log('🔍 Favorites Page Auth Debug:');
+    console.log('🔍 Favorites Page Debug:');
     console.log('- Is Authenticated:', isAuthenticated);
-    console.log('- User Role:', userRole);
-    console.log('- JWT Token:', jwtToken ? 'Found' : 'Missing');
+    console.log('- JWT Token:', jwtToken ? 'Present' : 'Missing');
+    console.log('- User Email:', userEmail);
 
-    // Показать/скрыть loading overlay
-    function showLoading() {
-        document.getElementById('loadingOverlay').style.display = 'flex';
-    }
 
-    function hideLoading() {
-        document.getElementById('loadingOverlay').style.display = 'none';
-    }
+    // ✅ ФУНКЦИЯ показа уведомлений
+    function showNotification(message, type) {
+        // Удаляем предыдущие уведомления
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(n => n.remove());
 
-    // ✅ ИСПРАВЛЕННАЯ функция удаления из избранного
-    function removeFromFavorites(storeId) {
-        if (!confirm('Удалить магазин из избранного?')) {
-            return;
-        }
+        // Создаем новое уведомление
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+            <span>${message}</span>
+        `;
 
-        // ✅ Получаем свежий токен
-        const token = getAuthToken();
+        document.body.appendChild(notification);
 
-        if (!isAuthenticated || !token) {
-            alert('Необходимо войти в систему');
-            window.location.href = '/login';
-            return;
-        }
-
-        showLoading();
-
-        fetch(`/favorites/stores/remove/${storeId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .then(response => {
-                hideLoading();
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        alert('Сессия истекла, войдите заново');
-                        window.location.href = '/login';
-                        return;
-                    }
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    showSuccessMessage('Магазин удален из избранного');
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1000);
-                } else {
-                    showErrorMessage('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
-                }
-            })
-            .catch(error => {
-                hideLoading();
-                console.error('Ошибка:', error);
-                showErrorMessage('Произошла ошибка при удалении');
-            });
-    }
-
-    // Показать сообщение об успехе
-    function showSuccessMessage(message) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message success-message';
-        messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-
-        const container = document.querySelector('.container');
-        container.insertBefore(messageDiv, container.firstChild.nextSibling);
-
+        // Автоматическое удаление через 4 секунды
         setTimeout(() => {
-            messageDiv.classList.add('fade-out');
-            setTimeout(() => messageDiv.remove(), 300);
-        }, 3000);
+            notification.classList.add('fade-out');
+            setTimeout(() => notification.remove(), 300);
+        }, 4000);
     }
 
-    // Показать сообщение об ошибке
-    function showErrorMessage(message) {
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message error-message';
-        messageDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
-
-        const container = document.querySelector('.container');
-        container.insertBefore(messageDiv, container.firstChild.nextSibling);
-
-        setTimeout(() => {
-            messageDiv.classList.add('fade-out');
-            setTimeout(() => messageDiv.remove(), 300);
-        }, 5000);
-    }
-
-    // ✅ Улучшенная функция для аутентифицированных запросов
-    function makeAuthenticatedRequest(url, options = {}) {
-        const token = getAuthToken();
-
-        if (!isAuthenticated || !token) {
-            alert('Необходимо войти в систему');
-            window.location.href = '/login';
-            return Promise.reject('No authentication');
-        }
-
-        options.headers = {
-            ...options.headers,
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        };
-
-        return fetch(url, options);
-    }
-
-    // Инициализация страницы
+    // ✅ ИНИЦИАЛИЗАЦИЯ страницы
     document.addEventListener('DOMContentLoaded', function() {
-        // ✅ Проверяем наличие токена при загрузке
-        if (isAuthenticated && !getAuthToken()) {
-            console.warn('⚠️ Пользователь должен быть авторизован, но токен не найден');
-            // Можно показать предупреждение или перенаправить на логин
-        }
-
-        // Автоскрытие существующих сообщений
-        const existingMessages = document.querySelectorAll('.message');
-        existingMessages.forEach(message => {
-            setTimeout(() => {
-                message.classList.add('fade-out');
-                setTimeout(() => message.remove(), 300);
-            }, 5000);
+        // Добавляем обработчики событий для кнопок удаления
+        const removeButtons = document.querySelectorAll('.remove-favorite');
+        removeButtons.forEach(button => {
+            const storeId = button.getAttribute('data-store-id');
+            if (storeId) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    removeFromFavorites(parseInt(storeId));
+                });
+            }
         });
 
         // Анимация появления карточек
@@ -757,198 +625,29 @@
             }, index * 100);
         });
 
-        // Добавляем обработчики для кнопок действий
-        document.querySelectorAll('.btn-primary, .btn-outline').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                if (!isAuthenticated || !getAuthToken()) {
-                    e.preventDefault();
-                    alert('Необходимо войти в систему');
-                    window.location.href = '/login';
-                }
-            });
-        });
-
         // Обработка ошибок загрузки изображений
         const images = document.querySelectorAll('.store-image');
         images.forEach(img => {
             img.addEventListener('error', function() {
-                const placeholder = document.createElement('div');
-                placeholder.className = 'store-image-placeholder';
-                placeholder.innerHTML = '<i class="fas fa-store"></i>';
-                this.parentNode.replaceChild(placeholder, this);
+                this.style.display = 'none';
+                const placeholder = this.nextElementSibling;
+                if (placeholder && placeholder.classList.contains('store-image-placeholder')) {
+                    placeholder.style.display = 'flex';
+                }
             });
+        });
+
+        // Автоскрытие существующих сообщений
+        const existingMessages = document.querySelectorAll('.message');
+        existingMessages.forEach(message => {
+            setTimeout(() => {
+                message.classList.add('fade-out');
+                setTimeout(() => message.remove(), 300);
+            }, 5000);
         });
     });
 </script>
-<!--<script>-->
-<!--    // ✅ Получаем токен и данные авторизации из Thymeleaf модели-->
-<!--    const jwtToken = '[[${jwtToken}]]';        // ✅ Получит реальный токен-->
-<!--    const isAuthenticated = [[${isAuthenticated}]]; // ✅ Получит true-->
-<!--    const userRole = '[[${userRole}]]';       // ✅ Получит роль-->
-
-<!--    // Показать/скрыть loading overlay-->
-<!--    function showLoading() {-->
-<!--        document.getElementById('loadingOverlay').style.display = 'flex';-->
-<!--    }-->
-
-<!--    function hideLoading() {-->
-<!--        document.getElementById('loadingOverlay').style.display = 'none';-->
-<!--    }-->
-
-<!--    // Удаление из избранного-->
-<!--    function removeFromFavorites(storeId) {-->
-<!--        if (!confirm('Удалить магазин из избранного?')) {-->
-<!--            return;-->
-<!--        }-->
-
-<!--        if (!isAuthenticated || !jwtToken) {-->
-<!--            alert('Необходимо войти в систему');-->
-<!--            window.location.href = '/login';-->
-<!--            return;-->
-<!--        }-->
-
-<!--        showLoading();-->
-
-<!--        fetch(`/favorites/stores/remove/${storeId}`, {-->
-<!--            method: 'DELETE',-->
-<!--            headers: {-->
-<!--                'Content-Type': 'application/json',-->
-<!--                'X-Requested-With': 'XMLHttpRequest',-->
-<!--                'Authorization': `Bearer ${jwtToken}`-->
-<!--            }-->
-<!--        })-->
-<!--            .then(response => {-->
-<!--                hideLoading();-->
-<!--                if (!response.ok) {-->
-<!--                    throw new Error(`HTTP error! status: ${response.status}`);-->
-<!--                }-->
-<!--                return response.json();-->
-<!--            })-->
-<!--            .then(data => {-->
-<!--                if (data.success) {-->
-<!--                    // Показываем успешное сообщение-->
-<!--                    showSuccessMessage('Магазин удален из избранного');-->
-
-<!--                    // Перезагружаем страницу через небольшую задержку-->
-<!--                    setTimeout(() => {-->
-<!--                        location.reload();-->
-<!--                    }, 1000);-->
-<!--                } else {-->
-<!--                    showErrorMessage('Ошибка: ' + (data.message || 'Неизвестная ошибка'));-->
-<!--                }-->
-<!--            })-->
-<!--            .catch(error => {-->
-<!--                hideLoading();-->
-<!--                console.error('Ошибка:', error);-->
-<!--                showErrorMessage('Произошла ошибка при удалении');-->
-<!--            });-->
-<!--    }-->
-
-<!--    // Показать сообщение об успехе-->
-<!--    function showSuccessMessage(message) {-->
-<!--        const messageDiv = document.createElement('div');-->
-<!--        messageDiv.className = 'message success-message';-->
-<!--        messageDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;-->
-
-<!--        const container = document.querySelector('.container');-->
-<!--        container.insertBefore(messageDiv, container.firstChild.nextSibling);-->
-
-<!--        // Автоматически скрыть через 3 секунды-->
-<!--        setTimeout(() => {-->
-<!--            messageDiv.classList.add('fade-out');-->
-<!--            setTimeout(() => messageDiv.remove(), 300);-->
-<!--        }, 3000);-->
-<!--    }-->
-
-<!--    // Показать сообщение об ошибке-->
-<!--    function showErrorMessage(message) {-->
-<!--        const messageDiv = document.createElement('div');-->
-<!--        messageDiv.className = 'message error-message';-->
-<!--        messageDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;-->
-
-<!--        const container = document.querySelector('.container');-->
-<!--        container.insertBefore(messageDiv, container.firstChild.nextSibling);-->
-
-<!--        // Автоматически скрыть через 5 секунд-->
-<!--        setTimeout(() => {-->
-<!--            messageDiv.classList.add('fade-out');-->
-<!--            setTimeout(() => messageDiv.remove(), 300);-->
-<!--        }, 5000);-->
-<!--    }-->
-
-<!--    // ✅ Глобальная функция для аутентифицированных запросов-->
-<!--    function makeAuthenticatedRequest(url, options = {}) {-->
-<!--        if (!isAuthenticated || !jwtToken) {-->
-<!--            alert('Необходимо войти в систему');-->
-<!--            window.location.href = '/login';-->
-<!--            return Promise.reject('No authentication');-->
-<!--        }-->
-
-<!--        options.headers = {-->
-<!--            ...options.headers,-->
-<!--            'Authorization': `Bearer ${jwtToken}`,-->
-<!--            'Content-Type': 'application/json',-->
-<!--            'X-Requested-With': 'XMLHttpRequest'-->
-<!--        };-->
-
-<!--        return fetch(url, options);-->
-<!--    }-->
-
-<!--    // Инициализация страницы-->
-<!--    document.addEventListener('DOMContentLoaded', function() {-->
-<!--        // Автоскрытие существующих сообщений-->
-<!--        const existingMessages = document.querySelectorAll('.message');-->
-<!--        existingMessages.forEach(message => {-->
-<!--            setTimeout(() => {-->
-<!--                message.classList.add('fade-out');-->
-<!--                setTimeout(() => message.remove(), 300);-->
-<!--            }, 5000);-->
-<!--        });-->
-
-<!--        // Логирование состояния авторизации-->
-<!--        if (isAuthenticated && jwtToken) {-->
-<!--            console.log('✅ Пользователь авторизован, роль:', userRole);-->
-<!--        } else {-->
-<!--            console.warn('❌ Пользователь не авторизован');-->
-<!--        }-->
-
-<!--        // Анимация появления карточек-->
-<!--        const storeCards = document.querySelectorAll('.store-card');-->
-<!--        storeCards.forEach((card, index) => {-->
-<!--            card.style.opacity = '0';-->
-<!--            card.style.transform = 'translateY(20px)';-->
-<!--            setTimeout(() => {-->
-<!--                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';-->
-<!--                card.style.opacity = '1';-->
-<!--                card.style.transform = 'translateY(0)';-->
-<!--            }, index * 100);-->
-<!--        });-->
-
-<!--        // Добавляем обработчики для кнопок действий-->
-<!--        document.querySelectorAll('.btn-primary, .btn-outline').forEach(btn => {-->
-<!--            btn.addEventListener('click', function(e) {-->
-<!--                if (!isAuthenticated) {-->
-<!--                    e.preventDefault();-->
-<!--                    alert('Необходимо войти в систему');-->
-<!--                    window.location.href = '/login';-->
-<!--                }-->
-<!--            });-->
-<!--        });-->
-<!--    });-->
-
-<!--    // Обработка ошибок загрузки изображений-->
-<!--    document.addEventListener('DOMContentLoaded', function() {-->
-<!--        const images = document.querySelectorAll('.store-image');-->
-<!--        images.forEach(img => {-->
-<!--            img.addEventListener('error', function() {-->
-<!--                const placeholder = document.createElement('div');-->
-<!--                placeholder.className = 'store-image-placeholder';-->
-<!--                placeholder.innerHTML = '<i class="fas fa-store"></i>';-->
-<!--                this.parentNode.replaceChild(placeholder, this);-->
-<!--            });-->
-<!--        });-->
-<!--    });-->
-<!--</script>-->
 <script src="/js/bolt-navigation.js"></script>
+<script src="/js/store/removeFromFavorites.js"></script>
 </body>
 </html>

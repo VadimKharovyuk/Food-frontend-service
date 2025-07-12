@@ -25,12 +25,8 @@ import java.util.*;
 public class FavoritesStoreController {
 
     private final FavoriteStoreClientService storeClientService;
-    private final JwtUtil jwtUtil;
-    private final TokenExtractor tokenExtractor; // ✅ Используем TokenExtractor
+    private final TokenExtractor tokenExtractor;
 
-    /**
-     * ✅ ОБНОВЛЕННЫЙ: Показать страницу избранных магазинов
-     */
     @GetMapping
     public String favoritesStores(
             HttpServletRequest request,
@@ -40,14 +36,10 @@ public class FavoritesStoreController {
         log.info("🛍️ Запрос избранных магазинов пользователя");
 
         try {
-            // ✅ НОВОЕ: Используем TokenExtractor для получения информации о пользователе
+
             UserTokenInfo userInfo = tokenExtractor.getCurrentUserInfo(request);
             boolean isAuthenticated = tokenExtractor.isAuthenticated(request);
 
-            // 🔍 Логируем информацию о пользователе
-            log.debug("🔍 Авторизация пользователя:");
-            log.debug("- Is Authenticated: {}", isAuthenticated);
-            log.debug("- UserInfo: {}", userInfo != null ? userInfo.toString() : "NULL");
 
             if (!isAuthenticated || userInfo == null) {
                 log.warn("❌ Пользователь не авторизован - перенаправление на логин");
@@ -111,6 +103,7 @@ public class FavoritesStoreController {
             model.addAttribute("isAuthenticated", false);
             model.addAttribute("error", "Произошла ошибка при загрузке избранных магазинов");
         }
+
 
         return "favorites/stores";
     }
