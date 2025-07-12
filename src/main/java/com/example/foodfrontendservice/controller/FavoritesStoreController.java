@@ -2,10 +2,10 @@ package com.example.foodfrontendservice.controller;
 
 import com.example.foodfrontendservice.config.JwtUtil;
 import com.example.foodfrontendservice.config.TokenExtractor;
+import com.example.foodfrontendservice.dto.AUTSERVICE.UserTokenInfo;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.Favorite.FavoriteStoreApiResponse;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.Favorite.FavoriteStoreResponseDto;
 import com.example.foodfrontendservice.service.FavoriteStoreClientService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.*;
+
 @Controller
 @RequiredArgsConstructor
 @Slf4j
@@ -25,10 +26,10 @@ public class FavoritesStoreController {
 
     private final FavoriteStoreClientService storeClientService;
     private final JwtUtil jwtUtil;
-    private final TokenExtractor tokenExtractor;
+    private final TokenExtractor tokenExtractor; // ✅ Используем TokenExtractor
 
     /**
-     * Показать страницу избранных магазинов
+     * ✅ ОБНОВЛЕННЫЙ: Показать страницу избранных магазинов
      */
     @GetMapping
     public String favoritesStores(
@@ -39,48 +40,48 @@ public class FavoritesStoreController {
         log.info("🛍️ Запрос избранных магазинов пользователя");
 
         try {
-            logRequestDetails(request);
+            // ✅ НОВОЕ: Используем TokenExtractor для получения информации о пользователе
+            UserTokenInfo userInfo = tokenExtractor.getCurrentUserInfo(request);
+            boolean isAuthenticated = tokenExtractor.isAuthenticated(request);
 
-            // ✅ ИСПРАВЛЕНИЕ: используем TokenExtractor
-            String token = tokenExtractor.extractToken(request);
+            // 🔍 Логируем информацию о пользователе
+            log.debug("🔍 Авторизация пользователя:");
+            log.debug("- Is Authenticated: {}", isAuthenticated);
+            log.debug("- UserInfo: {}", userInfo != null ? userInfo.toString() : "NULL");
 
-
-            if (token == null) {
-                log.warn("❌ JWT токен не найден - перенаправление на логин");
+            if (!isAuthenticated || userInfo == null) {
+                log.warn("❌ Пользователь не авторизован - перенаправление на логин");
                 redirectAttributes.addFlashAttribute("error", "Необходимо войти в систему");
                 return "redirect:/login";
             }
 
-            if (!jwtUtil.isTokenValid(token)) {
-                log.warn("❌ JWT токен недействителен - перенаправление на логин");
-                redirectAttributes.addFlashAttribute("error", "Сессия истекла, войдите заново");
-                return "redirect:/login";
-            }
+            log.info("👤 Пользователь: ID={}, Email={}, Role={}",
+                    userInfo.getUserId(), userInfo.getEmail(), userInfo.getRole());
 
-            String userEmail = jwtUtil.getEmailFromToken(token);
-            Long userId = jwtUtil.getUserIdFromToken(token);
-            String userRole = jwtUtil.getRoleFromToken(token);
-
-            log.info("👤 Пользователь: ID={}, Email={}, Role={}", userId, userEmail, userRole);
-
-
+            // ✅ Добавляем данные пользователя в модель
             model.addAttribute("isAuthenticated", true);
-            model.addAttribute("userRole", userRole);
-            model.addAttribute("userEmail", userEmail);
-            model.addAttribute("userId", userId);
+            model.addAttribute("userRole", userInfo.getRole());
+            model.addAttribute("userEmail", userInfo.getEmail());
+            model.addAttribute("userId", userInfo.getUserId());
+            model.addAttribute("jwtToken", userInfo.getToken()); // Для JavaScript
+            model.addAttribute("authToken", userInfo.getToken());
+            model.addAttribute("authHeader", "Bearer " + userInfo.getToken());
 
+            // ✅ Получаем избранные магазины
             FavoriteStoreApiResponse<List<FavoriteStoreResponseDto>> response =
-                    storeClientService.getMyFavorites(token);
+                    storeClientService.getMyFavorites(userInfo.getToken());
 
             if (response != null && response.getSuccess()) {
                 List<FavoriteStoreResponseDto> favoriteStores = response.getData();
 
-                log.info("✅ Получено {} избранных магазинов", favoriteStores != null ? favoriteStores.size() : 0);
+                log.info("✅ Получено {} избранных магазинов для пользователя {}",
+                        favoriteStores != null ? favoriteStores.size() : 0, userInfo.getEmail());
 
                 model.addAttribute("favoriteStores", favoriteStores != null ? favoriteStores : Collections.emptyList());
                 model.addAttribute("hasStores", favoriteStores != null && !favoriteStores.isEmpty());
                 model.addAttribute("storesCount", favoriteStores != null ? favoriteStores.size() : 0);
 
+                // ✅ Вычисляем средний рейтинг
                 if (favoriteStores != null && !favoriteStores.isEmpty()) {
                     double averageRating = favoriteStores.stream()
                             .filter(store -> store.getStore() != null && store.getStore().getRating() != null)
@@ -89,16 +90,18 @@ public class FavoritesStoreController {
                             .orElse(0.0);
 
                     model.addAttribute("averageRating", Math.round(averageRating * 10.0) / 10.0);
+                    log.debug("📊 Средний рейтинг избранных магазинов: {}", averageRating);
                 }
 
             } else {
-                log.error("❌ Ошибка получения избранных магазинов: {}",
-                        response != null ? response.getMessage() : "Неизвестная ошибка");
+                String errorMessage = response != null ? response.getMessage() : "Неизвестная ошибка";
+                log.error("❌ Ошибка получения избранных магазинов для {}: {}",
+                        userInfo.getEmail(), errorMessage);
 
                 model.addAttribute("favoriteStores", Collections.emptyList());
                 model.addAttribute("hasStores", false);
                 model.addAttribute("storesCount", 0);
-                model.addAttribute("error", response != null ? response.getMessage() : "Ошибка загрузки данных");
+                model.addAttribute("error", errorMessage);
             }
 
         } catch (Exception e) {
@@ -112,9 +115,8 @@ public class FavoritesStoreController {
         return "favorites/stores";
     }
 
-
     /**
-     * Добавление магазина в избранное
+     * ✅ ОБНОВЛЕННЫЙ: Добавление магазина в избранное
      */
     @PostMapping("/add/{storeId}")
     @ResponseBody
@@ -127,34 +129,45 @@ public class FavoritesStoreController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            String token = extractTokenFromRequest(request);
+            // ✅ НОВОЕ: Используем TokenExtractor
+            UserTokenInfo userInfo = tokenExtractor.getCurrentUserInfo(request);
 
-            if (token == null) {
+            if (userInfo == null) {
+                log.warn("❌ Пользователь не авторизован для добавления в избранное");
                 response.put("success", false);
                 response.put("message", "Необходимо войти в систему");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
 
-            if (!jwtUtil.isTokenValid(token)) {
+            // ✅ Валидация storeId
+            if (storeId == null || storeId <= 0) {
+                log.error("❌ Некорректный ID магазина: {}", storeId);
                 response.put("success", false);
-                response.put("message", "Сессия истекла, войдите заново");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+                response.put("message", "Некорректный ID магазина");
+                return ResponseEntity.badRequest().body(response);
             }
 
+            log.info("👤 Пользователь {} (ID: {}) добавляет магазин {} в избранное",
+                    userInfo.getEmail(), userInfo.getUserId(), storeId);
+
             FavoriteStoreApiResponse<FavoriteStoreResponseDto> apiResponse =
-                    storeClientService.addToFavorites(token, storeId);
+                    storeClientService.addToFavorites(userInfo.getToken(), storeId);
 
             if (apiResponse != null && apiResponse.getSuccess()) {
-                log.info("✅ Магазин {} успешно добавлен в избранное", storeId);
+                log.info("✅ Магазин {} успешно добавлен в избранное пользователем {}",
+                        storeId, userInfo.getEmail());
                 response.put("success", true);
                 response.put("message", "Магазин добавлен в избранное");
                 response.put("data", apiResponse.getData());
+                response.put("storeId", storeId);
                 return ResponseEntity.ok(response);
             } else {
-                log.error("❌ Ошибка добавления магазина в избранное: {}",
-                        apiResponse != null ? apiResponse.getMessage() : "Неизвестная ошибка");
+                String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Неизвестная ошибка";
+                log.error("❌ Ошибка добавления магазина {} в избранное для {}: {}",
+                        storeId, userInfo.getEmail(), errorMessage);
                 response.put("success", false);
-                response.put("message", apiResponse != null ? apiResponse.getMessage() : "Ошибка добавления");
+                response.put("message", errorMessage);
+                response.put("storeId", storeId);
                 return ResponseEntity.badRequest().body(response);
             }
 
@@ -162,10 +175,14 @@ public class FavoritesStoreController {
             log.error("💥 Исключение при добавлении в избранное", e);
             response.put("success", false);
             response.put("message", "Произошла ошибка");
+            response.put("storeId", storeId);
             return ResponseEntity.internalServerError().body(response);
         }
     }
 
+    /**
+     * ✅ ОБНОВЛЕННЫЙ: Удаление магазина из избранного
+     */
     @DeleteMapping("/remove/{storeId}")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> removeFromFavorites(
@@ -177,25 +194,17 @@ public class FavoritesStoreController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // Получаем и валидируем токен
-            String token = extractTokenFromRequest(request);
+            // ✅ НОВОЕ: Используем TokenExtractor
+            UserTokenInfo userInfo = tokenExtractor.getCurrentUserInfo(request);
 
-            if (token == null) {
-                log.warn("❌ JWT токен не найден для удаления из избранного");
+            if (userInfo == null) {
+                log.warn("❌ Пользователь не авторизован для удаления из избранного");
                 response.put("success", false);
                 response.put("message", "Необходимо войти в систему");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
 
-            // Валидируем токен
-            if (!jwtUtil.isTokenValid(token)) {
-                log.warn("❌ JWT токен недействителен для удаления из избранного");
-                response.put("success", false);
-                response.put("message", "Сессия истекла, войдите заново");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-            }
-
-            // Валидируем storeId
+            // ✅ Валидация storeId
             if (storeId == null || storeId <= 0) {
                 log.error("❌ Некорректный ID магазина для удаления: {}", storeId);
                 response.put("success", false);
@@ -203,18 +212,15 @@ public class FavoritesStoreController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // Получаем данные пользователя из токена
-            String userEmail = jwtUtil.getEmailFromToken(token);
-            Long userId = jwtUtil.getUserIdFromToken(token);
+            log.info("👤 Пользователь {} (ID: {}) удаляет магазин {} из избранного",
+                    userInfo.getEmail(), userInfo.getUserId(), storeId);
 
-            log.info("👤 Пользователь {} (ID: {}) удаляет магазин {} из избранного", userEmail, userId, storeId);
-
-            // ✅ ПРАВИЛЬНО: Вызываем метод сервиса
             FavoriteStoreApiResponse<String> apiResponse =
-                    storeClientService.removeFromFavorites(token, storeId);
+                    storeClientService.removeFromFavorites(userInfo.getToken(), storeId);
 
             if (apiResponse != null && apiResponse.getSuccess()) {
-                log.info("✅ Магазин {} успешно удален из избранного пользователем {}", storeId, userEmail);
+                log.info("✅ Магазин {} успешно удален из избранного пользователем {}",
+                        storeId, userInfo.getEmail());
                 response.put("success", true);
                 response.put("message", "Магазин удален из избранного");
                 response.put("data", apiResponse.getData());
@@ -222,7 +228,8 @@ public class FavoritesStoreController {
                 return ResponseEntity.ok(response);
             } else {
                 String errorMessage = apiResponse != null ? apiResponse.getMessage() : "Неизвестная ошибка";
-                log.error("❌ Ошибка удаления магазина {} из избранного: {}", storeId, errorMessage);
+                log.error("❌ Ошибка удаления магазина {} из избранного для {}: {}",
+                        storeId, userInfo.getEmail(), errorMessage);
 
                 response.put("success", false);
                 response.put("message", errorMessage);
@@ -245,105 +252,90 @@ public class FavoritesStoreController {
         }
     }
 
-
-
     /**
-     * ✅ УЛУЧШЕННЫЙ метод извлечения токена с детальным логированием
+     * ✅ НОВЫЙ API: Toggle favorite (для консистентности с другими контроллерами)
      */
-    private String extractTokenFromRequest(HttpServletRequest request) {
-        log.info("🔍 Извлечение токена из запроса...");
+    @PostMapping("/api/{storeId}/toggle-favorite")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> toggleFavorite(
+            @PathVariable Long storeId,
+            HttpServletRequest request) {
 
-        // 1. Проверяем Authorization header
-        String bearerToken = request.getHeader("Authorization");
-        log.info("📋 Authorization header: {}", bearerToken != null ? "Найден" : "Отсутствует");
+        log.info("🔄 Toggle favorite для магазина {} (из контроллера избранного)", storeId);
 
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            String token = bearerToken.substring(7);
-            log.info("✅ Токен найден в Authorization header (длина: {})", token.length());
-            return token;
-        }
+        Map<String, Object> response = new HashMap<>();
 
-        // 2. Проверяем cookies
-        log.info("🍪 Проверяем cookies...");
-        if (request.getCookies() != null) {
-            log.info("📦 Найдено {} cookies", request.getCookies().length);
+        try {
+            UserTokenInfo userInfo = tokenExtractor.getCurrentUserInfo(request);
 
-            for (Cookie cookie : request.getCookies()) {
-                log.info("🍪 Cookie: {} = {}", cookie.getName(),
-                        cookie.getValue() != null ? "[" + cookie.getValue().length() + " символов]" : "null");
-
-                if ("jwt".equals(cookie.getName()) || "accessToken".equals(cookie.getName())) {
-                    String token = cookie.getValue();
-                    if (token != null && !token.trim().isEmpty()) {
-                        log.info("✅ Токен найден в cookie '{}' (длина: {})", cookie.getName(), token.length());
-                        return token;
-                    }
-                }
+            if (userInfo == null) {
+                response.put("success", false);
+                response.put("message", "Необходимо войти в систему");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
-        } else {
-            log.warn("❌ Cookies отсутствуют в запросе");
-        }
 
-        // 3. Проверяем параметры запроса (на всякий случай)
-        String paramToken = request.getParameter("token");
-        if (paramToken != null && !paramToken.trim().isEmpty()) {
-            log.info("✅ Токен найден в параметрах (длина: {})", paramToken.length());
-            return paramToken;
-        }
-
-        log.warn("❌ Токен не найден ни в одном из источников");
-        return null;
-    }
-
-    /**
-     * ✅ МЕТОД для детального логирования запроса
-     */
-    private void logRequestDetails(HttpServletRequest request) {
-        log.info("📝 === ДЕТАЛИ ЗАПРОСА ===");
-        log.info("🌐 URL: {}", request.getRequestURL());
-        log.info("🔗 Method: {}", request.getMethod());
-        log.info("📍 Remote Address: {}", request.getRemoteAddr());
-        log.info("🖥️ User Agent: {}", request.getHeader("User-Agent"));
-
-        // Логируем все заголовки
-        log.info("📋 === ЗАГОЛОВКИ ===");
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String headerName = headerNames.nextElement();
-            String headerValue = request.getHeader(headerName);
-
-            if ("Authorization".equalsIgnoreCase(headerName) && headerValue != null) {
-                log.info("📋 {}: {}", headerName, headerValue.startsWith("Bearer ")
-                        ? "Bearer [HIDDEN:" + (headerValue.length() - 7) + " chars]"
-                        : "[HIDDEN:" + headerValue.length() + " chars]");
-            } else {
-                log.info("📋 {}: {}", headerName, headerValue);
+            if (storeId == null || storeId <= 0) {
+                response.put("success", false);
+                response.put("message", "Некорректный ID магазина");
+                return ResponseEntity.badRequest().body(response);
             }
-        }
 
-        // Логируем cookies
-        log.info("🍪 === COOKIES ===");
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                String value = cookie.getValue();
-                if ("jwt".equals(cookie.getName()) || "accessToken".equals(cookie.getName())) {
-                    log.info("🍪 {}: [HIDDEN:{} chars] (Domain: {}, Path: {})",
-                            cookie.getName(),
-                            value != null ? value.length() : 0,
-                            cookie.getDomain(),
-                            cookie.getPath());
+            // Получаем текущий список избранного для определения действия
+            FavoriteStoreApiResponse<List<FavoriteStoreResponseDto>> favoritesResponse =
+                    storeClientService.getMyFavorites(userInfo.getToken());
+
+            boolean isFavorite = false;
+            if (favoritesResponse != null && favoritesResponse.getSuccess() && favoritesResponse.getData() != null) {
+                isFavorite = favoritesResponse.getData().stream()
+                        .anyMatch(favorite -> favorite.getStore().getId().equals(storeId));
+            }
+
+            log.info("👤 Пользователь {} {} магазин {} (текущий статус: {})",
+                    userInfo.getEmail(), isFavorite ? "удаляет" : "добавляет",
+                    storeId, isFavorite ? "в избранном" : "не в избранном");
+
+            if (isFavorite) {
+                // Удаляем из избранного
+                FavoriteStoreApiResponse<String> removeResponse =
+                        storeClientService.removeFromFavorites(userInfo.getToken(), storeId);
+
+                if (removeResponse != null && removeResponse.getSuccess()) {
+                    response.put("success", true);
+                    response.put("message", "Магазин удален из избранного");
+                    response.put("isFavorite", false);
+                    response.put("action", "removed");
                 } else {
-                    log.info("🍪 {}: {} (Domain: {}, Path: {})",
-                            cookie.getName(),
-                            value,
-                            cookie.getDomain(),
-                            cookie.getPath());
+                    response.put("success", false);
+                    response.put("message", "Ошибка удаления из избранного");
+                }
+            } else {
+                // Добавляем в избранное
+                FavoriteStoreApiResponse<FavoriteStoreResponseDto> addResponse =
+                        storeClientService.addToFavorites(userInfo.getToken(), storeId);
+
+                if (addResponse != null && addResponse.getSuccess()) {
+                    response.put("success", true);
+                    response.put("message", "Магазин добавлен в избранное");
+                    response.put("isFavorite", true);
+                    response.put("action", "added");
+                    response.put("data", addResponse.getData());
+                } else {
+                    response.put("success", false);
+                    response.put("message", "Ошибка добавления в избранное");
                 }
             }
-        } else {
-            log.info("🍪 Cookies отсутствуют");
-        }
 
-        log.info("📝 === КОНЕЦ ДЕТАЛЕЙ ===");
+            response.put("storeId", storeId);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("💥 Исключение при toggle favorite для магазина {}", storeId, e);
+            response.put("success", false);
+            response.put("message", "Произошла ошибка");
+            response.put("storeId", storeId);
+            return ResponseEntity.internalServerError().body(response);
+        }
     }
+
+
 }
