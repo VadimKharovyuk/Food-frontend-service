@@ -1,5 +1,6 @@
 package com.example.foodfrontendservice.Client;
 
+import com.example.foodfrontendservice.Client.Fallback.ProductServiceClientFallbackFactory;
 import com.example.foodfrontendservice.config.FeignConfig;
 import com.example.foodfrontendservice.dto.CreateProductDto;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.Product.ProductResponseWrapper;
@@ -14,10 +15,14 @@ import org.springframework.web.multipart.MultipartFile;
         name = "product-service",
         path = "/api/products",
         contextId = "productServiceClient",
+        fallbackFactory = ProductServiceClientFallbackFactory.class,
         configuration = FeignConfig.class
 )
 public interface ProductServiceClient {
 
+    /**
+     * ✅ Получить продукты по категории
+     */
     @GetMapping("/category/{categoryId}")
     ResponseEntity<ProductResponseWrapper> getProductsByCategory(
             @PathVariable("categoryId") Long categoryId,
@@ -25,8 +30,9 @@ public interface ProductServiceClient {
             @RequestParam(defaultValue = "20") int size
     );
 
-
-    // 🔥 ИСПРАВЛЕННЫЙ метод - используем Map для точного контроля
+    /**
+     * ✅ Создать новый продукт
+     */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<SingleProductResponseWrapper> createProduct(
             @RequestPart(value = "product", required = true) String productJson,
@@ -34,9 +40,15 @@ public interface ProductServiceClient {
             @RequestHeader(value = "X-User-ID", required = false) Long userId
     );
 
+    /**
+     * ✅ Получить продукт по ID
+     */
     @GetMapping("/{id}")
     ResponseEntity<SingleProductResponseWrapper> getProduct(@PathVariable("id") Long id);
 
+    /**
+     * ✅ Удалить продукт
+     */
     @DeleteMapping("/{productId}")
     ResponseEntity<Void> deleteProduct(
             @PathVariable Long productId,
