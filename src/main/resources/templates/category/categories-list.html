@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickFood - Категории блюд</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/bolt-navigation.css">
+    <style>
+        :root {
+            --primary-green: #00d967;
+            --secondary-green: #00b852;
+            --accent-green: rgba(0, 217, 103, 0.1);
+            --primary-black: #1a1a1a;
+            --text-gray: #666;
+            --light-gray: #f8f9fa;
+            --pure-white: #ffffff;
+            --danger-red: #dc3545;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--primary-black);
+            background-color: var(--light-gray);
+            padding-top: 80px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 8px 25px rgba(0, 217, 103, 0.3);
+        }
+
+        .page-title {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        .stats-info {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .category-card {
+            background: var(--pure-white);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .category-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-image-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            background: linear-gradient(45deg, var(--accent-green), rgba(0, 217, 103, 0.05));
+        }
+
+        .category-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .category-card:hover .category-image {
+            transform: scale(1.05);
+        }
+
+        .category-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            background: linear-gradient(135deg, var(--accent-green), rgba(0, 217, 103, 0.1));
+        }
+
+        .category-content {
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .category-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-black);
+            margin-bottom: 0.5rem;
+        }
+
+        .category-stats {
+            color: var(--text-gray);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .category-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 0.8rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-green);
+            color: var(--pure-white);
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 217, 103, 0.3);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            background: var(--pure-white);
+            border-radius: 2rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+            opacity: 0.7;
+        }
+
+        .empty-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-black);
+            margin-bottom: 1rem;
+        }
+
+        .empty-description {
+            font-size: 1.1rem;
+            color: var(--text-gray);
+            margin-bottom: 3rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .message {
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .error-message {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger-red);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .categories-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Подключение навигации -->
+<div th:replace="~{fragments/navigation :: navigation}"></div>
+
+<div class="container">
+    <!-- Заголовок страницы -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-utensils"></i>
+            Категории блюд
+        </h1>
+        <p class="page-subtitle">Выберите любимую категорию и найдите лучшие рестораны</p>
+        <div class="stats-info" th:if="${hasCategories}">
+            Доступно <span th:text="${totalCount}">0</span> категорий
+        </div>
+    </div>
+
+    <!-- Сообщения об ошибках -->
+    <div th:if="${error}" class="message error-message">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span th:text="${error}">Ошибка</span>
+    </div>
+
+    <!-- Список категорий -->
+    <div th:if="${hasCategories}" class="categories-grid">
+        <div th:each="category : ${categories}" class="category-card">
+            <!-- Изображение категории -->
+            <div class="category-image-container">
+                <img th:if="${category.imageUrl != null and !#strings.isEmpty(category.imageUrl)}"
+                     th:src="${category.imageUrl}"
+                     th:alt="${category.name}"
+                     class="category-image"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="category-placeholder">
+                    <!-- Эмодзи для разных категорий -->
+                    <span th:switch="${category.name}">
+                        <span th:case="'Пицца'">🍕</span>
+                        <span th:case="'Суши'">🍣</span>
+                        <span th:case="'Бургеры'">🍔</span>
+                        <span th:case="'Азиатская'">🍜</span>
+                        <span th:case="'Здоровая еда'">🥗</span>
+                        <span th:case="'Десерты'">🍰</span>
+                        <span th:case="'Кофе'">☕</span>
+                        <span th:case="'Фастфуд'">🥙</span>
+                        <span th:case="*">🍽️</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Контент карточки -->
+            <div class="category-content">
+                <h3 class="category-name" th:text="${category.name}">Название категории</h3>
+                <div class="category-stats">
+                    <i class="fas fa-store"></i>
+                    Рестораны этой категории
+                </div>
+                <div class="category-actions">
+                    <a th:href="@{'/stores?category=' + ${category.id}}" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                        Смотреть рестораны
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Пустое состояние -->
+    <div th:unless="${hasCategories}" class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-utensils"></i>
+        </div>
+        <h2 class="empty-title">Категории не найдены</h2>
+        <p class="empty-description">
+            В данный момент категории блюд недоступны. Попробуйте обновить страницу или вернитесь позже.
+        </p>
+        <a href="/stores" class="btn btn-primary">
+            <i class="fas fa-store"></i>
+            Смотреть все рестораны
+        </a>
+    </div>
+</div>
+
+<script>
+    // ✅ Получаем данные авторизации из Thymeleaf
+    const isAuthenticated = [[${isAuthenticated}]];
+    const jwtToken = '[[${jwtToken}]]';
+
+    console.log('🗂️ Categories Page Debug:');
+    console.log('- Is Authenticated:', isAuthenticated);
+    console.log('- JWT Token:', jwtToken ? 'Present' : 'Missing');
+
+    // Инициализация страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        // Анимация появления карточек
+        const categoryCards = document.querySelectorAll('.category-card');
+        categoryCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+
+        // Обработка ошибок загрузки изображений
+        const images = document.querySelectorAll('.category-image');
+        images.forEach(img => {
+            img.addEventListener('error', function() {
+                this.style.display = 'none';
+                const placeholder = this.nextElementSibling;
+                if (placeholder && placeholder.classList.contains('category-placeholder')) {
+                    placeholder.style.display = 'flex';
+                }
+            });
+        });
+
+        // Автоскрытие сообщений об ошибках
+        const errorMessages = document.querySelectorAll('.message');
+        errorMessages.forEach(message => {
+            setTimeout(() => {
+                message.style.opacity = '0';
+                setTimeout(() => message.remove(), 300);
+            }, 5000);
+        });
+    });
+</script>
+<script src="/js/bolt-navigation.js"></script>
+</body>
+</html>
