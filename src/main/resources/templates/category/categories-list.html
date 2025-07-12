@@ -83,12 +83,17 @@
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             position: relative;
-            cursor: pointer;
+            cursor: pointer; /* ✅ Добавлено */
         }
 
         .category-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .category-card:active {
+            transform: translateY(-4px);
+            transition: transform 0.1s ease;
         }
 
         .category-image-container {
@@ -287,13 +292,13 @@
             <div class="category-content">
                 <h3 class="category-name" th:text="${category.name}">Название категории</h3>
                 <div class="category-stats">
-                    <i class="fas fa-store"></i>
-                    Рестораны этой категории
+                    <i class="fas fa-utensils"></i>
+                    Товары и рестораны категории
                 </div>
                 <div class="category-actions">
-                    <a th:href="@{'/stores?category=' + ${category.id}}" class="btn btn-primary">
-                        <i class="fas fa-search"></i>
-                        Смотреть рестораны
+                    <a th:href="@{'/categories/' + ${category.id}}" class="btn btn-primary">
+                        <i class="fas fa-eye"></i>
+                        Смотреть товары
                     </a>
                 </div>
             </div>

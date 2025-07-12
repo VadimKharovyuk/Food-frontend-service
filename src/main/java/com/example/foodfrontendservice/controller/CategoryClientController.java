@@ -2,9 +2,12 @@ package com.example.foodfrontendservice.controller;
 
 import com.example.foodfrontendservice.config.TokenExtractor;
 import com.example.foodfrontendservice.dto.AUTSERVICE.UserTokenInfo;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.Product.ProductResponseDto;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.Product.ProductResponseWrapper;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.CategoryDto;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.category.ListApiResponse;
 import com.example.foodfrontendservice.service.CategoryService;
+import com.example.foodfrontendservice.service.ProductService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,11 +24,12 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/categories") // ✅ ИСПРАВЛЕНИЕ: изменил на множественное число для консистентности
+@RequestMapping("/categories")
 public class CategoryClientController {
 
     private final CategoryService categoryService;
     private final TokenExtractor tokenExtractor;
+    private final ProductService productService ;
 
     /**
      * ✅ ОСНОВНОЙ метод: Показать все активные категории
@@ -103,54 +107,186 @@ public class CategoryClientController {
     }
 
     /**
-     * ✅ ДОПОЛНИТЕЛЬНЫЙ метод: Показать категорию по ID (опционально)
+     * ✅ ОБНОВЛЕННЫЙ метод: Показать товары категории по ID
      */
     @GetMapping("/{categoryId}")
-    public String getCategoryById(
+    public String getCategoryProducts(
             @PathVariable Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String priceRange,
             HttpServletRequest request,
             Model model) {
 
-        log.info("🗂️ Загрузка категории с ID: {}", categoryId);
+        log.info("🗂️ Загрузка товаров категории с ID: {}", categoryId);
 
         try {
             // ✅ Получаем информацию о пользователе
             UserTokenInfo userInfo = tokenExtractor.getCurrentUserInfo(request);
-            boolean isAuthenticated = tokenExtractor.isAuthenticated(request);
+            boolean isAuthenticated = (userInfo != null);
             addAuthDataToModel(model, userInfo, isAuthenticated);
 
-            // ✅ Получаем все категории для поиска нужной (используем активные)
-            ListApiResponse<CategoryDto> categoriesResponse = categoryService.getActiveCategoriesBrief();
-
-            if (categoriesResponse != null && categoriesResponse.getSuccess() && categoriesResponse.getData() != null) {
-                CategoryDto category = categoriesResponse.getData().stream()
-                        .filter(c -> c.getId().equals(categoryId))
-                        .findFirst()
-                        .orElse(null);
-
-                if (category != null) {
-                    log.info("✅ Найдена категория: {} (ID: {})", category.getName(), categoryId);
-                    model.addAttribute("category", category);
-                    model.addAttribute("categoryFound", true);
-                } else {
-                    log.warn("❌ Категория с ID {} не найдена или неактивна", categoryId);
-                    model.addAttribute("categoryFound", false);
-                    model.addAttribute("error", "Категория не найдена");
-                }
-            } else {
-                log.error("❌ Ошибка получения категорий при поиске ID {}", categoryId);
-                model.addAttribute("categoryFound", false);
-                model.addAttribute("error", "Ошибка загрузки категории");
+            // ✅ Получаем информацию о категории
+            CategoryDto category = getCategoryInfo(categoryId);
+            if (category == null) {
+                log.warn("❌ Категория с ID {} не найдена", categoryId);
+                model.addAttribute("error", "Категория не найдена");
+                return "category/category-not-found";
             }
 
+            log.info("✅ Найдена категория: {} (ID: {})", category.getName(), categoryId);
+
+            // ✅ Получаем продукты этой категории
+            try {
+                log.debug("🔍 Поиск продуктов: categoryId={}, page={}, size={}", categoryId, page, size);
+
+                // Вызываем сервис для получения продуктов
+                ProductResponseWrapper productsResponse = productService.getProductsByCategory(categoryId, page, size);
+
+                if (productsResponse != null && productsResponse.isSuccessful() && productsResponse.hasProducts()) {
+                    List<ProductResponseDto> products = productsResponse.getProducts();
+
+                    log.info("✅ Найдено {} продуктов в категории '{}'", products.size(), category.getName());
+
+                    // ✅ Добавляем данные продуктов в модель
+                    model.addAttribute("products", products);
+                    model.addAttribute("hasProducts", true);
+                    model.addAttribute("totalCount", productsResponse.getTotalCount());
+
+                    // ✅ Пагинация
+                    model.addAttribute("hasNext", productsResponse.getHasNext());
+                    model.addAttribute("hasPrevious", productsResponse.getHasPrevious());
+                    model.addAttribute("nextPage", page + 1);
+                    model.addAttribute("previousPage", page - 1);
+
+                    // ✅ Статистика для фильтров
+                    addProductStatistics(model, products);
+
+                } else {
+                    log.warn("⚠️ Продукты не найдены в категории {}: {}",
+                            categoryId, productsResponse != null ? productsResponse.getMessage() : "Пустой ответ");
+
+                    model.addAttribute("products", Collections.emptyList());
+                    model.addAttribute("hasProducts", false);
+                    model.addAttribute("totalCount", 0);
+                    model.addAttribute("hasNext", false);
+                    model.addAttribute("hasPrevious", false);
+
+                    String message = "В категории пока нет товаров";
+                    if (productsResponse != null && productsResponse.getMessage() != null) {
+                        message = productsResponse.getMessage();
+                    }
+                    model.addAttribute("message", message);
+                }
+
+            } catch (Exception productException) {
+                log.error("❌ Ошибка получения продуктов категории {}: {}", categoryId, productException.getMessage());
+
+                // Показываем категорию, но без продуктов
+                model.addAttribute("products", Collections.emptyList());
+                model.addAttribute("hasProducts", false);
+                model.addAttribute("totalCount", 0);
+                model.addAttribute("hasNext", false);
+                model.addAttribute("hasPrevious", false);
+                model.addAttribute("message", "Временные проблемы с загрузкой товаров. Попробуйте позже.");
+            }
+
+            // ✅ Добавляем общие данные
+            model.addAttribute("category", category);
+            model.addAttribute("categoryFound", true);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("pageSize", size);
+            model.addAttribute("sortBy", sortBy);
+            model.addAttribute("priceRange", priceRange);
+
+            log.info("✅ Страница категории '{}' загружена", category.getName());
+
         } catch (Exception e) {
-            log.error("💥 Исключение при загрузке категории с ID {}", categoryId, e);
+            log.error("💥 Исключение при загрузке категории {}", categoryId, e);
             model.addAttribute("categoryFound", false);
             model.addAttribute("error", "Произошла ошибка при загрузке категории");
         }
 
-        return "category/category-detail"; // ✅ Отдельный шаблон для детальной страницы
+        return "category/category-products";
     }
+
+    /**
+     * ✅ Добавление статистики продуктов для фильтров
+     */
+    private void addProductStatistics(Model model, List<ProductResponseDto> products) {
+        if (products == null || products.isEmpty()) return;
+
+        try {
+            // Диапазоны цен (используем finalPrice для учета скидок)
+            Double minPrice = products.stream()
+                    .filter(p -> p.getFinalPrice() != null)
+                    .mapToDouble(p -> p.getFinalPrice().doubleValue())
+                    .min().orElse(0.0);
+
+            Double maxPrice = products.stream()
+                    .filter(p -> p.getFinalPrice() != null)
+                    .mapToDouble(p -> p.getFinalPrice().doubleValue())
+                    .max().orElse(0.0);
+
+            // Средняя цена
+            Double avgPrice = products.stream()
+                    .filter(p -> p.getFinalPrice() != null)
+                    .mapToDouble(p -> p.getFinalPrice().doubleValue())
+                    .average()
+                    .orElse(0.0);
+
+            // Количество уникальных магазинов
+            long uniqueStores = products.stream()
+                    .filter(p -> p.getStoreId() != null)
+                    .mapToLong(ProductResponseDto::getStoreId)
+                    .distinct()
+                    .count();
+
+            // Количество товаров со скидкой
+            long discountedProducts = products.stream()
+                    .filter(p -> p.getHasDiscount() != null && p.getHasDiscount())
+                    .count();
+
+            // Количество популярных товаров
+            long popularProducts = products.stream()
+                    .filter(p -> p.getIsPopular() != null && p.getIsPopular())
+                    .count();
+
+            model.addAttribute("minPrice", Math.round(minPrice * 100.0) / 100.0);
+            model.addAttribute("maxPrice", Math.round(maxPrice * 100.0) / 100.0);
+            model.addAttribute("averagePrice", Math.round(avgPrice * 100.0) / 100.0);
+            model.addAttribute("uniqueStoresCount", uniqueStores);
+            model.addAttribute("discountedProductsCount", discountedProducts);
+            model.addAttribute("popularProductsCount", popularProducts);
+
+            log.debug("📊 Статистика продуктов: цена от {} до {}, средняя {}, магазинов {}, со скидкой {}, популярных {}",
+                    minPrice, maxPrice, avgPrice, uniqueStores, discountedProducts, popularProducts);
+
+        } catch (Exception e) {
+            log.warn("⚠️ Ошибка вычисления статистики продуктов: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * ✅ Вспомогательный метод получения информации о категории
+     */
+    private CategoryDto getCategoryInfo(Long categoryId) {
+        try {
+            ListApiResponse<CategoryDto> categoriesResponse = categoryService.getActiveCategoriesBrief();
+
+            if (categoriesResponse != null && categoriesResponse.getSuccess() && categoriesResponse.getData() != null) {
+                return categoriesResponse.getData().stream()
+                        .filter(c -> c.getId().equals(categoryId))
+                        .findFirst()
+                        .orElse(null);
+            }
+        } catch (Exception e) {
+            log.error("Ошибка получения информации о категории {}", categoryId, e);
+        }
+        return null;
+    }
+
 
     /**
      * ✅ ВСПОМОГАТЕЛЬНЫЙ метод: Добавление данных авторизации в модель
@@ -178,4 +314,5 @@ public class CategoryClientController {
             log.debug("👤 Пользователь не авторизован");
         }
     }
+
 }

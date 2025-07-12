@@ -2,6 +2,7 @@ package com.example.foodfrontendservice.Client;
 
 import com.example.foodfrontendservice.config.FeignConfig;
 import com.example.foodfrontendservice.dto.CreateProductDto;
+import com.example.foodfrontendservice.dto.PRODUCTSERVICE.Product.ProductResponseWrapper;
 import com.example.foodfrontendservice.dto.PRODUCTSERVICE.SingleProductResponseWrapper;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -16,6 +17,14 @@ import org.springframework.web.multipart.MultipartFile;
         configuration = FeignConfig.class
 )
 public interface ProductServiceClient {
+
+    @GetMapping("/category/{categoryId}")
+    ResponseEntity<ProductResponseWrapper> getProductsByCategory(
+            @PathVariable("categoryId") Long categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    );
+
 
     // 🔥 ИСПРАВЛЕННЫЙ метод - используем Map для точного контроля
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

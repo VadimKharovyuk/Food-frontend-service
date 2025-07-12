@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="'QuickFood - ' + ${category != null ? category.name : 'Категория'}">QuickFood - Категория</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/bolt-navigation.css">
+  <link rel="stylesheet" href="/css/category/category-products.css">
+</head>
+<body>
+
+<!-- Подключение навигации -->
+<div th:replace="~{fragments/navigation :: navigation}"></div>
+
+<div class="container">
+  <!-- Breadcrumb навигация -->
+  <div class="breadcrumb">
+    <a href="/"><i class="fas fa-home"></i> Главная</a>
+    <span> / </span>
+    <a href="/categories"><i class="fas fa-utensils"></i> Категории</a>
+    <span> / </span>
+    <span th:text="${category != null ? category.name : 'Категория'}">Пицца</span>
+  </div>
+
+  <!-- Сообщения об ошибках -->
+  <div th:if="${error}" class="message error-message">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span th:text="${error}">Ошибка</span>
+  </div>
+
+  <!-- Информационное сообщение -->
+  <div th:if="${message}" class="message info-message">
+    <i class="fas fa-info-circle"></i>
+    <span th:text="${message}">Информация</span>
+  </div>
+
+  <!-- Заголовок категории -->
+  <div th:if="${categoryFound}" class="category-header">
+    <h1 class="category-title">
+      <!-- Эмодзи для категорий -->
+      <span th:switch="${category.name}">
+                <span th:case="'Пицца'">🍕</span>
+                <span th:case="'Суши'">🍣</span>
+                <span th:case="'Бургеры'">🍔</span>
+                <span th:case="'Азиатская'">🍜</span>
+                <span th:case="'Здоровая еда'">🥗</span>
+                <span th:case="'Десерты'">🍰</span>
+                <span th:case="'Кофе'">☕</span>
+                <span th:case="'Фастфуд'">🥙</span>
+                <span th:case="*">🍽️</span>
+            </span>
+      <span th:text="${category.name}">Пицца</span>
+    </h1>
+    <p class="category-subtitle">Лучшие предложения в категории</p>
+    <div class="category-stats" th:if="${totalCount != null}">
+      Найдено <strong th:text="${totalCount}">0</strong> товаров
+    </div>
+  </div>
+
+  <!-- Фильтры и сортировка -->
+  <div th:if="${hasProducts}" class="filters-section">
+    <div class="filters-header">
+      <div class="filters-title">
+        <i class="fas fa-filter"></i>
+        Фильтры и сортировка
+      </div>
+      <div class="results-count" th:text="'Показано ' + ${products.size()} + ' из ' + ${totalCount} + ' товаров'">
+        Показано 10 из 25 товаров
+      </div>
+    </div>
+    <div class="filters-row">
+      <div class="filter-group">
+        <label for="sortBy">Сортировка:</label>
+        <select id="sortBy" name="sortBy" th:onchange="'updateFilters()'">
+          <option value="name" th:selected="${sortBy == 'name'}">По названию</option>
+          <option value="price" th:selected="${sortBy == 'price'}">По цене (возрастание)</option>
+          <option value="price_desc" th:selected="${sortBy == 'price_desc'}">По цене (убывание)</option>
+          <option value="popular" th:selected="${sortBy == 'popular'}">Популярные</option>
+          <option value="discount" th:selected="${sortBy == 'discount'}">Со скидкой</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="priceRange">Цена:</label>
+        <select id="priceRange" name="priceRange" th:onchange="'updateFilters()'">
+          <option value="" th:selected="${priceRange == null or priceRange == ''}">Любая</option>
+          <option value="0-500" th:selected="${priceRange == '0-500'}">До 500₽</option>
+          <option value="500-1000" th:selected="${priceRange == '500-1000'}">500-1000₽</option>
+          <option value="1000-2000" th:selected="${priceRange == '1000-2000'}">1000-2000₽</option>
+          <option value="2000+" th:selected="${priceRange == '2000+'}">От 2000₽</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Статистика товаров -->
+  <div th:if="${hasProducts}" class="products-stats">
+    <div class="stat-item" th:if="${minPrice != null}">
+      <div class="stat-value" th:text="${minPrice} + '₽'">450₽</div>
+      <div class="stat-label">Мин. цена</div>
+    </div>
+    <div class="stat-item" th:if="${maxPrice != null}">
+      <div class="stat-value" th:text="${maxPrice} + '₽'">1200₽</div>
+      <div class="stat-label">Макс. цена</div>
+    </div>
+    <div class="stat-item" th:if="${averagePrice != null}">
+      <div class="stat-value" th:text="${averagePrice} + '₽'">850₽</div>
+      <div class="stat-label">Средняя цена</div>
+    </div>
+    <div class="stat-item" th:if="${uniqueStoresCount != null}">
+      <div class="stat-value" th:text="${uniqueStoresCount}">5</div>
+      <div class="stat-label">Ресторанов</div>
+    </div>
+    <div class="stat-item" th:if="${discountedProductsCount != null and discountedProductsCount > 0}">
+      <div class="stat-value" th:text="${discountedProductsCount}">3</div>
+      <div class="stat-label">Со скидкой</div>
+    </div>
+  </div>
+
+  <!-- Сетка продуктов -->
+  <div th:if="${hasProducts}" class="products-grid">
+    <div th:each="product : ${products}" class="product-card">
+      <!-- Изображение продукта -->
+      <div class="product-image-container">
+        <img th:if="${product.picUrl != null and !#strings.isEmpty(product.picUrl)}"
+             th:src="${product.picUrl}"
+             th:alt="${product.name}"
+             class="product-image"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div th:unless="${product.picUrl != null and !#strings.isEmpty(product.picUrl)}"
+             class="product-image-placeholder">
+          <i class="fas fa-utensils"></i>
+        </div>
+
+        <!-- Бейджи -->
+        <div class="product-badges">
+          <div th:if="${product.hasDiscount != null and product.hasDiscount}" class="badge badge-discount">
+            <i class="fas fa-percent"></i> Скидка
+          </div>
+          <div th:if="${product.isPopular != null and product.isPopular}" class="badge badge-popular">
+            <i class="fas fa-fire"></i> Популярное
+          </div>
+        </div>
+      </div>
+
+      <!-- Контент продукта -->
+      <div class="product-content">
+        <h3 class="product-name" th:text="${product.name}">Пицца Маргарита</h3>
+        <p class="product-description" th:text="${product.description}">
+          Классическая пицца с томатами и моцареллой
+        </p>
+
+        <!-- Цены -->
+        <div class="product-pricing">
+          <div class="final-price" th:text="${product.finalPrice} + '₽'">450₽</div>
+          <div th:if="${product.hasDiscount != null and product.hasDiscount}"
+               class="original-price" th:text="${product.price} + '₽'">500₽</div>
+          <div th:if="${product.hasDiscount != null and product.hasDiscount}"
+               class="discount-amount"
+               th:text="'-' + ${T(java.lang.Math).round((product.price.subtract(product.finalPrice)).doubleValue())} + '₽'">
+            -50₽
+          </div>
+        </div>
+
+        <!-- Информация о магазине -->
+        <div class="product-store" th:if="${product.storeId != null}">
+          <i class="fas fa-store"></i>
+          <span>ID магазина: <span th:text="${product.storeId}">123</span></span>
+        </div>
+
+        <!-- Действия -->
+        <div class="product-actions">
+          <button class="btn btn-primary add-to-cart"
+                  th:data-product-id="${product.id}"
+                  th:data-store-id="${product.storeId}"
+                  th:disabled="${product.isAvailable != null and !product.isAvailable}">
+            <i class="fas fa-plus"></i>
+            <span th:if="${product.isAvailable == null or product.isAvailable}">Добавить</span>
+            <span th:unless="${product.isAvailable == null or product.isAvailable}">Недоступно</span>
+          </button>
+          <a th:href="@{'/stores/' + ${product.storeId}}" class="btn btn-outline">
+            <i class="fas fa-store"></i>
+            К магазину
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Пагинация -->
+  <div th:if="${hasProducts and (hasNext or hasPrevious)}" class="pagination-container">
+    <div class="pagination">
+      <!-- Предыдущая страница -->
+      <a th:if="${hasPrevious}"
+         th:href="@{'/categories/' + ${category.id} + '?page=' + ${previousPage} + '&size=' + ${pageSize} + (${sortBy} != null ? '&sortBy=' + ${sortBy} : '') + (${priceRange} != null ? '&priceRange=' + ${priceRange} : '')}"
+         class="btn btn-outline">
+        <i class="fas fa-chevron-left"></i>
+        Назад
+      </a>
+
+      <!-- Информация о странице -->
+      <div class="page-info">
+        Страница <strong th:text="${currentPage + 1}">1</strong>
+        <span th:if="${totalCount != null and pageSize != null}">
+                    из <strong th:text="${T(java.lang.Math).ceil(totalCount / pageSize)}">5</strong>
+                </span>
+      </div>
+
+      <!-- Следующая страница -->
+      <a th:if="${hasNext}"
+         th:href="@{'/categories/' + ${category.id} + '?page=' + ${nextPage} + '&size=' + ${pageSize} + (${sortBy} != null ? '&sortBy=' + ${sortBy} : '') + (${priceRange} != null ? '&priceRange=' + ${priceRange} : '')}"
+         class="btn btn-primary">
+        Далее
+        <i class="fas fa-chevron-right"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Пустое состояние -->
+  <div th:if="${categoryFound and !hasProducts}" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-box-open"></i>
+    </div>
+    <h2 class="empty-title">Товары не найдены</h2>
+    <p class="empty-description">
+      В категории <strong th:text="${category.name}">эта категория</strong> пока нет доступных товаров.
+      <span th:if="${message}" th:text="${message}">Попробуйте позже.</span>
+    </p>
+    <div class="empty-actions">
+      <a href="/stores" class="btn btn-primary">
+        <i class="fas fa-store"></i>
+        Смотреть все рестораны
+      </a>
+      <a href="/categories" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i>
+        Назад к категориям
+      </a>
+    </div>
+  </div>
+
+  <!-- Категория не найдена -->
+  <div th:unless="${categoryFound}" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-search"></i>
+    </div>
+    <h2 class="empty-title">Категория не найдена</h2>
+    <p class="empty-description">
+      Запрашиваемая категория не существует или была удалена.
+      Вернитесь к списку всех категорий.
+    </p>
+    <div class="empty-actions">
+      <a href="/categories" class="btn btn-primary">
+        <i class="fas fa-utensils"></i>
+        Все категории
+      </a>
+      <a href="/" class="btn btn-outline">
+        <i class="fas fa-home"></i>
+        На главную
+      </a>
+    </div>
+  </div>
+</div>
+
+<script src="/js/store/addToCart.js"></script>
+<script>
+  // ✅ Получаем данные авторизации из Thymeleaf
+  const isAuthenticated = [[${isAuthenticated}]];
+  const jwtToken = '[[${jwtToken}]]';
+  const categoryId = [[${category != null ? category.id : null}]];
+
+  console.log('🗂️ Category Products Page Debug:');
+  console.log('- Is Authenticated:', isAuthenticated);
+  console.log('- Category ID:', categoryId);
+  console.log('- Has Products:', [[${hasProducts}]]);
+
+  // ✅ Инициализируем модуль корзины с данными
+  if (typeof initCartModule === 'function') {
+    initCartModule(isAuthenticated, jwtToken);
+  }
+
+  // ✅ Функция обновления фильтров
+  function updateFilters() {
+    const sortBy = document.getElementById('sortBy').value;
+    const priceRange = document.getElementById('priceRange').value;
+
+    const params = new URLSearchParams();
+    params.set('page', '0');
+    params.set('size', '20');
+
+    if (sortBy) params.set('sortBy', sortBy);
+    if (priceRange) params.set('priceRange', priceRange);
+
+    window.location.href = `/categories/${categoryId}?${params.toString()}`;
+  }
+
+  // ✅ Функция показа уведомлений (если нет в addToCart.js)
+  function showNotification(message, type = 'info') {
+    // Используем функцию из addToCart.js или создаем свою
+    if (typeof showCartNotification === 'function') {
+      showCartNotification(message, type);
+    } else {
+      // Fallback уведомление
+      alert(message);
+    }
+  }
+
+  // ✅ Инициализация страницы
+  document.addEventListener('DOMContentLoaded', function() {
+    // Добавляем обработчики событий для кнопок "Добавить в корзину"
+    const addToCartButtons = document.querySelectorAll('.add-to-cart');
+    addToCartButtons.forEach(button => {
+      const productId = button.getAttribute('data-product-id');
+      const storeId = button.getAttribute('data-store-id');
+
+      if (productId && storeId) {
+        button.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (!this.disabled && typeof addToCart === 'function') {
+            addToCart(parseInt(productId), parseInt(storeId));
+          }
+        });
+      }
+    });
+
+    // Анимация появления карточек продуктов
+    const productCards = document.querySelectorAll('.product-card');
+    productCards.forEach((card, index) => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(30px)';
+      setTimeout(() => {
+        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        card.style.opacity = '1';
+        card.style.transform = 'translateY(0)';
+      }, index * 150);
+    });
+
+    // Обработка ошибок загрузки изображений
+    const images = document.querySelectorAll('.product-image');
+    images.forEach(img => {
+      img.addEventListener('error', function() {
+        this.style.display = 'none';
+        const placeholder = this.nextElementSibling;
+        if (placeholder && placeholder.classList.contains('product-image-placeholder')) {
+          placeholder.style.display = 'flex';
+        }
+      });
+    });
+
+    // Автоскрытие сообщений
+    const messages = document.querySelectorAll('.message');
+    messages.forEach(message => {
+      setTimeout(() => {
+        message.style.opacity = '0';
+        setTimeout(() => {
+          if (message.parentElement) {
+            message.remove();
+          }
+        }, 300);
+      }, 5000);
+    });
+
+    // Плавная анимация для заголовка и фильтров
+    const animatedElements = document.querySelectorAll('.category-header, .filters-section, .products-stats');
+    animatedElements.forEach((element, index) => {
+      element.style.opacity = '0';
+      element.style.transform = 'translateY(20px)';
+      setTimeout(() => {
+        element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        element.style.opacity = '1';
+        element.style.transform = 'translateY(0)';
+      }, index * 200);
+    });
+
+    console.log('✅ Category products page initialized');
+  });
+</script>
+
+<script src="/js/bolt-navigation.js"></script>
+</body>
+</html>

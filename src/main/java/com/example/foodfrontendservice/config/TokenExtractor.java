@@ -19,9 +19,7 @@ public class TokenExtractor {
     private static final String CACHED_USER_INFO_ATTR = "cached_user_info";
     private static final String CACHED_TOKEN_ATTR = "cached_token";
 
-    /**
-     * ✅ ОСНОВНОЙ метод извлечения токена
-     */
+
     public String extractToken(HttpServletRequest request) {
         // Проверяем кэш для текущего запроса
         String cachedToken = (String) request.getAttribute(CACHED_TOKEN_ATTR);
